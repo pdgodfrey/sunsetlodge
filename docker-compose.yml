@@ -1,0 +1,28 @@
+version: '3.3'
+services:
+  flyway:
+    image: flyway/flyway
+    network_mode: "host"
+    command: -url="jdbc:postgresql://localhost/sunsetlodge" -table=schema_version -user=sunset -password=abc123 -connectRetries=60 migrate
+    volumes:
+      - ./src/main/resources/db/migration:/flyway/sql
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: sunsetlodge-postgres
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: sunsetlodge
+      POSTGRES_USER: sunset
+      POSTGRES_PASSWORD: "abc123"
+    volumes:
+      - ./init/postgres:/docker-entrypoint-initdb.d/
+  
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
