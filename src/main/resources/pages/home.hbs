@@ -1,0 +1,13 @@
+{{#partial "content" }}
+  <h1>{{title}}</h1>
+  <ol>
+  {{#each seasons}}
+    <li>{{this.name}}</li>
+  {{/each}}
+  </ol>
+  <p>Total : {{seasons.length}}</p>
+  <p>{{> partials/foo parameter=123 }}</p>
+  <p>{{> partials/foo parameter=456 }}</p>
+{{/partial}}
+
+{{> layouts/base }}

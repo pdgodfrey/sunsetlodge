@@ -16,7 +16,7 @@ repositories {
   mavenCentral()
 }
 
-val vertxVersion = "4.3.5"
+val vertxVersion = "4.4.1"
 val junitJupiterVersion = "5.7.0"
 val logbackVersion = "1.4.5"
 val flywayVersion = "9.8.2"
@@ -37,6 +37,7 @@ dependencies {
   implementation("io.vertx:vertx-pg-client")
   implementation("io.vertx:vertx-lang-kotlin-coroutines")
   implementation("io.vertx:vertx-lang-kotlin")
+  implementation("io.vertx:vertx-web-templ-handlebars")
   implementation(kotlin("stdlib-jdk8"))
   testImplementation("io.vertx:vertx-junit5")
   testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")

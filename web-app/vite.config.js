@@ -8,6 +8,9 @@ import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    outDir: '../webroot'
+  },
   plugins: [
     vue(),
     // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin
@@ -15,6 +18,19 @@ export default defineConfig({
       autoImport: true,
     }),
   ],
+  // css: {
+  //   preprocessorOptions: {
+  //     sass: {
+  //       additionalData: [
+  //         // Make the variables defined in these files available to all components, without requiring an explicit
+  //         // @import of the files themselves
+  //         '@import "./styles/variables"',
+  //         // '@import "vuetify/src/styles/settings/_variables"',
+  //         '', // end with newline
+  //       ].join('\n'),
+  //     },
+  //   },
+  // },
   define: { 'process.env': {} },
   resolve: {
     alias: {
