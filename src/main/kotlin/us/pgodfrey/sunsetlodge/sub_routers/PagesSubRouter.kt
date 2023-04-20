@@ -7,14 +7,17 @@ import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
 import io.vertx.kotlin.coroutines.dispatcher
 import io.vertx.pgclient.PgPool
+import io.vertx.sqlclient.Tuple
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import us.pgodfrey.sunsetlodge.BaseSubRouter
+import us.pgodfrey.sunsetlodge.sql.PageSqlQueries
 
 
 class PagesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool) {
 
 
+  private val sqlQueries = PageSqlQueries();
   private lateinit var engine: HandlebarsTemplateEngine
 
   init {
@@ -22,6 +25,7 @@ class PagesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
     engine = HandlebarsTemplateEngine.create(vertx)
 
     router.get("/").handler(this::handleHome)
+    router.get("/rates-and-availability").handler(this::handleRatesAndAvailability)
 
   }
 
@@ -40,6 +44,43 @@ class PagesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
         data.put("seasons", seasons)
 
         engine.render(data, "pages/home.hbs") { res ->
+          if (res.succeeded()) {
+            ctx.response().end(res.result())
+          } else {
+            ctx.fail(res.cause())
+          }
+        }
+      } catch (e: Exception) {
+        e.printStackTrace()
+      }
+    }
+  }
+
+  fun handleRatesAndAvailability(ctx: RoutingContext) {
+    GlobalScope.launch(vertx.dispatcher()) {
+      try {
+        val data: JsonObject = JsonObject()
+
+        data.put("title", "Rates and Availability")
+
+        val currentSeason = execQuery(sqlQueries.currentSeason).first()
+        data.put("current_season", currentSeason.toJson())
+
+        var highSeasonRates = execQuery(sqlQueries.getHighSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
+          .map {
+            it.toJson()
+          }
+
+        data.put("high_current_rates", highSeasonRates)
+
+        var lowSeasonRates = execQuery(sqlQueries.getLowSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
+          .map {
+            it.toJson()
+          }
+
+        data.put("low_current_rates", lowSeasonRates)
+
+        engine.render(data, "pages/rates-and-availability.hbs") { res ->
           if (res.succeeded()) {
             ctx.response().end(res.result())
           } else {

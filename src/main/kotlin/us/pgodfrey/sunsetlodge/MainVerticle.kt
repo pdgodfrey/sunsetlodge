@@ -26,7 +26,6 @@ class MainVerticle : CoroutineVerticle() {
     httpPort = env.getOrDefault("HTTP_PORT", "8081").toInt()
     httpLogLevel = env.getOrDefault("HTTP_LOG_LEVEL", "1").toInt()
 
-
     val dbHost = env.getOrDefault("PG_HOST", "localhost")
     val dbName = env.getOrDefault("PG_DB", "sunsetlodge")
     val dbUser = env.getOrDefault("PG_USER", "sunset")
@@ -35,7 +34,7 @@ class MainVerticle : CoroutineVerticle() {
     val pgOptions = pgConnectOptionsOf(host = dbHost, database = dbName, user = dbUser, password = dbPass)
     pgPool = PgPool.pool(vertx, pgOptions, PoolOptions())
 
-//    baseSubRouter = BaseSubRouter(vertx, pgPool)
+    baseSubRouter = BaseSubRouter(vertx, pgPool)
 
     val router = Router.router(vertx)
 

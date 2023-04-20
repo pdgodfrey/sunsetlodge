@@ -3,11 +3,12 @@
   <ol>
   {{#each seasons}}
     <li>{{this.name}}</li>
+    <li>{{> partials/foo parameter=this.name }}</li>
   {{/each}}
   </ol>
   <p>Total : {{seasons.length}}</p>
-  <p>{{> partials/foo parameter=123 }}</p>
-  <p>{{> partials/foo parameter=456 }}</p>
+  <p>{{> partials/foo parameter=123  }}</p>
+  <p>{{> partials/foo parameter="hello" }}</p>
 {{/partial}}
 
 {{> layouts/base }}

@@ -42,6 +42,8 @@ dependencies {
   testImplementation("io.vertx:vertx-junit5")
   testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
 
+  implementation("com.ongres.scram:client:2.1")
+
 
   implementation("ch.qos.logback:logback-core:$logbackVersion")
   implementation("ch.qos.logback:logback-classic:$logbackVersion")
