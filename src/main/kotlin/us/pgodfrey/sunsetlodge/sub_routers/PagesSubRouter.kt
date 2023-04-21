@@ -25,6 +25,7 @@ class PagesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
     engine = HandlebarsTemplateEngine.create(vertx)
 
     router.get("/").handler(this::handleHome)
+    router.get("/hello-world").handler(this::handleHelloWorld)
     router.get("/rates-and-availability").handler(this::handleRatesAndAvailability)
 
   }
@@ -44,6 +45,24 @@ class PagesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
         data.put("seasons", seasons)
 
         engine.render(data, "pages/home.hbs") { res ->
+          if (res.succeeded()) {
+            ctx.response().end(res.result())
+          } else {
+            ctx.fail(res.cause())
+          }
+        }
+      } catch (e: Exception) {
+        e.printStackTrace()
+      }
+    }
+  }
+  fun handleHelloWorld(ctx: RoutingContext) {
+    GlobalScope.launch(vertx.dispatcher()) {
+      try {
+        val data: JsonObject = JsonObject()
+          .put("title", "Hello World")
+
+        engine.render(data, "pages/hello-world.hbs") { res ->
           if (res.succeeded()) {
             ctx.response().end(res.result())
           } else {

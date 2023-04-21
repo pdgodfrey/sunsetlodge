@@ -26,10 +26,10 @@ class MainVerticle : CoroutineVerticle() {
     httpPort = env.getOrDefault("HTTP_PORT", "8081").toInt()
     httpLogLevel = env.getOrDefault("HTTP_LOG_LEVEL", "1").toInt()
 
-    val dbHost = env.getOrDefault("PG_HOST", "localhost")
-    val dbName = env.getOrDefault("PG_DB", "sunsetlodge")
-    val dbUser = env.getOrDefault("PG_USER", "sunset")
-    val dbPass = env.getOrDefault("PG_PASS", "abc123")
+    val dbHost = env.getOrDefault("PG_HOST", "mahmud.db.elephantsql.com")
+    val dbName = env.getOrDefault("PG_DB", "yvthoxpi")
+    val dbUser = env.getOrDefault("PG_USER", "yvthoxpi")
+    val dbPass = env.getOrDefault("PG_PASS", "sqv2Bqb9tNlZv9vnDE6tD2-ax8ln3dl6")
 
     val pgOptions = pgConnectOptionsOf(host = dbHost, database = dbName, user = dbUser, password = dbPass)
     pgPool = PgPool.pool(vertx, pgOptions, PoolOptions())

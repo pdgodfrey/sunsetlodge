@@ -4,10 +4,10 @@
 # Ignore Gradle build output directory
 build
 out
-web-app/src/main/resources/webroot
+admin-app/src/main/resources/webroot
 .DS_Store
-web-app/node_modules
-web-app/dist
+admin-app/node_modules
+admin-app/dist
 
 
 # local env files
