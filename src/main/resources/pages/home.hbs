@@ -1,11 +1,74 @@
 {{#partial "content" }}
-  <h1>{{title}}</h1>
-  <ol>
-  {{#each seasons}}
-    <li>{{this.name}}</li>
-  {{/each}}
-  </ol>
-  <p>Total : {{seasons.length}}</p>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1  col-xs-12 image-container">
+        <img src="/images/home/home-01.jpg" alt="Sunset Lodge"/>
+      </div>
+    </div>
+
+    <div class="row zero-top-padding">
+      <article class="col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+        <p class="home-paragraph"><span class="h2">Sunset Lodge</span> is a waterfront family compound located on the eastern shore of Lake Damariscotta, Maine. The lodge, along with four surrounding cabins,
+          is able to sleep up to 26 people, making the rental property ideal for larger groups, family reunions, or weddings.
+        </p>
+        <p class="home-paragraph">We are currently accepting bookings for the 2018 season, please check our <a href="/rates_and_availability.html">rates & availability</a> page for more information.</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="container" id="latest-news">
+    <div class="row">
+      <div class="col-sm-10 col-sm-offset-1">
+        <p><span class="h3">Latest News:</span> lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean at dui turpis. Pellentesque at egestas metus, nec
+          blandit quam. Mauris nec placerat odio, vitae elementum magna. Nullam consectetur tortor est, vitae posuere nulla accumsan ac. Phasellus sodales
+          augue dui, lacinia condimentum mi sollicitudin sit amet. Etiam dapibus cursus est, sit amet congue purus mattis sed. </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div class="row"  id="featured">
+      <div class="col-sm-4 col-sm-offset-0">
+        <div class="row">
+          <div class="col-xs-8 col-xs-offset-2">
+            <a href="/rates-and-availability">
+              <div class="tile-container">
+                <img src="/images/home/vacation_tile_2.jpg"/>
+                <h3>Vacation</h3>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4 col-sm-offset-0">
+        <div class="row">
+          <div class="col-xs-8 col-xs-offset-2">
+            <a href="/weddings.html">
+              <div class="tile-container">
+                <img src="/images/home/weddings_tile.jpg"/>
+                <h3>Weddings</h3>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4 col-sm-offset-0">
+        <div class="row">
+          <div class="col-xs-8 col-xs-offset-2">
+            <a href="/sunsets.html">
+              <div class="tile-container">
+                <img src="/images/home/sunset_tile.jpg"/>
+                <h3>Sunsets</h3>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 {{/partial}}
 
 {{> layouts/base }}

@@ -27,7 +27,8 @@ class PagesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
     router.get("/").handler(this::handleHome)
     router.get("/hello-world").handler(this::handleHelloWorld)
     router.get("/rates-and-availability").handler(this::handleRatesAndAvailability)
-
+    router.get("/contact-us").handler(this::handleContactUs)
+    router.get("/things-to-do").handler(this::handleThingstoDo)
   }
 
   fun handleHome(ctx: RoutingContext) {
@@ -111,5 +112,41 @@ class PagesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
       }
     }
   }
+  fun handleContactUs(ctx: RoutingContext) {
+    GlobalScope.launch(vertx.dispatcher()) {
+      try {
+        val data: JsonObject = JsonObject()
+          .put("title", "Contact Us")
 
+        engine.render(data, "pages/contact-us.hbs") { res ->
+          if (res.succeeded()) {
+            ctx.response().end(res.result())
+          } else {
+            ctx.fail(res.cause())
+          }
+        }
+      } catch (e: Exception) {
+        e.printStackTrace()
+      }
+    }
+  }
+
+  fun handleThingstoDo(ctx: RoutingContext) {
+    GlobalScope.launch(vertx.dispatcher()) {
+      try {
+        val data: JsonObject = JsonObject()
+          .put("title", "Things to Do")
+
+        engine.render(data, "pages/things-to-do.hbs") { res ->
+          if (res.succeeded()) {
+            ctx.response().end(res.result())
+          } else {
+            ctx.fail(res.cause())
+          }
+        }
+      } catch (e: Exception) {
+        e.printStackTrace()
+      }
+    }
+  }
 }
