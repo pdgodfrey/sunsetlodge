@@ -29,6 +29,7 @@ class PagesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
     router.get("/rates-and-availability").handler(this::handleRatesAndAvailability)
     router.get("/contact-us").handler(this::handleContactUs)
     router.get("/things-to-do").handler(this::handleThingstoDo)
+    router.get("/lodges-and-cabins").handler(this::handleLodgesandCabins)
   }
 
   fun handleHome(ctx: RoutingContext) {
@@ -138,6 +139,24 @@ class PagesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
           .put("title", "Things to Do")
 
         engine.render(data, "pages/things-to-do.hbs") { res ->
+          if (res.succeeded()) {
+            ctx.response().end(res.result())
+          } else {
+            ctx.fail(res.cause())
+          }
+        }
+      } catch (e: Exception) {
+        e.printStackTrace()
+      }
+    }
+  }
+  fun handleLodgesandCabins(ctx: RoutingContext) {
+    GlobalScope.launch(vertx.dispatcher()) {
+      try {
+        val data: JsonObject = JsonObject()
+          .put("title", "Lodges and Cabins")
+
+        engine.render(data, "pages/lodges-and-cabins.hbs") { res ->
           if (res.succeeded()) {
             ctx.response().end(res.result())
           } else {
