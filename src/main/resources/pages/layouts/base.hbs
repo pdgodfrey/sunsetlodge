@@ -12,9 +12,9 @@
 
 
   <!-- Bootstrap -->
-  <link href="/sunset_static/css/bootstrap.min.css" rel="stylesheet">
-  <link href="/sunset_static/css/font-awesome.min.css" rel="stylesheet">
-  <link href="/sunset_static/css/styles.css" rel="stylesheet">
+<!--  <link href="/css/bootstrap.min.css" rel="stylesheet">-->
+  <link href="/css/font-awesome.min.css" rel="stylesheet">
+  <link href="/css/main.css" rel="stylesheet">
 
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -25,60 +25,61 @@
 
   <style>
     html {
-      background: url('/sunset_static/images/backgrounds/background_05.jpg') no-repeat center center fixed;
+      background: url('/images/backgrounds/background_05.jpg') no-repeat center center fixed;
     }
   </style>
 </head>
 <body>
 
-<nav class="navbar navbar-default navbar-fixed-top">
-  <div class="container-fluid">
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+  <a class="navbar-brand" href="#"><img src="/images/logo-205.png" alt="Sunset Lodge"/></a>
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuItems" aria-controls="menuItems" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
 
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <i class="fa fa-bars"></i> Menu
-        <!--<span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>-->
-      </button>
+    <i class="fa fa-bars"></i> Menu
+  </button>
 
-      <h1>
-        <a class="navbar-brand" href="/sunset_static/" title="Sunset Lodge"><img src="/sunset_static/images/logo-205.png" alt="Sunset Lodge"/></a>
-      </h1>
+  <div class="collapse navbar-collapse" id="menuItems">
 
-    </div>
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="/sunset_static/lodge_and_cabins.html">The Lodge & Cabins</a></li>
-        <li class="hidden-sm"><a href="/sunset_static/rates_and_availability.html">Rates & Availability</a></li>
-        <li class="hidden-sm"><a href="/sunset_static/weddings.html">Weddings</a></li>
-        <li class="hidden-md hidden-sm"><a href="/sunset_static/location.html">Location</a></li>
-        <li class="hidden-md hidden-sm"><a href="/sunset_static/sunsets.html">Sunsets</a></li>
-        <li class="hidden-sm"><a href="/sunset_static/contact.html">Contact</a></li>
-        <li class="dropdown hidden-xs hidden-lg">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">More <b class="caret"></b></a>
-          <ul class="dropdown-menu">
-            <li class="hidden-lg hidden-md"><a href="/sunset_static/rates_and_availability.html">Rates & Availability</a></li>
-            <li class="hidden-lg hidden-md"><a href="/sunset_static/weddings.html">Weddings</a></li>
-            <li class="hidden-lg"><a href="/sunset_static/location.html">Location</a></li>
-            <li class="hidden-lg"><a href="/sunset_static/sunsets.html">Sunsets</a></li>
-            <li class="hidden-lg hidden-md"><a href="/sunset_static/contact.html">Contact</a></li>
-          </ul>
-        </li>
-      </ul>
-    </div><!-- /.navbar-collapse -->
+    <ul class="navbar-nav ms-auto mb-2 mb-md-0">
+      <li class="nav-item">
+        <a class="nav-link" href="#">The Lodge & Cabins</a>
+      </li>
+      <li class="nav-item d-block d-sm-none d-lg-block">
+        <a class="nav-link" href="#">Rates & Availability</a>
+      </li>
+      <li class="nav-item  d-block d-sm-none d-xl-block">
+        <a class="nav-link" href="#">Weddings</a>
+      </li>
+      <li class="nav-item  d-block d-sm-none d-xl-block">
+        <a class="nav-link" href="#">Location</a>
+      </li>
+      <li class="nav-item  d-block d-sm-none d-xl-block">
+        <a class="nav-link" href="#">Sunsets</a>
+      </li>
+      <li class="nav-item  d-block d-sm-none d-lg-block">
+        <a class="nav-link">Contact</a>
+      </li>
+      <li class="nav-item dropdown d-none d-sm-block d-xl-none">
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">More</a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item d-none d-md-block d-lg-none" href="#">Rates & Availability</a></li>
+          <li><a class="dropdown-item d-block" href="#">Weddings</a></li>
+          <li><a class="dropdown-item d-block" href="#">Location</a></li>
+          <li><a class="dropdown-item d-block" href="#">Sunsets</a></li>
+          <li><a class="dropdown-item d-none d-md-block d-lg-none" href="#">Contact</a></li>
+        </ul>
+      </li>
+    </ul>
   </div>
 </nav>
 
   {{#block "content"}}
   {{/block}}
 
-<script src="/sunset_static/js/jquery-3.1.1.min.js"></script>
+<script src="/js/jquery-3.1.1.min.js"></script>
 
-<script src="/sunset_static/js/bootstrap.min.js"></script>
-<script src="/sunset_static/js/main.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/default.js"></script>
 </body>
 </html>

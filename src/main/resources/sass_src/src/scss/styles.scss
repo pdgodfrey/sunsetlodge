@@ -1,0 +1,585 @@
+
+@import 'includes/vars';
+@import 'includes/fonts';
+@import 'includes/colors';
+
+
+
+// Import all of Bootstrap's CSS
+@import "~bootstrap/scss/bootstrap";
+
+
+
+// Import custom Bootstrap variables
+
+//@import 'bootstrap-variables';
+
+$dark: $dark-transparent-purple;
+
+
+html {
+  -webkit-background-size: cover !important;
+  -moz-background-size: cover !important;
+  -o-background-size: cover !important;
+  background-size: cover !important;
+}
+
+:root {
+  --bs-body-bg: transparent;
+  --bs-body-font-size: #{$font-size-sm};
+  --bs-body-color: #ccc;
+  --bs-font-sans-serif: #{$pt-sans};
+  --bs-body-font-family: #{$pt-sans};
+  --bs-link-color: #{$link-orange};
+  --bs-link-hover-color: #{$link-orange-hover};
+  --bs-dark: #{$dark-transparent-purple};
+  --bs-dark-rgb: 21, 10, 40;
+  --bs-nav-link-font-size: 1.095rem;
+  --bs-nav-link-padding-x: 0.5rem;
+}
+
+.bg-dark {
+  --bs-bg-opacity: 0.8;
+}
+
+.navbar {
+  --bs-navbar-padding-y: 0;
+}
+
+.navbar-nav {
+  --bs-nav-link-padding-y: 0.25rem;
+}
+
+.nav-link {
+  color: $pale-yellow-lightest;
+  border-radius: 3px;
+  &:hover, &:focus {
+    color: $dark-orange;
+    text-decoration: none;
+    background: $pale-yellow-lightest;
+  }
+
+  &:last-child {
+    margin-right: 15px;
+  }
+}
+
+.navbar-dark .navbar-nav .nav-link {
+  margin-left: 1.875rem;
+}
+
+.navbar-toggler {
+  color: $pale-yellow-lightest;
+}
+
+.nav-tabs .nav-link.active {
+  background:  $pale-yellow-lightest;
+  color:  $dark-orange;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.smalltext {
+  font-size: $font-size-sm;
+}
+
+.italics {
+  font-style: italic;
+}
+
+.navbar {
+  /* background: rgba(255, 255, 255, 0.5); */
+
+  font-family:  $pt-sans-caption;
+  /*font-size: 1.75rem;*/
+  font-size: 1.75rem;
+  /*text-transform: uppercase;*/
+
+  .container-fluid > .navbar-header {
+    padding-left: 0px !important;
+  }
+
+
+  .container-fluid > .navbar-collapse {
+    margin-right: 15px;
+  }
+
+  .nav {
+    @include media-breakpoint-down(sm) {
+      margin-top: 15px;
+    }
+
+    > li {
+      margin: 15px 0 0 30px;
+      /* position: relative;
+       display:block;
+       min-width: 150px;*/
+
+      @include media-breakpoint-down(sm) {
+        margin-top: 10px;
+      }
+
+      &.separator {
+        margin-top:26px;
+        display: none;
+
+        @include media-breakpoint-down(sm) {
+          margin-top: 10px;
+        }
+
+      }
+
+      > a {
+
+        @include media-breakpoint-up(sm) {
+          margin: 0px;
+          padding: 5px;
+          border-radius: 3px;
+
+
+
+          &:hover {
+            /*border-bottom: 2px solid $dark-orange;*/
+            /*bottom: -2px;*/
+            background: lighten($wheat, 5%);
+          }
+        }
+      }
+    }
+
+  }
+}
+
+
+
+.navbar-header h1 {
+  margin: 0px;
+
+}
+.navbar-brand {
+  background-color: $pale-yellow-lighter;
+
+
+  background: -webkit-linear-gradient(left,  $pale-yellow-lighter, $pale-yellow-lighter, $pale-yellow-lighter, $pale-yellow-lighter, transparent ); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(right, $pale-yellow-lighter, $pale-yellow-lighter, $pale-yellow-lighter, $pale-yellow-lighter, transparent ); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(right, $pale-yellow-lighter, $pale-yellow-lighter, $pale-yellow-lighter, $pale-yellow-lighter, transparent ); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(to right, $pale-yellow-lighter, $pale-yellow-lighter, $pale-yellow-lighter, $pale-yellow-lighter, transparent ); /* Standard syntax */
+
+  padding: 0px 45px 0 15px;
+  img {
+    max-height: 60px;
+  }
+}
+
+.dropdown-menu {
+  font-size: 1.7rem;
+  font-family:  $pt-sans-caption;
+  /*text-transform: uppercase;*/
+  .separator {
+    display: none;
+
+    @include media-breakpoint-down(sm) {
+      margin-top: 10px;
+    }
+  }
+}
+
+.navbar-toggle {
+  color: $pale-yellow-lightest;
+  margin-bottom: 0px;
+  margin-top: 7px;
+
+  &.collapsed {
+    color: $pale-yellow;
+  }
+
+}
+
+.navbar-nav {
+
+  .separator {
+
+    @include media-breakpoint-down(sm) {
+      display: none;
+    }
+  }
+}
+
+body {
+
+
+  .container {
+    &:nth-of-type(1) {
+      .row:nth-of-type(1) {
+        margin-top:100px;
+      }
+    }
+
+    .row {
+      //background: $wheat-ninety;
+      background: $darker-transparent-purple;
+      padding: 20px 0;
+      //border-radius: 10px;
+
+      div {
+        .row {
+          // border-radius: 0px;
+        }
+      }
+
+    }
+  }
+}
+
+
+.nav-tabs {
+  li {
+    a {
+      color: $pale-yellow-lightest;
+      font-size:1.5rem;
+    }
+  }
+
+}
+
+
+.zero-top-padding {
+  padding-top: 0px !important;
+}
+
+.image-container {
+  img {
+    max-width: 100%;
+    border: 3px double #B94125;//darken($dark-orange, 15%);
+    border-radius: 10px;
+  }
+}
+
+h1 {
+  text-align: center;
+  font-family:  $pt-serif;
+  color: $title-brown;
+}
+
+h2, .h2 {
+  font-family: $pt-serif;
+  color: $wheat;
+  //font-size: 3rem;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  text-align: center;
+  /*font-weight: bold;*/
+}
+h3, .h3 {
+  font-family: $pt-serif;
+  color: $wheat;
+  //font-size: 2.5rem;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  text-align: center;
+  /*font-weight: bold;*/
+}
+h4, .h4 {
+  font-family: $pt-serif;
+  color: $wheat;
+  //font-size: 2.0rem;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  text-align: center;
+  /*font-weight: bold;*/
+}
+
+article {
+  margin-top: 10px;
+
+}
+
+p {
+  &.home-paragraph {
+    font-size: 15px;
+    line-height: 2.2rem;
+  }
+}
+
+#featured {
+  margin: 20px -15px;
+  background: transparent;
+  border-radius: 10px !important;
+
+  //background: -webkit-linear-gradient(left,  $pale-yellow-lighter , $paler-yellow , $paler-yellow , $paler-yellow,  $pale-yellow-lighter ); /* For Safari 5.1 to 6.0 */
+  //background: -o-linear-gradient(right,  $pale-yellow-lighter, $paler-yellow , $paler-yellow , $paler-yellow,  $pale-yellow-lighter ); /* For Opera 11.1 to 12.0 */
+  //background: -moz-linear-gradient(right,  $pale-yellow-lighter, $paler-yellow , $paler-yellow , $paler-yellow,  $pale-yellow-lighter ); /* For Firefox 3.6 to 15 */
+  //background: linear-gradient(to right,  $pale-yellow-lighter , $paler-yellow , $paler-yellow , $paler-yellow,  $pale-yellow-lighter ); /* Standard syntax */
+  //height: 200px;
+
+  div {
+    div.row {
+      div {
+        margin-top: 5px;
+
+        a {
+          color: $pale-yellow-lightest;
+
+
+
+          div.tile-container {
+            width: 100%;
+
+            img {
+              max-width: 100%;
+              border: 2px solid darken($dark-orange, 15%);
+              border-radius: 5px;
+            }
+
+            h3 {
+              text-align: center;
+              font-size: 2rem;
+              font-family: $pt-serif-caption;
+              margin-bottom: 10px;
+              font-weight: bold;
+              /*font-size: 3rem;
+              font-family: 'Alex Brush', cursive;
+              margin-bottom: 5px;*/
+            }
+          }
+
+
+
+          &:hover {
+            color: $dark-orange;
+            text-decoration: none;
+
+            div.tile-container {
+              img {
+                border: 2px solid $dark-orange;
+              }
+
+              h3 {
+                background: lighten($wheat, 5%);
+                color: $dark-orange;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.inline-form-control {
+  display: inline;
+  width: inherit;
+  background: transparent;
+  border: 1px solid $pale-yellow-lightest;
+  color: $orange;
+}
+
+.border-line {
+  border-bottom: 1px solid white;
+  display:block;
+}
+
+/*
+inspired from https://codepen.io/Rowno/pen/Afykb
+*/
+.carousel-fade .carousel-inner .item {
+  opacity: 0;
+  transition-property: opacity;
+}
+
+.carousel-fade .carousel-inner .active {
+  opacity: 1;
+}
+
+.carousel-fade .carousel-inner .active.left,
+.carousel-fade .carousel-inner .active.right {
+  left: 0;
+  opacity: 0;
+  z-index: 1;
+}
+
+.carousel-fade .carousel-inner .next.left,
+.carousel-fade .carousel-inner .prev.right {
+  opacity: 1;
+}
+
+.carousel-fade .carousel-control {
+  z-index: 2;
+}
+
+/*
+WHAT IS NEW IN 3.3: "Added transforms to improve carousel performance in modern browsers."
+now override the 3.3 new styles for modern browsers & apply opacity
+*/
+@media all and (transform-3d), (-webkit-transform-3d) {
+  .carousel-fade .carousel-inner > .item.next,
+  .carousel-fade .carousel-inner > .item.active.right {
+    opacity: 0;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+  .carousel-fade .carousel-inner > .item.prev,
+  .carousel-fade .carousel-inner > .item.active.left {
+    opacity: 0;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+  .carousel-fade .carousel-inner > .item.next.left,
+  .carousel-fade .carousel-inner > .item.prev.right,
+  .carousel-fade .carousel-inner > .item.active {
+    opacity: 1;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.image-carousel .carousel-inner .item {
+  @include media-breakpoint-up(md) {
+    height: 400px;
+  }
+  @include media-breakpoint-down(md) {
+    height: 300px;
+  }
+  @include media-breakpoint-down(sm) {
+    height: 250px;
+  }
+  background: #000;
+
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0px auto;
+  }
+}
+
+.carousel-control {
+  width: 5% !important;
+}
+
+.thumbnail-carousel .item {
+
+  .row {
+    margin-top:0px !important;
+    padding: 0px 0px;
+
+    .thumbnail {
+      margin-bottom: 0px;
+      border: 0px;
+
+      &.current-image {
+        border: 1px solid $dark-orange;
+      }
+    }
+  }
+}
+
+
+.carousel-caption {
+  bottom: 0px;
+  padding-top: 10px;
+  background: rgba(0,0,0,0.7);
+
+  @include media-breakpoint-up(md) {
+    padding-bottom: 10px;
+    left: 0px;
+    right: 0px;
+  }
+  @include media-breakpoint-down(md) {
+    padding-bottom: 5px;
+    padding-top: 5px;
+    left: 0px;
+    right: 0px;
+  }
+}
+
+.table-responsive {
+  th, td {
+    text-align: center;
+  }
+
+  .not-applicable {
+    //color: $dark-orange;
+    background: rgba(187, 77, 0, 0.6);
+  }
+
+  table.calendar-table {
+    tr {
+      &:first-child {
+        background: $midnight-blue;
+        th {
+          padding: 16px 8px;
+        }
+      }
+      td,th {
+        &.not-this-month {
+          opacity: 0.5;
+        }
+      }
+      &.invisble {
+        visibility: hidden;
+      }
+    }
+  }
+}
+
+.not-open {
+  background: $dark-grey;
+}
+.rented {
+  background: $red;
+}
+.available {
+  background: ForestGreen;
+}
+.partially-available {
+  background: repeating-linear-gradient(
+      -45deg,
+      ForestGreen,
+      ForestGreen 5px,
+      $red 5px,
+      $red 10px
+  );
+}
+
+.calendar-guide {
+  margin-bottom: 10px;
+  height: 20px;
+  float: left;
+}
+.square {
+  width: 1.5rem;
+  height: 1.5rem;
+  float: left;
+  margin-top: 4px;
+  border: 1px solid white;
+}
+
+.guide-explanation {
+  float: left;
+  margin-left: 10px;
+}
+
+.minor-gap {
+  margin-top: 4rem;
+}
+
+.form-group {
+  select {
+    width: 100%;
+  }
+}
+
+#latest-news {
+  margin-top: 40px;
+
+  >.row {
+    padding-top: 20px;
+  }
+}

@@ -5,19 +5,20 @@
   </div>
 
   <div class="row zero-top-padding">
-    <article class="col-sm-10 col-sm-offset-1">
+    <article class="col-sm-10 offset-sm-1">
+
       <p><span class="h3">Sunset Lodge</span> and the surrounding cabins are available to rent for 5 months out of the year, from June to October.<br/>
         During our high season ({{current_season.start_date}} - {{current_season.end_date}}), we only accept bookings of all of the units together (other than Judy's Cabin).
       </p>
       <!-- Nav tabs -->
-      <ul class="nav nav-tabs" role="tablist" id="rates-availability-tabs">
-        <li role="presentation" class="active"><a href="#rates" aria-controls="home" role="tab" data-toggle="tab">Rates</a></li>
-        <li role="presentation"><a href="#availability" aria-controls="profile" role="tab" data-toggle="tab">Availability</a></li>
+      <ul class="nav nav-tabs"  id="rates-availability-tabs">
+        <li class="nav-item"><a href="#rates" class="nav-link active" data-bs-toggle="tab">Rates</a></li>
+        <li class="nav-item"><a href="#availability" class="nav-link" data-bs-toggle="tab">Availability</a></li>
       </ul>
 
       <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" id="rates">
-          <article class="col-md-12 col-md-offset-0">
+        <div class="tab-pane active" id="rates">
+          <article class="col-md-12 offset-md-0">
             <p><span class="h4">The {{current_season.name}} high season weekly rates</span> are below. During the high season, we require a 1 week minimum stay.<br/>
               <span class=" italics">All rates subject to 9% state sales tax. Security deposits required.</span></p>
 
@@ -75,7 +76,7 @@
             <p class="minor-gap"><span class="h4">Daily rates</span>, listed below, are available for the off-season. A minimum 3 night stay is required.<br/>
               <span class=" italics">All rates subject to 9% state sales tax. Security deposits required.</span></p>
 
-            <div class="table-responsive col-sm-8 col-sm-offset-2">
+            <div class="table-responsive col-sm-8 offset-sm-2">
               <table class="table">
                 <tr>
                   <th></th>
@@ -117,8 +118,8 @@
           </article>
         </div>
 
-        <div role="tabpanel" class="tab-pane" id="availability">
-          <article class="col-md-12 col-md-offset-0">
+        <div class="tab-pane" id="availability">
+          <article class="col-md-12 offset-md-0">
             <p><span class="h4">2017 Availability</span> is listed below, for 2018 availability <a href="#">click here</a></p>
             <div class="calendar-guide col-md-3"><div class="not-open square"></div><div class="guide-explanation">Closed</div></div>
             <div class="calendar-guide col-md-3"><div class="rented square"></div><div class="guide-explanation">Rented</div></div>
@@ -138,7 +139,7 @@
             </p>
 
 
-            <div class="col-md-12 col-md-offset-0">
+            <div class="col-md-12 offset-md-0">
               <div id="calendar-carousel" class="carousel slide" data-ride="carousel" data-interval="false">
 
                 <!-- Wrapper for slides -->

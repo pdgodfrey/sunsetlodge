@@ -24,6 +24,14 @@ class PagesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
 
     engine = HandlebarsTemplateEngine.create(vertx)
 
+    router.route("/*").handler { ctx: RoutingContext ->
+
+      logger.info(
+        "=====" + ctx.request().method() + ": " + ctx.normalizedPath() + " : " + ctx.request().absoluteURI()
+      )
+
+      ctx.next()
+    }
     router.get("/").handler(this::handleHome)
     router.get("/hello-world").handler(this::handleHelloWorld)
     router.get("/rates-and-availability").handler(this::handleRatesAndAvailability)
