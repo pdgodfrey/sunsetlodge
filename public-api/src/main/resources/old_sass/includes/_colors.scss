@@ -1,0 +1,65 @@
+$purple: #5528A3;
+
+$purple-lighter: lighten($purple, 30%);
+$orange: #F27E01;
+$red: #8F250C;
+$dark-orange: #BB4D00;
+$pale-yellow: #FBBA72;
+$paler-yellow:  lighten($pale-yellow, 5%);
+$pale-yellow-lighter: lighten($pale-yellow, 10%);
+$pale-yellow-lightest: lighten($pale-yellow, 15%);
+$wheat: #f5deb3;
+$blue: #88A6B5;
+$sunset-dark: #2c2127;
+//$sunset-dark: #160b0f;
+//$sunset-dark: #312a32;
+//$sunset-dark: #454350;
+//$sunset-dark: #473134;
+
+
+$sunset-light-yellow: #fcf7c7;
+
+
+$isabelline: #EAEAEA;
+$columbia-blue: #C0D6DF;
+$paynes-grey: #4F6D7A;
+//$wheat: #e8DAB2;
+$medium-vermilion: #DD6E42;
+
+$light-wheat: lighten($wheat, 5%);
+$lighter-wheat: lighten($wheat, 10%);
+$lightest-wheat: lighten($wheat, 15%);
+
+$title-brown: #6a271c;
+
+$chocolate: #B46415;
+$midnight-blue: #0A224B;
+$tan: #D7BD89;
+$steel-blue: #4D76AB;
+$black: #211B1C;
+
+$light-chocolate: lighten($chocolate, 30%);
+$lighter-chocolate: lighten($chocolate, 50%);
+$lightest-chocolate: lighten($chocolate, 60%);
+
+$wheat-ninety: rgba(245, 222, 179, 0.9);
+$wheat-ninety-five: rgba(242, 212, 156, 0.95);
+
+$tan-ninety: rgba(227, 195, 152, 0.9);
+$tan-ninety-five: rgba(227, 195, 152, 0.95);
+
+$pale-yellow-eighty: rgba(252, 210, 164, 0.8);
+$pale-yellow-ninety: rgba(252, 210, 164, 0.9);
+$pale-yellow-ninety-five: rgba(252, 210, 164, 0.95);
+
+
+
+$dark-transparent-grey: rgba(50,50,50, 0.8);
+$dark-transparent-grey: rgba(42, 20, 81, 0.8);
+$dark-transparent-grey: rgba(32, 15, 61, 0.8);
+$dark-transparent-purple: rgba(21, 10, 40, 0.7);
+$darker-transparent-purple: rgba(21, 10, 40, 0.8);
+//$dark-transparent-purple: rgba(30, 24, 40, 0.7);
+
+$light-grey: #ccc;
+$dark-grey: #666;

@@ -1,44 +1,29 @@
-# default
+# README #
 
-## Project setup
+This README would normally document whatever steps are necessary to get your application up and running.
 
-```
-# yarn
-yarn
+### What is this repository for? ###
 
-# npm
-npm install
+* Quick summary
+* Version
+* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
-# pnpm
-pnpm install
-```
+### How do I get set up? ###
 
-### Compiles and hot-reloads for development
+* Summary of set up
+* Configuration
+* Dependencies
+* Database configuration
+* How to run tests
+* Deployment instructions
 
-```
-# yarn
-yarn dev
+### Contribution guidelines ###
 
-# npm
-npm run dev
+* Writing tests
+* Code review
+* Other guidelines
 
-# pnpm
-pnpm dev
-```
+### Who do I talk to? ###
 
-### Compiles and minifies for production
-
-```
-# yarn
-yarn build
-
-# npm
-npm run build
-
-# pnpm
-pnpm build
-```
-
-### Customize configuration
-
-See [Configuration Reference](https://vitejs.dev/config/).
+* Repo owner or admin
+* Other community or team contact
