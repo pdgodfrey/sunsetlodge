@@ -21,22 +21,6 @@ const authStore = useAuthStore();
         <!---Navigation -->
         <!-- ---------------------------------------------- -->
         <perfect-scrollbar class="scrollnavbar">
-            <div class="profile">
-                <div class="profile-pic profile-pic py-7 px-3">
-                    <v-avatar size="45">
-                        <img src="@/assets/images/profile/user2.jpg" width="50" alt="Julia" />
-                    </v-avatar>
-                </div>
-                <div class="profile-name d-flex align-center px-3">
-                    <h5 class="text-white font-weight-medium">Julia Roberts</h5>
-                    <div class="ml-auto profile-logout">
-                        <v-btn variant="text" icon rounded="md" color="white" @click="authStore.logout()">
-                            <PowerIcon size="22"/>
-                            <v-tooltip activator="parent" location="top">Logout</v-tooltip>
-                        </v-btn>
-                    </div>
-                </div>
-            </div>
             <v-list class="py-6 px-4">
                 <!---Menu Loop -->
                 <template v-for="(item, i) in sidebarMenu">

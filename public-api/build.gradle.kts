@@ -49,6 +49,16 @@ dependencies {
 
   implementation("org.postgresql:postgresql:42.5.0")
   implementation("org.flywaydb:flyway-core:$flywayVersion")
+
+
+  testImplementation("io.vertx:vertx-junit5")
+  testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+  testImplementation("org.assertj:assertj-core:$assertjVersion")
+  testImplementation("io.rest-assured:rest-assured:$restAssuredVersion")
+  testImplementation("io.rest-assured:kotlin-extensions:$restAssuredVersion")
+  testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
+  testImplementation("org.testcontainers:postgresql:$testContainersVersion")
+  testImplementation("org.testcontainers:elasticsearch:$testContainersVersion")
 }
 
 val compileKotlin: KotlinCompile by tasks
@@ -64,6 +74,7 @@ tasks.withType<ShadowJar> {
 
 tasks.withType<Test> {
   useJUnitPlatform()
+  environment("DISPLAY_SQL_ERRORS", "true")
   testLogging {
     events = setOf(PASSED, SKIPPED, FAILED)
   }

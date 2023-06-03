@@ -14,9 +14,9 @@ const config: ConfigProps = {
     Customizer_drawer: false,
     mini_sidebar: false,
     setHorizontalLayout: false, // Horizontal layout
-    actTheme: 'BLUE_THEME',
+    actTheme: 'ORANGE_THEME',
     inputBg: 'BLUE_THEME',
-    boxed: true,
+    boxed: false,
     setBorderCard: false
 };
 

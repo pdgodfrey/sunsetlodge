@@ -52,16 +52,6 @@ const authStore = useAuthStore();
                     </v-list-item>
                 </v-list>
             </perfect-scrollbar>
-            <div class="px-8 py-3">
-                <div class="bg-lightprimary rounded-md pa-5 overflow-hidden position-relative">
-                    <h5 class="text-h6">
-                        Unlimited<br />
-                        Access
-                    </h5>
-                    <v-btn variant="flat" color="primary" class="mt-3">Upgrade</v-btn>
-                    <img src="@/assets/images/backgrounds/unlimited-bg.png" alt="bg-img" class="right-pos-img" />
-                </div>
-            </div>
             <div class="pt-4 pb-6 px-8 text-center">
                 <v-btn color="primary" variant="outlined" block @click="authStore.logout()">Logout</v-btn>
             </div>

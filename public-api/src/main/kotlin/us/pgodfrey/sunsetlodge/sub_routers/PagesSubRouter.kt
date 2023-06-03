@@ -11,27 +11,22 @@ import io.vertx.sqlclient.Tuple
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import us.pgodfrey.sunsetlodge.BaseSubRouter
+import us.pgodfrey.sunsetlodge.sql.MiscSqlQueries
 import us.pgodfrey.sunsetlodge.sql.PageSqlQueries
+import us.pgodfrey.sunsetlodge.sql.SeasonSqlQueries
 
 
 class PagesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool) {
 
 
-  private val sqlQueries = PageSqlQueries();
+  private val pageSqlQueries = PageSqlQueries();
+  private val seasonSqlQueries = SeasonSqlQueries();
   private lateinit var engine: HandlebarsTemplateEngine
 
   init {
 
     engine = HandlebarsTemplateEngine.create(vertx)
 
-    router.route("/*").handler { ctx: RoutingContext ->
-
-      logger.info(
-        "=====" + ctx.request().method() + ": " + ctx.normalizedPath() + " : " + ctx.request().absoluteURI()
-      )
-
-      ctx.next()
-    }
     router.get("/").handler(this::handleHome)
     router.get("/hello-world").handler(this::handleHelloWorld)
     router.get("/rates-and-availability").handler(this::handleRatesAndAvailability)
@@ -94,17 +89,17 @@ class PagesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
 
         data.put("title", "Rates and Availability")
 
-        val currentSeason = execQuery(sqlQueries.currentSeason).first()
+        val currentSeason = execQuery(seasonSqlQueries.getCurrentSeason).first()
         data.put("current_season", currentSeason.toJson())
 
-        var highSeasonRates = execQuery(sqlQueries.getHighSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
+        var highSeasonRates = execQuery(pageSqlQueries.getHighSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
           .map {
             it.toJson()
           }
 
         data.put("high_current_rates", highSeasonRates)
 
-        var lowSeasonRates = execQuery(sqlQueries.getLowSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
+        var lowSeasonRates = execQuery(pageSqlQueries.getLowSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
           .map {
             it.toJson()
           }
