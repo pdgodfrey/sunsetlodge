@@ -16,5 +16,7 @@ data class SeasonSqlQueries(
     "($1, $2, $3, $4, $5, $6) returning *",
   val updateSeason: String = "update seasons set name = $1, start_date = $2, end_date = $3, high_season_start_date = $4, " +
     "high_season_end_date = $5, is_open = $6 where id = $7 returning *",
-  val deleteSeason: String = "delete from seasons where id = $1"
+  val deleteSeason: String = "delete from seasons where id = $1",
+
+  val getSeasonForDates: String = "select * from seasons where $1 between start_date and end_date"
 )

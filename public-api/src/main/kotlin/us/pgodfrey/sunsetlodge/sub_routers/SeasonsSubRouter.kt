@@ -31,6 +31,66 @@ class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPo
     router.delete("/:id").handler(this::handleDeleteSeason)
   }
 
+  /**
+   * Get the "current" season
+   *
+   * <p>
+   *   <b>Method:</b> <code>GET</code>
+   * </p>
+   * <p>
+   *   <b>Path:</b> <code>/api/seasons/current</code>
+   * </p>
+   * <p>
+   *   <b>Query Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Path Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Body Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Json Return Body:</b>
+   * </p>
+   *   <ul>
+   *     <li>
+   *       <code>success</code> - boolean
+   *     </li>
+   *     <li>
+   *       <code>season</code> - object
+   *       <ul>
+   *           <li><code>id</code> - integer</li>
+   *           <li><code>name</code> - text</li>
+   *           <li><code>start_date</code> - text (yyyy-mm-dd)</li>
+   *           <li><code>end_date</code> - text (yyyy-mm-dd)</li>
+   *           <li><code>is_open</code> - boolean</li>
+   *           <li><code>high_season_start_date</code> - text (yyyy-mm-dd)</li>
+   *           <li><code>high_season_end_date</code> - text (yyyy-mm-dd)</li>
+   *       </ul>
+   *     </li>
+   *   </ul>
+   *
+   *
+   * @param context RoutingContext
+   */
   fun handleGetCurrentSeason(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {
@@ -48,6 +108,67 @@ class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPo
     }
   }
 
+  /**
+   * Get the seasons
+   *
+   * <p>
+   *   <b>Method:</b> <code>GET</code>
+   * </p>
+   * <p>
+   *   <b>Path:</b> <code>/api/seasons</code>
+   * </p>
+   * <p>
+   *   <b>Query Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Path Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Body Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Json Return Body:</b>
+   * </p>
+   *   <ul>
+   *     <li>
+   *       <code>success</code> - boolean
+   *     </li>
+   *     <li>
+   *       <code>rows</code> - array
+   *       <ul>
+   *           <li><code>id</code> - integer</li>
+   *           <li><code>name</code> - text</li>
+   *           <li><code>start_date</code> - text (yyyy-mm-dd)</li>
+   *           <li><code>end_date</code> - text (yyyy-mm-dd)</li>
+   *           <li><code>is_open</code> - boolean</li>
+   *           <li><code>high_season_start_date</code> - text (yyyy-mm-dd)</li>
+   *           <li><code>high_season_end_date</code> - text (yyyy-mm-dd)</li>
+   *           <li><code>is_current</code> - boolean</li>
+   *       </ul>
+   *     </li>
+   *   </ul>
+   *
+   *
+   * @param context RoutingContext
+   */
   fun handleGetSeasons(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {
@@ -65,6 +186,67 @@ class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPo
     }
   }
 
+
+  /**
+   * Get an individual season
+   *
+   * <p>
+   *   <b>Method:</b> <code>GET</code>
+   * </p>
+   * <p>
+   *   <b>Path:</b> <code>/api/seasons/:id</code>
+   * </p>
+   * <p>
+   *   <b>Query Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Path Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>id</code> - integer
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Body Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Json Return Body:</b>
+   * </p>
+   *   <ul>
+   *     <li>
+   *       <code>success</code> - boolean
+   *     </li>
+   *     <li>
+   *       <code>season</code> - object
+   *       <ul>
+   *           <li><code>id</code> - integer</li>
+   *           <li><code>name</code> - text</li>
+   *           <li><code>start_date</code> - text (yyyy-mm-dd)</li>
+   *           <li><code>end_date</code> - text (yyyy-mm-dd)</li>
+   *           <li><code>is_open</code> - boolean</li>
+   *           <li><code>high_season_start_date</code> - text (yyyy-mm-dd)</li>
+   *           <li><code>high_season_end_date</code> - text (yyyy-mm-dd)</li>
+   *       </ul>
+   *     </li>
+   *   </ul>
+   *
+   *
+   * @param context RoutingContext
+   */
   fun handleGetSeason(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {
@@ -83,6 +265,82 @@ class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPo
     }
   }
 
+
+  /**
+   * Create a Season
+   *
+   * <p>
+   *   <b>Method:</b> <code>POST</code>
+   * </p>
+   * <p>
+   *   <b>Path:</b> <code>/api/seasons</code>
+   * </p>
+   * <p>
+   *   <b>Query Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Path Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Body Params (Json Format):</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>name</code> - text
+   *   </li>
+   *   <li>
+   *     <code>start_date</code> - text (yyyy-mm-dd)
+   *   </li>
+   *   <li>
+   *     <code>end_date</code> - text (yyyy-mm-dd)
+   *   </li>
+   *   <li>
+   *     <code>high_season_start_date</code> - text (yyyy-mm-dd)
+   *   </li>
+   *   <li>
+   *     <code>high_season_end_date</code> - text (yyyy-mm-dd)
+   *   </li>
+   *   <li>
+   *     <code>is_open</code> - boolean
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Json Return Body:</b>
+   * </p>
+   *   <ul>
+   *     <li>
+   *       <code>success</code> - boolean
+   *     </li>
+   *     <li>
+   *       <code>data</code> - object
+   *       <ul>
+   *           <li><code>id</code> - integer</li>
+   *           <li><code>name</code> - text</li>
+   *           <li><code>start_date</code> - text</li>
+   *           <li><code>end_date</code> - text</li>
+   *           <li><code>is_open</code> - boolean</li>
+   *           <li><code>high_season_start_date</code> - text</li>
+   *           <li><code>high_season_end_date</code> - text</li>
+   *       </ul>
+   *     </li>
+   *   </ul>
+   *
+   *
+   * @param context RoutingContext
+   */
   fun handleCreateSeason(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {
@@ -115,6 +373,84 @@ class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPo
     }
   }
 
+  /**
+   * Update a Season
+   *
+   * <p>
+   *   <b>Method:</b> <code>POST</code>
+   * </p>
+   * <p>
+   *   <b>Path:</b> <code>/api/seasons/:id</code>
+   * </p>
+   * <p>
+   *   <b>Query Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Path Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>id</code> - integer
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Body Params (Json Format):</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>id</code> - integer
+   *   </li>
+   *   <li>
+   *     <code>name</code> - text
+   *   </li>
+   *   <li>
+   *     <code>start_date</code> - text (yyyy-mm-dd)
+   *   </li>
+   *   <li>
+   *     <code>end_date</code> - text (yyyy-mm-dd)
+   *   </li>
+   *   <li>
+   *     <code>high_season_start_date</code> - text (yyyy-mm-dd)
+   *   </li>
+   *   <li>
+   *     <code>high_season_end_date</code> - text (yyyy-mm-dd)
+   *   </li>
+   *   <li>
+   *     <code>is_open</code> - boolean
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Json Return Body:</b>
+   * </p>
+   *   <ul>
+   *     <li>
+   *       <code>success</code> - boolean
+   *     </li>
+   *     <li>
+   *       <code>data</code> - object
+   *       <ul>
+   *           <li><code>id</code> - integer</li>
+   *           <li><code>name</code> - text</li>
+   *           <li><code>start_date</code> - text</li>
+   *           <li><code>end_date</code> - text</li>
+   *           <li><code>is_open</code> - boolean</li>
+   *           <li><code>high_season_start_date</code> - text</li>
+   *           <li><code>high_season_end_date</code> - text</li>
+   *       </ul>
+   *     </li>
+   *   </ul>
+   *
+   *
+   * @param context RoutingContext
+   */
   fun handleUpdateSeason(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {
@@ -150,12 +486,60 @@ class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPo
     }
   }
 
+  /**
+   * Delete a Sesaon
+   *
+   * <p>
+   *   <b>Method:</b> <code>DELETE</code>
+   * </p>
+   * <p>
+   *   <b>Path:</b> <code>/api/seasons/:id</code>
+   * </p>
+   * <p>
+   *   <b>Query Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Path Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>id</code> - integer
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Body Params (Json Format):</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Json Return Body:</b>
+   * </p>
+   *   <ul>
+   *     <li>
+   *       <code>success</code> - boolean
+   *     </li>
+   *   </ul>
+   *
+   *
+   * @param context RoutingContext
+   */
   fun handleDeleteSeason(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {
         val id = ctx.request().getParam("id").toInt()
 
-        val season = execQuery(seasonSqlQueries.deleteSeason, Tuple.of(id))
+        execQuery(seasonSqlQueries.deleteSeason, Tuple.of(id))
 
         sendJsonPayload(ctx, json {
           obj(

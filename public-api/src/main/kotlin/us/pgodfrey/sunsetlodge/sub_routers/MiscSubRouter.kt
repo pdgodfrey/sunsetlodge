@@ -28,6 +28,62 @@ class MiscSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool)
     router.get("/buildings").handler(this::handleGetBuildings)
   }
 
+
+  /**
+   * Get a list of Buildings
+   *
+   * <p>
+   *   <b>Method:</b> <code>GET</code>
+   * </p>
+   * <p>
+   *   <b>Path:</b> <code>/api/buildings</code>
+   * </p>
+   * <p>
+   *   <b>Query Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Path Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Body Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Json Return Body:</b>
+   * </p>
+   *   <ul>
+   *     <li>
+   *       <code>success</code> - boolean
+   *     </li>
+   *     <li>
+   *       <code>rows</code> - array
+   *       <ul>
+   *           <li><code>id</code> - integer</li>
+   *           <li><code>name</code> - text</li>
+   *       </ul>
+   *     </li>
+   *   </ul>
+   *
+   *
+   * @param context RoutingContext
+   */
   fun handleGetBuildings(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {

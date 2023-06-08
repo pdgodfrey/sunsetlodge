@@ -13,10 +13,7 @@ import io.vertx.kotlin.coroutines.await
 import io.vertx.kotlin.pgclient.pgConnectOptionsOf
 import io.vertx.pgclient.PgPool
 import io.vertx.sqlclient.PoolOptions
-import us.pgodfrey.sunsetlodge.sub_routers.MiscSubRouter
-import us.pgodfrey.sunsetlodge.sub_routers.PagesSubRouter
-import us.pgodfrey.sunsetlodge.sub_routers.RatesSubRouter
-import us.pgodfrey.sunsetlodge.sub_routers.SeasonsSubRouter
+import us.pgodfrey.sunsetlodge.sub_routers.*
 
 
 class MainVerticle : CoroutineVerticle() {
@@ -64,6 +61,7 @@ class MainVerticle : CoroutineVerticle() {
     router.get("/healthz").handler(this::healthCheck)
 
 
+    router.route("/api/bookings*").subRouter(BookingsSubRouter(vertx, pgPool).getSubRouter());
     router.route("/api/rates*").subRouter(RatesSubRouter(vertx, pgPool).getSubRouter());
     router.route("/api/seasons*").subRouter(SeasonsSubRouter(vertx, pgPool).getSubRouter());
     router.route("/api/*").subRouter(MiscSubRouter(vertx, pgPool).getSubRouter());

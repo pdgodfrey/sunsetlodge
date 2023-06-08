@@ -6,6 +6,7 @@ plugins {
   kotlin ("jvm") version "1.7.21"
   application
   id("org.flywaydb.flyway") version "9.8.2"
+  id("org.jetbrains.dokka") version "1.8.20"
 }
 
 group = "us.pgodfrey"

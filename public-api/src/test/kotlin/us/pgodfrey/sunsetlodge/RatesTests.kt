@@ -14,8 +14,6 @@ import io.vertx.junit5.VertxTestContext
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.assertj.core.api.Assertions
-import org.assertj.core.api.Assertions.`as`
 import org.assertj.core.api.Assertions.assertThat
 import org.flywaydb.core.Flyway
 import org.junit.ClassRule
@@ -26,13 +24,12 @@ import org.slf4j.LoggerFactory
 import org.testcontainers.containers.PostgreSQLContainer
 import java.time.LocalDate
 import java.util.*
-import kotlin.collections.LinkedHashMap
 
 @DisplayName("RatesTest")
 @ExtendWith(VertxExtension::class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class RatesTest {
+class RatesTests {
   private val logger: Logger = LoggerFactory.getLogger(javaClass)
   private var requestSpecification: RequestSpecification? = null
   var sessionValue: String? = null

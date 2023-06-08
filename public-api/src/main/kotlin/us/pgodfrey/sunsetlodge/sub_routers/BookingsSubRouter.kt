@@ -11,31 +11,34 @@ import io.vertx.sqlclient.Tuple
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import us.pgodfrey.sunsetlodge.BaseSubRouter
-import us.pgodfrey.sunsetlodge.sql.RateSqlQueries
+import us.pgodfrey.sunsetlodge.sql.BookingSqlQueries
+import us.pgodfrey.sunsetlodge.sql.SeasonSqlQueries
 import java.security.InvalidParameterException
+import java.time.LocalDate
 
 
-class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool) {
+class BookingsSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool) {
 
-  private val rateSqlQueries = RateSqlQueries();
+  private val bookingSqlQueries = BookingSqlQueries();
+  private val seasonSqlQueries = SeasonSqlQueries();
 
   init {
 
-    router.get("/").handler(this::handleGetRatesForSeason)
-    router.post("/").handler(this::handleCreateRate)
-    router.put("/:id").handler(this::handleUpdateRate)
-    router.delete("/:id").handler(this::handleDeleteRate)
+    router.get("/").handler(this::handleGetBookingsForSeason)
+    router.post("/").handler(this::handleCreateBooking)
+    router.put("/:id").handler(this::handleUpdateBooking)
+    router.delete("/:id").handler(this::handleDeleteBooking)
   }
 
 
   /**
-   * Get a list of rates for a given season
+   * Get a list of bookings for a given season
    *
    * <p>
    *   <b>Method:</b> <code>GET</code>
    * </p>
    * <p>
-   *   <b>Path:</b> <code>/api/rates</code>
+   *   <b>Path:</b> <code>/api/bookings</code>
    * </p>
    * <p>
    *   <b>Query Params:</b>
@@ -76,11 +79,9 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
    *       <ul>
    *           <li><code>id</code> - integer</li>
    *           <li><code>season_id</code> - integer</li>
-   *           <li><code>building_id</code> - integer</li>
-   *           <li><code>high_season_rate</code> - integer</li>
-   *           <li><code>low_season_rate</code> - integer</li>
-   *           <li><code>season_name</code> - text</li>
-   *           <li><code>building_name</code> - text</li>
+   *           <li><code>name</code> - text</li>
+   *           <li><code>start_date</code> - text (yyyy-mm-dd)</li>
+   *           <li><code>end_date</code> - text (yyyy-mm-dd)</li>
    *       </ul>
    *     </li>
    *   </ul>
@@ -88,15 +89,15 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
    *
    * @param context RoutingContext
    */
-  fun handleGetRatesForSeason(ctx: RoutingContext) {
+  fun handleGetBookingsForSeason(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {
         val id = ctx.request().getParam("season_id").toInt()
-        val rates = execQuery(rateSqlQueries.getRatesForSeason, Tuple.of(id))
+        val bookings = execQuery(bookingSqlQueries.getBookingsForSeason, Tuple.of(id))
 
         sendJsonPayload(ctx, json {
           obj(
-            "rows" to rates.map { it.toJson() }
+            "rows" to bookings.map { it.toJson() }
           )
         })
       } catch (e: Exception) {
@@ -108,13 +109,13 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
 
 
   /**
-   * Create a Rate for a building and season
+   * Create a booking for a season
    *
    * <p>
    *   <b>Method:</b> <code>POST</code>
    * </p>
    * <p>
-   *   <b>Path:</b> <code>/api/rates</code>
+   *   <b>Path:</b> <code>/api/bookings</code>
    * </p>
    * <p>
    *   <b>Query Params:</b>
@@ -143,13 +144,16 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
    *     <code>season_id</code> - integer
    *   </li>
    *   <li>
-   *     <code>building_id</code> - integer
+   *     <code>name</code> - text
    *   </li>
    *   <li>
-   *     <code>high_season_rate</code> - integer
+   *     <code>start_date</code> - text (yyyy-mm-dd)
    *   </li>
    *   <li>
-   *     <code>low_season_rate</code> - integer
+   *     <code>end_date</code> - text (yyyy-mm-dd)
+   *   </li>
+   *   <li>
+   *     <code>building_ids</code> - integer array
    *   </li>
    * </ul>
    * <p>
@@ -163,10 +167,9 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
    *       <code>data</code> - object
    *       <ul>
    *           <li><code>id</code> - integer</li>
-   *           <li><code>season_id</code> - integer</li>
-   *           <li><code>building_id</code> - integer</li>
-   *           <li><code>high_season_rate</code> - integer</li>
-   *           <li><code>low_season_rate</code> - integer</li>
+   *           <li><code>name</code> - text</li>
+   *           <li><code>start_date</code> - text (yyyy-mm-dd)</li>
+   *           <li><code>end_date</code> - text (yyyy-mm-dd)</li>
    *       </ul>
    *     </li>
    *   </ul>
@@ -174,26 +177,35 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
    *
    * @param context RoutingContext
    */
-  fun handleCreateRate(ctx: RoutingContext) {
+  fun handleCreateBooking(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {
         val data = ctx.body().asJsonObject()
 
-        validateRateData(data)
+        validateBookingData(data)
 
-        checkForExistingRate(data)
+        validateBookingDates(data)
 
         val params = Tuple.tuple()
         params.addInteger(data.getInteger("season_id"))
-        params.addInteger(data.getInteger("building_id"))
-        params.addInteger(data.getInteger("high_season_rate"))
-        params.addInteger(data.getInteger("low_season_rate"))
+        params.addString(data.getString("name"))
+        params.addLocalDate(LocalDate.parse(data.getString("start_date")))
+        params.addLocalDate(LocalDate.parse(data.getString("end_date")))
 
-        val rate = execQuery(rateSqlQueries.createRate, params)
+        val booking = execQuery(bookingSqlQueries.createBooking, params)
+
+        val buildingIds = data.getJsonArray("building_ids")
+
+        buildingIds.forEach {
+          val buildingId = it as Int
+          execQuery(bookingSqlQueries.createBookingBuilding,
+            Tuple.of(booking.first().getInteger("id"), buildingId))
+        }
+
 
         sendJsonPayload(ctx, json {
           obj(
-            "data" to rate.first().toJson()
+            "data" to booking.first().toJson()
           )
         })
       } catch (e: InvalidParameterException) {
@@ -211,13 +223,13 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
 
 
   /**
-   * Update a Rate for a building and season
+   * Update a Booking
    *
    * <p>
    *   <b>Method:</b> <code>PUT</code>
    * </p>
    * <p>
-   *   <b>Path:</b> <code>/api/rates/:id</code>
+   *   <b>Path:</b> <code>/api/bookings/:id</code>
    * </p>
    * <p>
    *   <b>Query Params:</b>
@@ -243,19 +255,19 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
    *
    * <ul>
    *   <li>
-   *     <code>season_id</code> - integer
-   *   </li>
-   *   <li>
-   *     <code>building_id</code> - integer
-   *   </li>
-   *   <li>
-   *     <code>high_season_rate</code> - integer
-   *   </li>
-   *   <li>
-   *     <code>low_season_rate</code> - integer
-   *   </li>
-   *   <li>
    *     <code>id</code> - integer
+   *   </li>
+   *   <li>
+   *     <code>name</code> - text
+   *   </li>
+   *   <li>
+   *     <code>start_date</code> - text (yyyy-mm-dd)
+   *   </li>
+   *   <li>
+   *     <code>end_date</code> - text (yyyy-mm-dd)
+   *   </li>
+   *   <li>
+   *     <code>building_ids</code> - integer array
    *   </li>
    * </ul>
    * <p>
@@ -269,10 +281,9 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
    *       <code>data</code> - object
    *       <ul>
    *           <li><code>id</code> - integer</li>
-   *           <li><code>season_id</code> - integer</li>
-   *           <li><code>building_id</code> - integer</li>
-   *           <li><code>high_season_rate</code> - integer</li>
-   *           <li><code>low_season_rate</code> - integer</li>
+   *           <li><code>name</code> - text</li>
+   *           <li><code>start_date</code> - text (yyyy-mm-dd)</li>
+   *           <li><code>end_date</code> - text (yyyy-mm-dd)</li>
    *       </ul>
    *     </li>
    *   </ul>
@@ -280,25 +291,38 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
    *
    * @param context RoutingContext
    */
-  fun handleUpdateRate(ctx: RoutingContext) {
+  fun handleUpdateBooking(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {
         val data = ctx.body().asJsonObject()
 
-        validateRateData(data)
+        validateBookingData(data)
+
+        validateBookingDates(data)
 
         val id = ctx.request().getParam("id").toInt()
 
         val params = Tuple.tuple()
-        params.addInteger(data.getInteger("high_season_rate"))
-        params.addInteger(data.getInteger("low_season_rate"))
+        params.addString(data.getString("name"))
+        params.addLocalDate(LocalDate.parse(data.getString("start_date")))
+        params.addLocalDate(LocalDate.parse(data.getString("end_date")))
         params.addInteger(id)
 
-        val rate = execQuery(rateSqlQueries.updateRate, params)
+        val booking = execQuery(bookingSqlQueries.updateBooking, params)
+
+        execQuery(bookingSqlQueries.deleteBookingBuildingForBooking, Tuple.of(id))
+
+        val buildingIds = data.getJsonArray("building_ids")
+
+        buildingIds.forEach {
+          val buildingId = it as Int
+          execQuery(bookingSqlQueries.createBookingBuilding,
+            Tuple.of(booking.first().getInteger("id"), buildingId))
+        }
 
         sendJsonPayload(ctx, json {
           obj(
-            "data" to rate.first().toJson()
+            "data" to booking.first().toJson()
           )
         })
       } catch (e: InvalidParameterException) {
@@ -313,13 +337,13 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
 
 
   /**
-   * Delete a Rate for a building and season
+   * Delete a Booking
    *
    * <p>
    *   <b>Method:</b> <code>DELETE</code>
    * </p>
    * <p>
-   *   <b>Path:</b> <code>/api/rates/:id</code>
+   *   <b>Path:</b> <code>/api/bookings/:id</code>
    * </p>
    * <p>
    *   <b>Query Params:</b>
@@ -360,12 +384,13 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
    *
    * @param context RoutingContext
    */
-  fun handleDeleteRate(ctx: RoutingContext) {
+  fun handleDeleteBooking(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {
         val id = ctx.request().getParam("id").toInt()
 
-        execQuery(rateSqlQueries.deleteRate, Tuple.of(id))
+        execQuery(bookingSqlQueries.deleteBookingBuildingForBooking, Tuple.of(id))
+        execQuery(bookingSqlQueries.deleteBooking, Tuple.of(id))
 
         sendJsonPayload(ctx, json {
           obj(
@@ -379,7 +404,7 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
     }
   }
 
-  fun validateRateData(data: JsonObject?){
+  fun validateBookingData(data: JsonObject?){
     if (data == null) {
       throw InvalidParameterException("No request body")
     } else {
@@ -387,8 +412,17 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
       if (!data.containsKey("season_id") || data.getInteger("season_id") == null) {
         invalidFields.add("Season is a required field")
       }
-      if (!data.containsKey("building_id") || data.getInteger("building_id") == null) {
-        invalidFields.add("Building is a required field")
+      if (!data.containsKey("name") || data.getString("name").isNullOrBlank()) {
+        invalidFields.add("Name is a required field")
+      }
+      if (!data.containsKey("start_date") || data.getString("start_date").isNullOrBlank()) {
+        invalidFields.add("Start Date is a required field")
+      }
+      if (!data.containsKey("end_date") || data.getString("end_date").isNullOrBlank()) {
+        invalidFields.add("End Date is a required field")
+      }
+      if (!data.containsKey("building_ids") || data.getJsonArray("building_ids").size() == 0) {
+        invalidFields.add("One or more buildings must be selected")
       }
 
       if(invalidFields.size > 0){
@@ -397,15 +431,25 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool
     }
   }
 
-  suspend fun checkForExistingRate(data: JsonObject){
+  suspend fun validateBookingDates(data: JsonObject){
     val params = Tuple.tuple()
-    params.addInteger(data.getInteger("season_id"))
-    params.addInteger(data.getInteger("building_id"))
+    params.addLocalDate(LocalDate.parse(data.getString("start_date")))
 
-    val existingRate = execQuery(rateSqlQueries.getRateForSeasonAndBuilding, params)
+    val startDateSeason = execQuery(seasonSqlQueries.getSeasonForDates, params)
 
-    if(existingRate.size() > 0){
-      throw IllegalArgumentException("Rate already exists for this building and season")
+    val params2 = Tuple.tuple()
+    params2.addLocalDate(LocalDate.parse(data.getString("end_date")))
+    val endDateSeason = execQuery(seasonSqlQueries.getSeasonForDates, params2)
+
+    if(startDateSeason.size() == 0 || endDateSeason.size() == 0){
+      throw IllegalArgumentException("Booking dates must be within season start and end dates")
+    } else {
+      val seasonOne = startDateSeason.first()
+      val seasonTwo = endDateSeason.first()
+
+      if(seasonOne.getInteger("id") != seasonTwo.getInteger("id")){
+        throw IllegalArgumentException("Booking dates are within different seasons")
+      }
     }
   }
 }

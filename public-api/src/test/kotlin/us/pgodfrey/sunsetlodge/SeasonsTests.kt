@@ -14,8 +14,6 @@ import io.vertx.junit5.VertxTestContext
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.assertj.core.api.Assertions
-import org.assertj.core.api.Assertions.`as`
 import org.assertj.core.api.Assertions.assertThat
 import org.flywaydb.core.Flyway
 import org.junit.ClassRule
@@ -32,7 +30,7 @@ import kotlin.collections.LinkedHashMap
 @ExtendWith(VertxExtension::class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SeasonsTest {
+class SeasonsTests {
   private val logger: Logger = LoggerFactory.getLogger(javaClass)
   private var requestSpecification: RequestSpecification? = null
   var sessionValue: String? = null
