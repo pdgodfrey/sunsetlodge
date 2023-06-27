@@ -54,20 +54,15 @@ class TestMainVerticle {
         .setBaseUri("http://localhost:${httpPort}/")
         .build()
 
+      postgreSQLContainer.start()
 
+      val flyway = Flyway.configure().dataSource(postgreSQLContainer.getJdbcUrl(), postgreSQLContainer.getUsername(), postgreSQLContainer.getPassword()).load()
+      flyway.migrate()
 
-      if(httpPort == 8081) {
-        postgreSQLContainer.start()
-
-        val flyway = Flyway.configure().dataSource(postgreSQLContainer.getJdbcUrl(), postgreSQLContainer.getUsername(), postgreSQLContainer.getPassword()).load()
-        flyway.migrate()
-
-        vertx.deployVerticle(MainVerticle(), testContext.succeeding<String> { _ ->
-          testContext.completeNow()
-        })
-      } else {
+      vertx.deployVerticle(MainVerticle(), testContext.succeeding<String> { _ ->
         testContext.completeNow()
-      }
+      })
+
     }
   }
 

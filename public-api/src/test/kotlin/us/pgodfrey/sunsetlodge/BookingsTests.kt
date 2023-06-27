@@ -1,5 +1,6 @@
 package us.pgodfrey.sunsetlodge
 
+import helpers.GetSession
 import io.restassured.RestAssured
 import io.restassured.builder.RequestSpecBuilder
 import io.restassured.config.RedirectConfig
@@ -77,20 +78,19 @@ class BookingsTests {
         .setBaseUri("http://localhost:${httpPort}/")
         .build()
 
+      postgreSQLContainer.start()
 
+      val flyway = Flyway.configure().dataSource(postgreSQLContainer.getJdbcUrl(), postgreSQLContainer.getUsername(), postgreSQLContainer.getPassword()).load()
+      flyway.migrate()
 
-      if(httpPort == 8081) {
-        postgreSQLContainer.start()
+      vertx.deployVerticle(MainVerticle(), testContext.succeeding<String> { _ ->
+        val cookies = GetSession().getAuthCookies()
+        sessionValue = cookies["auth-token"]
+        refreshValue = cookies["refresh-token"]
 
-        val flyway = Flyway.configure().dataSource(postgreSQLContainer.getJdbcUrl(), postgreSQLContainer.getUsername(), postgreSQLContainer.getPassword()).load()
-        flyway.migrate()
-
-        vertx.deployVerticle(MainVerticle(), testContext.succeeding<String> { _ ->
-          testContext.completeNow()
-        })
-      } else {
         testContext.completeNow()
-      }
+      })
+
     }
   }
 

@@ -3,6 +3,9 @@ package us.pgodfrey.sunsetlodge
 import io.vertx.core.Vertx
 import io.vertx.core.impl.logging.LoggerFactory
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.auth.jwt.JWTAuth
+import io.vertx.ext.auth.sqlclient.SqlAuthentication
+import io.vertx.ext.auth.sqlclient.SqlAuthenticationOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.core.json.json
@@ -17,18 +20,28 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
-open class BaseSubRouter(val vertx: Vertx, val pgPool: PgPool) {
+open class BaseSubRouter(val vertx: Vertx, val pgPool: PgPool, jwtAuth: JWTAuth) {
   val logger = LoggerFactory.getLogger(javaClass)
 
   val router: Router = Router.router(vertx)
 
   var displaySqlErrors = false;
 
+  var sqlAuthentication: SqlAuthentication
 
   init {
     val env = System.getenv()
 
     this.displaySqlErrors = env.getOrDefault("DISPLAY_SQL_ERRORS", "false").toBoolean()
+
+
+    val sqlOptions = SqlAuthenticationOptions()
+
+    sqlOptions.setAuthenticationQuery("SELECT password FROM users WHERE email ilike $1")
+
+    sqlAuthentication = SqlAuthentication.create(pgPool, sqlOptions)
+
+
   }
 
   fun getSubRouter(): Router {

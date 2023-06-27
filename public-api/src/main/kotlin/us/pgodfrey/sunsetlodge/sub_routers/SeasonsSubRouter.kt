@@ -2,6 +2,7 @@ package us.pgodfrey.sunsetlodge.sub_routers
 
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
@@ -16,7 +17,7 @@ import java.security.InvalidParameterException
 import java.time.LocalDate
 
 
-class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool) {
+class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
 
   private val seasonSqlQueries = SeasonSqlQueries();
 
