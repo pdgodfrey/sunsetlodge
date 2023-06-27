@@ -142,7 +142,7 @@ class BookingsTests {
 
   @Test
   @Order(2)
-  @DisplayName("Invalid Body Create Rate")
+  @DisplayName("Invalid Body Create Booking")
   fun invalidBodyCreateBooking() {
     val response = RestAssured.given(requestSpecification)
       .given()

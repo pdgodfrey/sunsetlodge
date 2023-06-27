@@ -62,7 +62,7 @@ class EmailerVerticle: CoroutineVerticle() {
       .setTo(toList)
       .setSubject(messageBody.getString("subject", ""))
 
-    engine.render(messageBody, "email_templates/password-reset.hbs") {
+    engine.render(messageBody, "email_templates/${messageBody.getString("template")}") {
       if(it.succeeded()){
         logger.info("succeeded")
 

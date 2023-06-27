@@ -126,6 +126,7 @@ class AuthSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRou
             .put("subject", "Sunset Lodge: Password Reset")
             .put("name", user.getString("name"))
             .put("reset_token", resetToken.toString())
+            .put("template", "password-reset.hbs")
 
           vertx.eventBus().request<Any>("email.send", emailObj) {
 

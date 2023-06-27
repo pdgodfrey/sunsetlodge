@@ -6,10 +6,12 @@ data class UserSqlQueries(
     "inner join roles on role_id = roles.id " +
     "order by users.name",
 
-  val insertUser: String = "insert into users (name, email, role_id,  reset_token, reset_token_expiration, created_at, updated_at) " +
-    "values ($1, $2, 2, now() + interval '10 minutes', now(), now())",
+  val insertUser: String = "insert into users (name, email, role_id, password, created_at, updated_at) " +
+    "values ($1, $2, $3, '', now(), now()) returning *",
 
-  val updateUser: String = "update users set name = $1, email = $2, role_id = $3, updated_at = $4 where id = $5",
+  val updateUser: String = "update users set name = $1, email = $2, role_id = $3, updated_at = now() where id = $4 returning *",
+
+  val deleteUser: String = "delete from users where id = $1",
 
   val setResetPassword: String = "update users set reset_token = $1, reset_token_expiration = now() + interval '10 minutes'," +
     "updated_at = now() where id = $2",
