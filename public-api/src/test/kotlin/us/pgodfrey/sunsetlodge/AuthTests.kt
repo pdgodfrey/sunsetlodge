@@ -3,10 +3,13 @@ package us.pgodfrey.sunsetlodge
 import helpers.GetSession
 import io.restassured.RestAssured
 import io.restassured.builder.RequestSpecBuilder
+import io.restassured.config.RedirectConfig
 import io.restassured.filter.log.RequestLoggingFilter
 import io.restassured.filter.log.ResponseLoggingFilter
+import io.restassured.http.ContentType
 import io.restassured.specification.RequestSpecification
 import io.vertx.core.Vertx
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.client.WebClient
 import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
@@ -84,8 +87,7 @@ class AuthTests {
 
       vertx.deployVerticle(MainVerticle(), testContext.succeeding<String> { _ ->
         val cookies = GetSession().getAuthCookies()
-        sessionValue = cookies["auth-token"]
-        refreshValue = cookies["refresh-token"]
+        sessionValue = cookies["vertx-web.session"]
 
         testContext.completeNow()
       })
@@ -97,31 +99,29 @@ class AuthTests {
     postgreSQLContainer.stop()
   }
 
+
   @Test
   @Order(1)
-  @DisplayName("validateRefresh")
-  fun validateRefresh() {
-    Thread.sleep(1500) //front end will avoid simultaneous refresh - delaying thread here for to avoid conflict
+  @DisplayName("getUser")
+  fun getUser() {
     val response = RestAssured.given(requestSpecification)
       .given()
-      .param("refresh_token", refreshValue)
-      .post("/auth/refresh")
+      .cookie("vertx-web.session", sessionValue)
+      .get("/api/auth/user")
       .then()
       .assertThat()
       .statusCode(200)
       .extract()
     val jsonPath = response.jsonPath()
 
-    val cookies = response.cookies()
 
     assertThat(jsonPath.getBoolean("success")).isTrue()
 
+    assertThat(jsonPath.getString("user.email")).isEqualTo("test@admin.com")
+    assertThat(jsonPath.getString("user.name")).isEqualTo("Test Admin")
 
-    sessionValue = cookies["auth-token"]
-    refreshValue = cookies["refresh-token"]
+
   }
-
-
 
 
   @Test
@@ -130,8 +130,8 @@ class AuthTests {
   fun testLogout() {
     val response = RestAssured.given(requestSpecification)
       .given()
-      .header("Authorization", "Bearer ${sessionValue}")
-      .post("/auth/logout")
+      .cookie("vertx-web.session", sessionValue)
+      .post("/api/auth/logout")
       .then()
       .assertThat()
       .statusCode(200)
@@ -143,34 +143,55 @@ class AuthTests {
   }
 
 
-
-
   @Test
   @Order(3)
-  @DisplayName("failedRefreshAfterLogout")
-  fun failedRefreshAfterLogout() {
-    Thread.sleep(1500) //front end will avoid simultaneous refresh - delaying thread here for to avoid conflict
-    val response = RestAssured.given(requestSpecification)
+  @DisplayName("getUsersAfterLogout")
+  fun getUsersAfterLogout() {
+    RestAssured.given(requestSpecification)
       .given()
-      .param("refresh_token", refreshValue)
-      .post("/auth/refresh")
+      .cookie("vertx-web.session", sessionValue)
+      .config(RestAssured.config().redirect(RedirectConfig().followRedirects(false)))
+      .get("/api/auth/user")
       .then()
       .assertThat()
-      .statusCode(400)
-      .extract()
-      .asString()
+      .statusCode(401)
 
-    assertThat(response).contains("Refresh token has already been used")
+
   }
+
+//
+//
+//
+//  @Test
+//  @Order(3)
+//  @DisplayName("failedRefreshAfterLogout")
+//  fun failedRefreshAfterLogout() {
+//    Thread.sleep(1500) //front end will avoid simultaneous refresh - delaying thread here for to avoid conflict
+//    val response = RestAssured.given(requestSpecification)
+//      .given()
+//      .param("refresh_token", refreshValue)
+//      .post("/api/auth/refresh")
+//      .then()
+//      .assertThat()
+//      .statusCode(400)
+//      .extract()
+//      .asString()
+//
+//    assertThat(response).contains("Refresh token has already been used")
+//  }
 
   @Test
   @Order(4)
   @DisplayName("testResetPassword")
   fun testResetPassword() {
+    val data = JsonObject()
+      .put("email", "test@admin.com")
+
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .param("email", "test@admin.com")
-      .post("/auth/reset-password")
+      .contentType(ContentType.JSON)
+      .body(data.encode())
+      .post("/api/auth/reset-password")
       .then()
       .assertThat()
       .statusCode(200)

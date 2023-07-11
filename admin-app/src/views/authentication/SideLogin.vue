@@ -2,6 +2,17 @@
 import Logo from '@/layouts/full/logo/LogoDark.vue';
 /* Login form */
 import LoginForm from '@/components/auth/LoginForm.vue';
+import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm.vue';
+import SetPasswordForm from '@/components/auth/SetPasswordForm.vue';
+import {computed} from "vue";
+import {useRoute} from "vue-router";
+
+const getCurrentRoute: any = computed(() => {
+  const route = useRoute()
+  const currentRouteName = computed(() => route.name)
+  return currentRouteName
+});
+
 </script>
 
 <template>
@@ -20,15 +31,11 @@ import LoginForm from '@/components/auth/LoginForm.vue';
                 </div>
             </v-col>
             <v-col cols="12" lg="5" xl="4" class="d-flex align-center justify-center bg-surface">
-                <div class="mt-xl-0 mt-5 mw-100">
-                    <h2 class="text-h3 mb-2">Welcome to Modernize</h2>
-                    <div class="text-subtitle-1 mb-6">Your Admin Dashboard</div>
-                    <LoginForm />
-                    <h6 class="text-h6  d-flex align-center mt-6 font-weight-medium">
-                        New to Modernize?
-                        <v-btn class="pl-0 text-primary text-body-1 opacity-1 pl-2 font-weight-medium" height="auto"
-                            to="/" variant="plain">Create an account</v-btn>
-                    </h6>
+                <div class="mt-xl-0 mt-5 mw-100 w-75">
+                    <div class="text-subtitle-1 mb-6">Sunset Lodge Admin Dashboard</div>
+                    <LoginForm v-if="getCurrentRoute.value === 'Login'" />
+                    <ForgotPasswordForm v-if="getCurrentRoute.value === 'Forgot Password'" />
+                    <SetPasswordForm v-if="getCurrentRoute.value === 'Reset Password'" />
                 </div>
             </v-col>
         </v-row>

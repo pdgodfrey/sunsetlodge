@@ -16,7 +16,7 @@ import us.pgodfrey.sunsetlodge.sql.PageSqlQueries
 import us.pgodfrey.sunsetlodge.sql.SeasonSqlQueries
 
 
-class PagesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
+class PagesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool) {
 
 
   private val pageSqlQueries = PageSqlQueries();
@@ -32,7 +32,7 @@ class PagesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRo
     router.get("/rates-and-availability").handler(this::handleRatesAndAvailability)
     router.get("/contact-us").handler(this::handleContactUs)
     router.get("/things-to-do").handler(this::handleThingstoDo)
-    router.get("/lodges-and-cabins").handler(this::handleLodgesandCabins)
+    router.get("/lodge-and-cabins").handler(this::handleLodgeAndCabins)
     router.get("/sunsets").handler(this::handleSunsets)
     router.get("/weddings").handler(this::handleWeddings)
   }
@@ -155,7 +155,7 @@ class PagesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRo
       }
     }
   }
-  fun handleLodgesandCabins(ctx: RoutingContext) {
+  fun handleLodgeAndCabins(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {
         val data: JsonObject = JsonObject()

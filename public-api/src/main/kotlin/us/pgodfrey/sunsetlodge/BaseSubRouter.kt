@@ -20,14 +20,12 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
-open class BaseSubRouter(val vertx: Vertx, val pgPool: PgPool, jwtAuth: JWTAuth) {
+open class BaseSubRouter(val vertx: Vertx, val pgPool: PgPool) {
   val logger = LoggerFactory.getLogger(javaClass)
 
   val router: Router = Router.router(vertx)
 
   var displaySqlErrors = false;
-
-  var sqlAuthentication: SqlAuthentication
 
   init {
     val env = System.getenv()
@@ -35,11 +33,7 @@ open class BaseSubRouter(val vertx: Vertx, val pgPool: PgPool, jwtAuth: JWTAuth)
     this.displaySqlErrors = env.getOrDefault("DISPLAY_SQL_ERRORS", "false").toBoolean()
 
 
-    val sqlOptions = SqlAuthenticationOptions()
 
-    sqlOptions.setAuthenticationQuery("SELECT password FROM users WHERE email ilike $1")
-
-    sqlAuthentication = SqlAuthentication.create(pgPool, sqlOptions)
 
 
   }

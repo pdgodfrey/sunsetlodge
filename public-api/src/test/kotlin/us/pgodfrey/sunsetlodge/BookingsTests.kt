@@ -27,7 +27,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import java.time.LocalDate
 import java.util.*
 
-@DisplayName("RatesTest")
+@DisplayName("BookingTest")
 @ExtendWith(VertxExtension::class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -85,8 +85,7 @@ class BookingsTests {
 
       vertx.deployVerticle(MainVerticle(), testContext.succeeding<String> { _ ->
         val cookies = GetSession().getAuthCookies()
-        sessionValue = cookies["auth-token"]
-        refreshValue = cookies["refresh-token"]
+        sessionValue = cookies["vertx-web.session"]
 
         testContext.completeNow()
       })
@@ -107,6 +106,7 @@ class BookingsTests {
       .given()
       .contentType(ContentType.JSON)
       .body(seasonObject.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/seasons")
       .then()
@@ -126,6 +126,7 @@ class BookingsTests {
   fun getBookings() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("season_id", 1)
       .get("/api/bookings")
@@ -146,6 +147,7 @@ class BookingsTests {
   fun invalidBodyCreateBooking() {
     val response = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/bookings")
       .then()
@@ -171,6 +173,7 @@ class BookingsTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/bookings")
       .then()
@@ -196,6 +199,7 @@ class BookingsTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/bookings")
       .then()
@@ -223,6 +227,7 @@ class BookingsTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/bookings")
       .then()
@@ -244,6 +249,7 @@ class BookingsTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/bookings")
       .then()
@@ -270,6 +276,7 @@ class BookingsTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/bookings")
       .then()
@@ -294,6 +301,7 @@ class BookingsTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/bookings")
       .then()
@@ -313,6 +321,7 @@ class BookingsTests {
       .given()
       .contentType(ContentType.JSON)
       .body(bookingObject.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/bookings")
       .then()
@@ -338,6 +347,7 @@ class BookingsTests {
   fun getBookingsAfterCreate() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("season_id", 1)
       .get("/api/bookings")
@@ -362,6 +372,7 @@ class BookingsTests {
       .given()
       .contentType(ContentType.JSON)
       .body(bookingObject.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .put("/api/bookings/"+ bookingObject.getInteger("id"))
       .then()
@@ -379,6 +390,7 @@ class BookingsTests {
   fun getBookingsAfterUpdate() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("season_id", 1)
       .get("/api/bookings/")
@@ -403,6 +415,7 @@ class BookingsTests {
   fun deleteRate() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .delete("/api/bookings/"+bookingObject.getInteger("id"))
       .then()
@@ -420,6 +433,7 @@ class BookingsTests {
   fun getSeasonsAfterDelete() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("season_id", 1)
       .get("/api/bookings/")

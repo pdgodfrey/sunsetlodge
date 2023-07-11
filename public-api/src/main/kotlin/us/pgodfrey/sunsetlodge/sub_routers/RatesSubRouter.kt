@@ -16,7 +16,7 @@ import us.pgodfrey.sunsetlodge.sql.RateSqlQueries
 import java.security.InvalidParameterException
 
 
-class RatesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
+class RatesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool) {
 
   private val rateSqlQueries = RateSqlQueries();
 

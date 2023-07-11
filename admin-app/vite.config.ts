@@ -25,5 +25,17 @@ export default defineConfig({
     optimizeDeps: {
         exclude: ['vuetify'],
         entries: ['./src/**/*.vue']
-    }
+    },
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:8081',
+          changeOrigin: false,
+          secure: false,
+          // ws: true,
+          // rewrite: (path) => path.replace(/^\/api/, ''),
+        },
+      },
+      cors: true
+    },
 });

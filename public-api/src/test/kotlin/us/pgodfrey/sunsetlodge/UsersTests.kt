@@ -92,8 +92,7 @@ class UsersTests {
 
       vertx.deployVerticle(MainVerticle(), testContext.succeeding<String> { _ ->
         val cookies = GetSession().getAuthCookies()
-        sessionValue = cookies["auth-token"]
-        refreshValue = cookies["refresh-token"]
+        sessionValue = cookies["vertx-web.session"]
 
         testContext.completeNow()
       })
@@ -110,6 +109,7 @@ class UsersTests {
   fun getUsers() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .get("/api/users")
       .then()
@@ -136,6 +136,7 @@ class UsersTests {
       .given()
       .contentType(ContentType.JSON)
       .body(userObject.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/users")
       .then()
@@ -163,6 +164,7 @@ class UsersTests {
       .given()
       .contentType(ContentType.JSON)
       .body(testObject.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/users")
       .then()
@@ -186,6 +188,7 @@ class UsersTests {
       .given()
       .contentType(ContentType.JSON)
       .body(testObject.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/users")
       .then()
@@ -203,6 +206,7 @@ class UsersTests {
   fun invalidBodyCreateUser() {
     val response = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/users")
       .then()
@@ -220,6 +224,7 @@ class UsersTests {
   fun getUsersAfterCreate() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .get("/api/users")
       .then()
@@ -255,6 +260,7 @@ class UsersTests {
       .given()
       .contentType(ContentType.JSON)
       .body(userObject.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .put("/api/users/${userObject.getInteger("id")}")
       .then()
@@ -275,6 +281,7 @@ class UsersTests {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
       .queryParam("id", userObject.getInteger("id"))
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/users/reset-password")
       .then()
@@ -290,6 +297,7 @@ class UsersTests {
       .given()
       .param("kind", "to")
       .param("query", "test@user.com")
+      .cookie("vertx-web.session", sessionValue)
       .get("/api/v2/search")
       .then()
       .assertThat()
@@ -307,6 +315,7 @@ class UsersTests {
   fun getUsersAfterUpdate() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .get("/api/users")
       .then()
@@ -337,6 +346,7 @@ class UsersTests {
   fun deleteUser() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .delete("/api/users/${userObject.getInteger("id")}")
       .then()
@@ -355,6 +365,7 @@ class UsersTests {
   fun getUsersAfterDelete() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .get("/api/users")
       .then()

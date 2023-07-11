@@ -63,8 +63,7 @@ class SimpleObjectsTests {
 
       vertx.deployVerticle(MainVerticle(), testContext.succeeding<String> { _ ->
         val cookies = GetSession().getAuthCookies()
-        sessionValue = cookies["auth-token"]
-        refreshValue = cookies["refresh-token"]
+        sessionValue = cookies["vertx-web.session"]
 
         testContext.completeNow()
       })
@@ -82,6 +81,7 @@ class SimpleObjectsTests {
   fun getBuildings() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .get("/api/buildings")
       .then()
@@ -122,5 +122,28 @@ class SimpleObjectsTests {
     assertThat(jsonPath.getInt("rows[5].max_occupancy")).isEqualTo(6)
     assertThat(jsonPath.getInt("rows[5].bedrooms")).isEqualTo(3)
     assertThat(jsonPath.getInt("rows[5].bathrooms")).isEqualTo(1)
+  }
+
+  @Test
+  @Order(2)
+  @DisplayName("Test Get Roles")
+  fun getRoles() {
+    val jsonPath = RestAssured.given(requestSpecification)
+      .given()
+      .cookie("vertx-web.session", sessionValue)
+      .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
+      .get("/api/roles")
+      .then()
+      .assertThat()
+      .statusCode(200)
+      .extract()
+      .jsonPath()
+
+    assertThat(jsonPath.getBoolean("success")).isTrue()
+    assertThat(jsonPath.getList<Any>("rows").size).isEqualTo(2)
+
+    assertThat(jsonPath.getString("rows[0].name")).isEqualTo("User")
+
+    assertThat(jsonPath.getString("rows[1].name")).isEqualTo("Administrator")
   }
 }

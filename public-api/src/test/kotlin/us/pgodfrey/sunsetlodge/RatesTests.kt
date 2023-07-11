@@ -98,8 +98,7 @@ class RatesTests {
 
       vertx.deployVerticle(MainVerticle(), testContext.succeeding<String> { _ ->
         val cookies = GetSession().getAuthCookies()
-        sessionValue = cookies["auth-token"]
-        refreshValue = cookies["refresh-token"]
+        sessionValue = cookies["vertx-web.session"]
 
         testContext.completeNow()
       })
@@ -120,6 +119,7 @@ class RatesTests {
         .given()
         .contentType(ContentType.JSON)
         .body(data.encode())
+        .cookie("vertx-web.session", sessionValue)
         .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
         .post("/api/seasons")
         .then()
@@ -147,6 +147,7 @@ class RatesTests {
   fun getRates() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("season_id", 1)
       .get("/api/rates")
@@ -215,6 +216,7 @@ class RatesTests {
   fun invalidBodyCreateSeason() {
     val response = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/rates")
       .then()
@@ -240,6 +242,7 @@ class RatesTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/rates")
       .then()
@@ -264,6 +267,7 @@ class RatesTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/rates")
       .then()
@@ -288,6 +292,7 @@ class RatesTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/rates")
       .then()
@@ -313,6 +318,7 @@ class RatesTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/rates")
       .then()
@@ -338,6 +344,7 @@ class RatesTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/rates")
       .then()
@@ -360,6 +367,7 @@ class RatesTests {
         .given()
         .contentType(ContentType.JSON)
         .body(data.encode())
+        .cookie("vertx-web.session", sessionValue)
         .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
         .post("/api/rates")
         .then()
@@ -383,6 +391,7 @@ class RatesTests {
   fun getRatesAfterCreate() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("season_id", seasonObjects.get(0).getInteger("id"))
       .get("/api/rates")
@@ -407,6 +416,7 @@ class RatesTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .put("/api/rates/"+ data.getInteger("id"))
       .then()
@@ -424,6 +434,7 @@ class RatesTests {
   fun getRatesAfterUpdate() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("season_id", seasonObjects.get(0).getInteger("id"))
       .get("/api/rates/")
@@ -445,6 +456,7 @@ class RatesTests {
   fun deleteRate() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .delete("/api/rates/"+rateObjects.get(0).getInteger("id"))
       .then()
@@ -462,6 +474,7 @@ class RatesTests {
   fun getSeasonsAfterDelete() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
+      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("season_id", seasonObjects.get(0).getInteger("id"))
       .get("/api/rates/")
