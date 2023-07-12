@@ -65,7 +65,6 @@ function handleResponse(response: any) {
             const error = text;
             return Promise.reject(error);
         } else {
-          console.log(text)
           try {
             const data = text && JSON.parse(text);
             return data;

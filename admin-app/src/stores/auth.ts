@@ -26,13 +26,16 @@ export const useAuthStore = defineStore({
           localStorage.setItem('user', JSON.stringify(userResponse.user));
             // redirect to previous url or default to home page
           router.push(this.returnUrl || '/');
+
         },
-        logout() {
-            this.user = null;
+        async logout() {
+          await fetchWrapper.post(`${baseUrl}/api/auth/logout`)
 
-            localStorage.removeItem('user');
+          this.user = null;
 
-            router.push('/');
+          localStorage.removeItem('user');
+
+          router.push('/auth/login');
         },
         async forgotPassword(username: String) {
           return await fetchWrapper.post(`${baseUrl}/api/auth/reset-password`, { email: username });
