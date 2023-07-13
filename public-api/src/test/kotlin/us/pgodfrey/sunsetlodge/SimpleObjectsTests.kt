@@ -62,8 +62,12 @@ class SimpleObjectsTests {
       flyway.migrate()
 
       vertx.deployVerticle(MainVerticle(), testContext.succeeding<String> { _ ->
-        val cookies = GetSession().getAuthCookies()
-        sessionValue = cookies["vertx-web.session"]
+        GetSession().setPassword()
+        val response = GetSession().loginResponse()
+        val cookies = response.cookies()
+        val jsonPath = response.jsonPath()
+        sessionValue = cookies["auth-token"]
+        refreshValue = jsonPath.getString("refresh_token")
 
         testContext.completeNow()
       })
@@ -81,7 +85,7 @@ class SimpleObjectsTests {
   fun getBuildings() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("vertx-web.session", sessionValue)
+      .cookie("auth-token", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .get("/api/buildings")
       .then()
@@ -130,7 +134,7 @@ class SimpleObjectsTests {
   fun getRoles() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("vertx-web.session", sessionValue)
+      .cookie("auth-token", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .get("/api/roles")
       .then()

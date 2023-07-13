@@ -2,14 +2,14 @@ package us.pgodfrey.sunsetlodge
 
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.impl.logging.LoggerFactory
+import io.vertx.ext.auth.PubSecKeyOptions
+import io.vertx.ext.auth.jwt.JWTAuth
+import io.vertx.ext.auth.jwt.JWTAuthOptions
 import io.vertx.ext.auth.sqlclient.SqlAuthentication
 import io.vertx.ext.auth.sqlclient.SqlAuthenticationOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
-import io.vertx.ext.web.handler.BodyHandler
-import io.vertx.ext.web.handler.CorsHandler
-import io.vertx.ext.web.handler.SessionHandler
-import io.vertx.ext.web.handler.StaticHandler
+import io.vertx.ext.web.handler.*
 import io.vertx.ext.web.sstore.LocalSessionStore
 import io.vertx.ext.web.sstore.SessionStore
 import io.vertx.kotlin.core.json.json
@@ -38,6 +38,8 @@ class MainVerticle : CoroutineVerticle() {
 
   private lateinit var pgPool: PgPool
 
+  private lateinit var jwtAuth: JWTAuth
+  private lateinit var jwtHandler: JWTAuthHandler
 
   private var uploadsDir = ""
 
@@ -63,17 +65,32 @@ class MainVerticle : CoroutineVerticle() {
     val emailVerticle = EmailerVerticle()
     vertx.deployVerticle(emailVerticle).await()
 
-    baseSubRouter = BaseSubRouter(vertx, pgPool)
+
+    val publicKey = readPemFile("public_key.pem")
+    val privateKey = readPemFile("private_key.pem")
+
+    jwtAuth = JWTAuth.create(
+      vertx, JWTAuthOptions()
+        .addPubSecKey(
+          PubSecKeyOptions()
+            .setAlgorithm("RS256")
+            .setBuffer(publicKey)
+        )
+        .addPubSecKey(
+          PubSecKeyOptions()
+            .setAlgorithm("RS256")
+            .setBuffer(privateKey)
+        )
+    )
+    jwtHandler = JWTAuthHandler.create(jwtAuth)
+
+    baseSubRouter = BaseSubRouter(vertx, pgPool, jwtAuth)
 
     val router = Router.router(vertx)
 
     router.route().handler(BodyHandler.create())
 
     router.route().handler(StaticHandler.create());
-
-    val store: SessionStore = LocalSessionStore.create(vertx)
-
-    router.route().handler(SessionHandler.create(store).setNagHttps(false))
 
     val sqlOptions = SqlAuthenticationOptions()
 
@@ -85,14 +102,12 @@ class MainVerticle : CoroutineVerticle() {
     router.route("/*").handler { ctx: RoutingContext ->
 
       logger.info(
-        "=====" + ctx.session().id()
-      )
-      logger.info(
         "=====" + ctx.request().method() + ": " + ctx.normalizedPath() + " : " + ctx.request().absoluteURI()
       )
-      logger.info(ctx.request().cookies().size.toString())
       ctx.request().cookies().forEach {
-        logger.info("${it.name} : ${it.value}")
+        if(it.name.equals("auth-token")){
+          ctx.request().headers().add("Authorization", "Bearer ${it.value}")
+        }
       }
 
       ctx.next()
@@ -122,34 +137,24 @@ class MainVerticle : CoroutineVerticle() {
     router.get("/readyz").handler(baseSubRouter::readinessCheck)
     router.get("/healthz").handler(this::healthCheck)
 
-    val jsonBodyLoginHandler = JsonBodyLoginHandlerImpl(sqlAuthentication, "email", "password", null, null)
+    router.route("/api/auth/user").handler(jwtHandler);
+    router.route("/api/auth/logout").handler(jwtHandler);
 
-    val sunsetAuthHandler = SunsetAuthHandler.create(sqlAuthentication)
+    router.route("/api/auth*").subRouter(AuthSubRouter(vertx, pgPool, sqlAuthentication, jwtAuth).getSubRouter());
 
-    router.route("/api/auth/authenticate").handler(jsonBodyLoginHandler);
+    router.route("/api*").handler(jwtHandler);
 
-
-    router.route("/api/auth/user").handler(sunsetAuthHandler);
-
-    router.route("/api/auth*").subRouter(AuthSubRouter(vertx, pgPool, sqlAuthentication).getSubRouter());
-
-
-//    router.route("/api*").handler(RedirectAuthHandler.create(sqlAuthentication, "/auth/login"));
-
-
-    router.route("/api*").handler(sunsetAuthHandler);
-
-    router.route("/api/bookings*").subRouter(BookingsSubRouter(vertx, pgPool).getSubRouter());
-    router.route("/api/galleries*").subRouter(GalleriesSubRouter(vertx, pgPool).getSubRouter());
-    router.route("/api/images*").subRouter(ImagesSubRouter(vertx, pgPool, uploadsDir).getSubRouter());
-    router.route("/api/rates*").subRouter(RatesSubRouter(vertx, pgPool).getSubRouter());
-    router.route("/api/seasons*").subRouter(SeasonsSubRouter(vertx, pgPool).getSubRouter());
-    router.route("/api/users*").subRouter(UsersSubRouter(vertx, pgPool).getSubRouter());
-    router.route("/api/*").subRouter(MiscSubRouter(vertx, pgPool).getSubRouter());
+    router.route("/api/bookings*").subRouter(BookingsSubRouter(vertx, pgPool, jwtAuth).getSubRouter());
+    router.route("/api/galleries*").subRouter(GalleriesSubRouter(vertx, pgPool, jwtAuth).getSubRouter());
+    router.route("/api/images*").subRouter(ImagesSubRouter(vertx, pgPool, uploadsDir, jwtAuth).getSubRouter());
+    router.route("/api/rates*").subRouter(RatesSubRouter(vertx, pgPool, jwtAuth).getSubRouter());
+    router.route("/api/seasons*").subRouter(SeasonsSubRouter(vertx, pgPool, jwtAuth).getSubRouter());
+    router.route("/api/users*").subRouter(UsersSubRouter(vertx, pgPool, jwtAuth).getSubRouter());
+    router.route("/api/*").subRouter(MiscSubRouter(vertx, pgPool, jwtAuth).getSubRouter());
 
     router.get("/gallery-images/*").handler(this::serveUpload)
 
-    router.route().subRouter(PagesSubRouter(vertx, pgPool).getSubRouter());
+    router.route().subRouter(PagesSubRouter(vertx, pgPool, jwtAuth).getSubRouter());
 
     router.route().failureHandler { failureRoutingContext ->
       logger.info("failure handler")

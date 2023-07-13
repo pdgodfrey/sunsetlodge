@@ -15,7 +15,7 @@ import us.pgodfrey.sunsetlodge.sql.MiscSqlQueries
 import us.pgodfrey.sunsetlodge.sql.SeasonSqlQueries
 
 
-class MiscSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool) {
+class MiscSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
 
 
   private val miscSqlQueries = MiscSqlQueries();

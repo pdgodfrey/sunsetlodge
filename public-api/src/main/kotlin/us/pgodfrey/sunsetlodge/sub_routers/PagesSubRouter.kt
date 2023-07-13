@@ -16,7 +16,7 @@ import us.pgodfrey.sunsetlodge.sql.PageSqlQueries
 import us.pgodfrey.sunsetlodge.sql.SeasonSqlQueries
 
 
-class PagesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool) {
+class PagesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
 
 
   private val pageSqlQueries = PageSqlQueries();

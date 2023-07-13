@@ -86,8 +86,12 @@ class AuthTests {
 
 
       vertx.deployVerticle(MainVerticle(), testContext.succeeding<String> { _ ->
-        val cookies = GetSession().getAuthCookies()
-        sessionValue = cookies["vertx-web.session"]
+        GetSession().setPassword()
+        val response = GetSession().loginResponse()
+        val cookies = response.cookies()
+        val jsonPath = response.jsonPath()
+        sessionValue = cookies["auth-token"]
+        refreshValue = jsonPath.getString("refresh_token")
 
         testContext.completeNow()
       })
@@ -106,7 +110,7 @@ class AuthTests {
   fun getUser() {
     val response = RestAssured.given(requestSpecification)
       .given()
-      .cookie("vertx-web.session", sessionValue)
+      .cookie("auth-token", sessionValue)
       .get("/api/auth/user")
       .then()
       .assertThat()
@@ -124,13 +128,44 @@ class AuthTests {
   }
 
 
+
   @Test
   @Order(2)
+  @DisplayName("validateRefresh")
+  fun validateRefresh() {
+    Thread.sleep(1500) //front end will avoid simultaneous refresh - delaying thread here for to avoid conflict
+    val data = JsonObject()
+      .put("refresh_token", refreshValue)
+    val response = RestAssured.given(requestSpecification)
+      .given()
+      .contentType(ContentType.JSON)
+      .body(data.encode())
+      .post("/api/auth/refresh")
+      .then()
+      .assertThat()
+      .statusCode(200)
+      .extract()
+    val jsonPath = response.jsonPath()
+
+    val cookies = response.cookies()
+
+    assertThat(jsonPath.getBoolean("success")).isTrue()
+
+    logger.info("old token ${refreshValue}")
+
+    sessionValue = cookies["auth-token"]
+    refreshValue = jsonPath.getString("refresh_token")
+    logger.info("new token ${refreshValue}")
+  }
+
+
+  @Test
+  @Order(3)
   @DisplayName("testLogout")
   fun testLogout() {
     val response = RestAssured.given(requestSpecification)
       .given()
-      .cookie("vertx-web.session", sessionValue)
+      .cookie("auth-token", sessionValue)
       .post("/api/auth/logout")
       .then()
       .assertThat()
@@ -144,12 +179,11 @@ class AuthTests {
 
 
   @Test
-  @Order(3)
+  @Order(4)
   @DisplayName("getUsersAfterLogout")
   fun getUsersAfterLogout() {
     RestAssured.given(requestSpecification)
       .given()
-      .cookie("vertx-web.session", sessionValue)
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(false)))
       .get("/api/auth/user")
       .then()
@@ -159,29 +193,32 @@ class AuthTests {
 
   }
 
-//
-//
-//
-//  @Test
-//  @Order(3)
-//  @DisplayName("failedRefreshAfterLogout")
-//  fun failedRefreshAfterLogout() {
-//    Thread.sleep(1500) //front end will avoid simultaneous refresh - delaying thread here for to avoid conflict
-//    val response = RestAssured.given(requestSpecification)
-//      .given()
-//      .param("refresh_token", refreshValue)
-//      .post("/api/auth/refresh")
-//      .then()
-//      .assertThat()
-//      .statusCode(400)
-//      .extract()
-//      .asString()
-//
-//    assertThat(response).contains("Refresh token has already been used")
-//  }
+
+
 
   @Test
-  @Order(4)
+  @Order(5)
+  @DisplayName("failedRefreshAfterLogout")
+  fun failedRefreshAfterLogout() {
+    Thread.sleep(1500) //front end will avoid simultaneous refresh - delaying thread here for to avoid conflict
+    val data = JsonObject()
+      .put("refresh_token", refreshValue)
+    val response = RestAssured.given(requestSpecification)
+      .given()
+      .contentType(ContentType.JSON)
+      .body(data.encode())
+      .post("/api/auth/refresh")
+      .then()
+      .assertThat()
+      .statusCode(400)
+      .extract()
+      .asString()
+
+    assertThat(response).contains("Refresh token has already been used")
+  }
+
+  @Test
+  @Order(6)
   @DisplayName("testResetPassword")
   fun testResetPassword() {
     val data = JsonObject()
@@ -213,5 +250,54 @@ class AuthTests {
 
     assertThat(jsonPath2.getInt("total")).isEqualTo(1)
     assertThat(jsonPath2.getString("items[0].Content.Body")).contains("Dear Test Admin")
+  }
+
+  @Test
+  @Order(7)
+  @DisplayName("reAuthenticateAndRefresh")
+  fun reAuthenticateAndRefresh() {
+    val response = GetSession().loginResponse()
+    val cookies = response.cookies()
+    val jsonPath = response.jsonPath()
+    sessionValue = cookies["auth-token"]
+    refreshValue = jsonPath.getString("refresh_token")
+    Thread.sleep(1500)
+
+    val data = JsonObject()
+      .put("refresh_token", refreshValue)
+    val response2 = RestAssured.given(requestSpecification)
+      .given()
+      .contentType(ContentType.JSON)
+      .body(data.encode())
+      .post("/api/auth/refresh")
+      .then()
+      .assertThat()
+      .statusCode(200)
+      .extract()
+    val jsonPath2 = response2.jsonPath()
+
+    assertThat(jsonPath2.getBoolean("success")).isTrue()
+  }
+
+  @Test
+  @Order(8)
+  @DisplayName("reuseRefreshTokenForError")
+  fun reuseRefreshTokenForError() {
+    Thread.sleep(1500)
+    val data = JsonObject()
+      .put("refresh_token", refreshValue)
+
+    val response = RestAssured.given(requestSpecification)
+      .given()
+      .contentType(ContentType.JSON)
+      .body(data.encode())
+      .post("/api/auth/refresh")
+      .then()
+      .assertThat()
+      .statusCode(400)
+      .extract()
+      .asString()
+
+    assertThat(response).contains("Refresh token is not the latest token")
   }
 }

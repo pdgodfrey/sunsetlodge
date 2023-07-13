@@ -2,6 +2,7 @@ package us.pgodfrey.sunsetlodge.sub_routers
 
 import io.vertx.core.Vertx
 import io.vertx.core.http.Cookie
+import io.vertx.core.http.CookieSameSite
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.JWTOptions
 import io.vertx.ext.auth.VertxContextPRNG
@@ -31,10 +32,12 @@ import java.time.ZoneOffset
 import java.util.*
 
 
-class AuthSubRouter(vertx: Vertx, pgPool: PgPool, sqlAuthentication: SqlAuthentication) : BaseSubRouter(vertx, pgPool) {
+class AuthSubRouter(vertx: Vertx, pgPool: PgPool, sqlAuthentication: SqlAuthentication, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
 
   private val userSqlQueries = UserSqlQueries()
   private val authSqlQueries = AuthSqlQueries()
+
+  private val jwtAuth: JWTAuth;
 
   private var JWT_EXPIRE_MINS = 0
   private var JWT_REFRESH_EXPIRE_MINS = 0
@@ -49,9 +52,13 @@ class AuthSubRouter(vertx: Vertx, pgPool: PgPool, sqlAuthentication: SqlAuthenti
     JWT_EXPIRE_MINS = env.getOrDefault("JWT_EXPIRE_MINS", "5").toInt()
     JWT_REFRESH_EXPIRE_MINS = env.getOrDefault("JWT_REFRESH_EXPIRE_MINS", "1440").toInt() //24 hrs
 
+    this.jwtAuth = jwtAuth
+
     router.get("/user").handler(this::handleGetUser)
+    router.post("/authenticate").handler(this::handleAuthenticate)
     router.post("/reset-password").handler(this::handleResetPassword)
     router.post("/set-password").handler(this::handleSetPassword)
+    router.post("/refresh").handler(this::handleRefresh)
     router.post("/logout").handler(this::handleLogout)
 
     this.sqlAuthentication = sqlAuthentication
@@ -109,9 +116,9 @@ class AuthSubRouter(vertx: Vertx, pgPool: PgPool, sqlAuthentication: SqlAuthenti
   fun handleGetUser(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {
-        val ctxUser = ctx.user()
+        val ctxUser = ctx.user().principal()
 
-        val user = execQuery(userSqlQueries.getUserByEmail, Tuple.of(ctx.user().principal().getString("username"))).first().toJson()
+        val user = execQuery(userSqlQueries.getUserById, Tuple.of(ctxUser.getString("sub").toInt())).first().toJson()
 
         val returnUser = JsonObject()
           .put("name", user.getString("name"))
@@ -122,6 +129,209 @@ class AuthSubRouter(vertx: Vertx, pgPool: PgPool, sqlAuthentication: SqlAuthenti
             "user" to returnUser
           )
         })
+      } catch (e: Exception) {
+        logger.error(e.printStackTrace())
+        fail500(ctx, e)
+      }
+    }
+  }
+
+
+  /**
+   * Login, get access token & refresh token
+   *
+   * <p>
+   *   <b>Method:</b> <code>POST</code>
+   * </p>
+   * <p>
+   *   <b>Path:</b> <code>/auth/authenticate</code>
+   * </p>
+   * <p>
+   *   <b>Query Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Path Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Body Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>email</code> - text
+   *   </li>
+   *   <li>
+   *     <code>password</code> - text
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Json Return Body:</b>
+   * </p>
+   *   <ul>
+   *     <li>
+   *       <code>success</code> - boolean
+   *     </li>
+   *     <li>
+   *       <code>refresh_token</code> - text
+   *     </li>
+   *   </ul>
+   *
+   *
+   * @param context RoutingContext
+   */
+  fun handleAuthenticate(ctx: RoutingContext) {
+    GlobalScope.launch(vertx.dispatcher()) {
+      try {
+        val data = ctx.body().asJsonObject()
+        val authInfo = JsonObject()
+          .put("username", data.getString("email"))
+          .put("password", data.getString("password"))
+
+        val credentials = UsernamePasswordCredentials(authInfo)
+
+        val authUser = sqlAuthentication.authenticate(credentials)
+          .onFailure {
+            fail500(ctx, it)
+          }
+          .await()
+
+        val fullUser = execQuery(userSqlQueries.getUserByEmail, Tuple.of(authUser.principal().getString("username"))).first()
+
+        val fullUserObj = fullUser.toJson()
+
+        issueJwtToken(ctx, fullUserObj)
+        val refreshToken = issueRefreshToken(ctx, fullUserObj, JWT_REFRESH_EXPIRE_MINS)
+
+        sendJsonPayload(ctx, json {
+          obj(
+            "refresh_token" to refreshToken
+          )
+        })
+      } catch (e: Exception) {
+        logger.error(e.printStackTrace())
+        fail500(ctx, e)
+      }
+    }
+  }
+
+
+
+  /**
+   * Get access via refresh token
+   *
+   * <p>
+   *   <b>Method:</b> <code>POST</code>
+   * </p>
+   * <p>
+   *   <b>Path:</b> <code>/auth/refresh</code>
+   * </p>
+   * <p>
+   *   <b>Query Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Path Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>-</code>
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Body Params:</b>
+   * </p>
+   *
+   * <ul>
+   *   <li>
+   *     <code>refresh_token</code> - text
+   *   </li>
+   * </ul>
+   * <p>
+   *   <b>Json Return Body:</b>
+   * </p>
+   *   <ul>
+   *     <li>
+   *       <code>success</code> - boolean
+   *     </li>
+   *     <li>
+   *       <code>refresh_token</code> - text
+   *     </li>
+   *   </ul>
+   *
+   *
+   * @param context RoutingContext
+   */
+  fun handleRefresh(ctx: RoutingContext) {
+    GlobalScope.launch(vertx.dispatcher()) {
+      try {
+        val data = ctx.body().asJsonObject()
+        val refreshToken = data.getString("refresh_token")
+
+        val credentials = TokenCredentials(refreshToken)
+
+        logger.info("refresh token ${refreshToken}")
+
+        val authUser = jwtAuth.authenticate(credentials)
+          .map {
+            it.principal()
+          }
+          .onFailure {
+            fail500(ctx, InvalidParameterException("Invalid refresh token"))
+          }
+          .await()
+
+        val userId = authUser.getString("sub").toInt()
+
+        val tokenHash = hashString(refreshToken)
+
+        val latestRefreshToken = execQuery(authSqlQueries.getLatestRefreshTokenForUser, Tuple.of(userId)).first()
+
+        if(latestRefreshToken.getString("refresh_token") != tokenHash){
+          //Latest token has already been used, invalidate all!
+          execQuery(authSqlQueries.revokeRefreshTokensForUser, Tuple.of(userId))
+          throw InvalidParameterException("Refresh token is not the latest token")
+        } else if(latestRefreshToken.getBoolean("is_used") == true){
+          //Latest token has already been used, invalidate all!
+          execQuery(authSqlQueries.revokeRefreshTokensForUser, Tuple.of(userId))
+          throw InvalidParameterException("Refresh token has already been used")
+        } else {
+          execQuery(authSqlQueries.setRefreshTokenToUsed, Tuple.of(tokenHash))
+
+          val fullUser = execQuery(userSqlQueries.getUserById, Tuple.of(userId)).first()
+
+          val fullUserObj = fullUser.toJson()
+
+          issueJwtToken(ctx, fullUserObj)
+          val refreshToken = issueRefreshToken(ctx, fullUserObj, JWT_REFRESH_EXPIRE_MINS)
+
+          sendJsonPayload(ctx, json {
+            obj(
+              "refresh_token" to refreshToken
+            )
+          })
+        }
+
+      } catch (e: InvalidParameterException) {
+        logger.error(e.printStackTrace())
+        fail400(ctx, e)
       } catch (e: Exception) {
         logger.error(e.printStackTrace())
         fail500(ctx, e)
@@ -460,8 +670,15 @@ class AuthSubRouter(vertx: Vertx, pgPool: PgPool, sqlAuthentication: SqlAuthenti
   fun handleLogout(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {
+        val user = ctx.user().principal()
+
+        val userId = user.getString("sub").toInt()
+
+        ctx.response().removeCookie("auth-token")
+
+        execQuery(authSqlQueries.revokeRefreshTokensForUser, Tuple.of(userId))
+
         ctx.clearUser()
-//        ctx.session().destroy()
 
         sendJsonPayload(ctx, json {
           obj(
@@ -476,5 +693,67 @@ class AuthSubRouter(vertx: Vertx, pgPool: PgPool, sqlAuthentication: SqlAuthenti
         fail500(ctx, e)
       }
     }
+  }
+
+  private fun issueJwtToken(context: RoutingContext, user: JsonObject) {
+    logger.info("make auth token")
+
+    val jwtOptions = JWTOptions()
+      .setAlgorithm("RS256")
+      .setExpiresInMinutes(JWT_EXPIRE_MINS)
+      .setIssuer("sunsetlodge-api")
+      .setSubject("${user.getInteger("id")}")
+
+    val claims = JsonObject()
+      .put("name", user.getString("name"))
+
+
+    val token = jwtAuth.generateToken(claims, jwtOptions)
+
+    val cookie = Cookie.cookie("auth-token", token)
+    cookie.setHttpOnly(true)
+    cookie.setMaxAge((JWT_EXPIRE_MINS * 60).toLong())
+    cookie.setSameSite(CookieSameSite.NONE)
+
+    context.response().addCookie(cookie)
+  }
+
+  private suspend fun issueRefreshToken(context: RoutingContext, user: JsonObject, expirationMinutes: Int): String {
+
+    val expiration = LocalDateTime.now().plusMinutes(expirationMinutes.toLong())
+
+    val jwtOptions = JWTOptions()
+      .setAlgorithm("RS256")
+      .setExpiresInMinutes(expirationMinutes)
+      .setIssuer("sunsetlodge-api")
+      .setSubject("${user.getInteger("id")}")
+
+    val claims = JsonObject()
+      .put("name", user.getString("name"))
+
+    val token = jwtAuth.generateToken(claims, jwtOptions)
+
+    val hash = hashString(token)
+
+    execQuery(authSqlQueries.insertRefreshToken, Tuple.of(hash, expiration, user.getInteger("id")))
+
+    return token
+
+  }
+
+  private fun hashString(input: String): String {
+    val HEX_CHARS = "0123456789ABCDEF"
+    val bytes = MessageDigest
+      .getInstance("SHA-256")
+      .digest(input.toByteArray())
+    val result = StringBuilder(bytes.size * 2)
+
+    bytes.forEach {
+      val i = it.toInt()
+      result.append(HEX_CHARS[i shr 4 and 0x0f])
+      result.append(HEX_CHARS[i and 0x0f])
+    }
+
+    return result.toString()
   }
 }

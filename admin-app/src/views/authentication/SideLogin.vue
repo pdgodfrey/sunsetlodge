@@ -6,12 +6,14 @@ import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm.vue';
 import SetPasswordForm from '@/components/auth/SetPasswordForm.vue';
 import {computed} from "vue";
 import {useRoute} from "vue-router";
+import {useAuthStore} from "@/stores/auth";
 
 const getCurrentRoute: any = computed(() => {
   const route = useRoute()
   const currentRouteName = computed(() => route.name)
   return currentRouteName
 });
+
 
 </script>
 

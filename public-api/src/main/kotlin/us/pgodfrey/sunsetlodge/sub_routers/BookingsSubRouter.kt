@@ -18,7 +18,7 @@ import java.security.InvalidParameterException
 import java.time.LocalDate
 
 
-class BookingsSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool) {
+class BookingsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
 
   private val bookingSqlQueries = BookingSqlQueries();
   private val seasonSqlQueries = SeasonSqlQueries();

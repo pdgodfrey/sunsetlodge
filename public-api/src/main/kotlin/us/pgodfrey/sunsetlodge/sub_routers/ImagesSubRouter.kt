@@ -21,7 +21,7 @@ import java.security.InvalidParameterException
 import javax.imageio.ImageIO
 
 
-class ImagesSubRouter(vertx: Vertx, pgPool: PgPool, uploadsDir: String) : BaseSubRouter(vertx, pgPool) {
+class ImagesSubRouter(vertx: Vertx, pgPool: PgPool, uploadsDir: String, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
 
   private val imageSqlQueries = ImageSqlQueries();
   private var uploadsDir = ""

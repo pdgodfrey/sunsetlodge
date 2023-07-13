@@ -15,7 +15,7 @@ import us.pgodfrey.sunsetlodge.sql.GallerySqlQueries
 import java.security.InvalidParameterException
 
 
-class GalleriesSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool) {
+class GalleriesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
 
 
   private val galleriesSqlQueries = GallerySqlQueries();

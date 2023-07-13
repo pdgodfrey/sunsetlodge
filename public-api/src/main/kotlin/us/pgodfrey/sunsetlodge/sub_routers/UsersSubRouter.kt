@@ -19,7 +19,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class UsersSubRouter(vertx: Vertx, pgPool: PgPool) : BaseSubRouter(vertx, pgPool) {
+class UsersSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
 
   private val userSqlQueries = UserSqlQueries();
   private val authSqlQueries = AuthSqlQueries();

@@ -7,6 +7,8 @@ import io.restassured.filter.cookie.CookieFilter
 import io.restassured.filter.log.RequestLoggingFilter
 import io.restassured.filter.log.ResponseLoggingFilter
 import io.restassured.http.ContentType
+import io.restassured.response.ExtractableResponse
+import io.restassured.response.Response
 import io.restassured.specification.RequestSpecification
 import io.vertx.core.json.JsonObject
 import org.assertj.core.api.Assertions
@@ -55,7 +57,28 @@ class GetSession {
     return cookies
   }
 
-  private fun setPassword() {
+
+  fun loginResponse(): ExtractableResponse<Response> {
+
+    val loginData = JsonObject()
+      .put("email", "test@admin.com")
+      .put("password", "tester")
+
+    val response = RestAssured.given(requestSpecification)
+      .given()
+      .contentType(ContentType.JSON)
+      .body(loginData.encode())
+      .config(RestAssured.config().redirect(RedirectConfig().followRedirects(false)))
+      .post("/api/auth/authenticate")
+      .then()
+      .assertThat()
+      .statusCode(200)
+      .extract()
+
+    return response
+  }
+
+  fun setPassword() {
     val setPasswordData = JsonObject()
       .put("email", "test@admin.com")
       .put("reset_token", "123")

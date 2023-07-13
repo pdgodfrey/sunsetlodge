@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 
 import UiParentCard from '@/components/shared/UiParentCard.vue';
+import {useAuthStore} from "@/stores/auth";
 
 const page = ref({ title: 'Sample Page' });
 const breadcrumbs = ref([
@@ -11,6 +12,12 @@ const breadcrumbs = ref([
         href: '#'
     }
 ]);
+
+const authStore = useAuthStore();
+if(authStore.user !== "{}"){
+  authStore.startRefreshTokenTimer()
+}
+// console.log(authStore.getUser)
 </script>
 
 <template>
