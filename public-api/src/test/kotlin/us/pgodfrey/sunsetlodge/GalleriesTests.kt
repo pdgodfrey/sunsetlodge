@@ -68,7 +68,7 @@ class GalleriesTests {
         val response = GetSession().loginResponse()
         val cookies = response.cookies()
         val jsonPath = response.jsonPath()
-        sessionValue = cookies["auth-token"]
+        sessionValue = jsonPath.getString("token")
         refreshValue = jsonPath.getString("refresh_token")
 
         testContext.completeNow()
@@ -87,7 +87,7 @@ class GalleriesTests {
   fun getGalleryCategories() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .get("/api/galleries/gallery-categories")
       .then()
@@ -123,7 +123,7 @@ class GalleriesTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .put("/api/galleries/gallery-categories/"+ data.getInteger("id"))
       .then()
@@ -141,7 +141,7 @@ class GalleriesTests {
   fun getGalleryCategoriesAfterUpdate() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .get("/api/galleries/gallery-categories")
       .then()
@@ -169,7 +169,7 @@ class GalleriesTests {
   fun getGalleriesForOne() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("gallery_category_id", 1)
       .get("/api/galleries")
@@ -203,7 +203,7 @@ class GalleriesTests {
   fun getGalleriesForTwo() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("gallery_category_id", 2)
       .get("/api/galleries")
@@ -228,7 +228,7 @@ class GalleriesTests {
   fun getGalleriesForThree() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("gallery_category_id", 3)
       .get("/api/galleries")
@@ -256,7 +256,7 @@ class GalleriesTests {
   fun getGalleriesForFour() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("gallery_category_id", 4)
       .get("/api/galleries")
@@ -285,7 +285,7 @@ class GalleriesTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .put("/api/galleries/"+ data.getInteger("id"))
       .then()
@@ -303,7 +303,7 @@ class GalleriesTests {
   fun getGalleriesForFourAfterUpdate() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("gallery_category_id", 4)
       .get("/api/galleries")

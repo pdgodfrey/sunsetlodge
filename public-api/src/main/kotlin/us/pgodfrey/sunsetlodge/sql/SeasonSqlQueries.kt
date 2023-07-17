@@ -4,9 +4,10 @@ data class SeasonSqlQueries(
   val getCurrentSeason: String = "select * from seasons where date_part('year', end_date) = date_part('year', CURRENT_DATE) limit 1",
   val getNextSeason: String = "select * from seasons where date_part('year', end_date) = date_part('year', CURRENT_DATE)+1 limit 1",
 
-  val getSeasons: String = "select seasons.*," +
+  val getSeasons: String = "select * from (select seasons.*," +
     "(id = (select id from seasons WHERE date_part('year', end_date) = date_part('year', CURRENT_DATE))) as is_current "+
-    "from seasons order by start_date",
+    "from seasons) tbl " +
+    "order by is_current is not true, end_date < now()",
 
   val getSeason: String = "select seasons.*," +
     "(id = (select id from seasons WHERE date_part('year', end_date) = date_part('year', CURRENT_DATE))) as is_current "+

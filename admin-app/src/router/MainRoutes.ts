@@ -1,15 +1,20 @@
 const MainRoutes = {
-    path: '/main',
+    path: '/',
     meta: {
         requiresAuth: true
     },
-    redirect: '/main',
+    redirect: '/bookings',
     component: () => import('@/layouts/full/FullLayout.vue'),
     children: [
         {
-            name: 'Starter',
-            path: '/',
-            component: () => import('@/views/StarterPage.vue')
+            name: 'Bookings',
+            path: '/bookings',
+            component: () => import('@/views/Bookings.vue')
+        },
+        {
+          name: 'Seasons',
+          path: '/seasons',
+          component: () => import('@/views/Seasons.vue')
         },
     ]
 };

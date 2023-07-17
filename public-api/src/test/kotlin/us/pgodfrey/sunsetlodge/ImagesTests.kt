@@ -83,7 +83,7 @@ class ImagesTests {
         val response = GetSession().loginResponse()
         val cookies = response.cookies()
         val jsonPath = response.jsonPath()
-        sessionValue = cookies["auth-token"]
+        sessionValue = jsonPath.getString("token")
         refreshValue = jsonPath.getString("refresh_token")
 
         testContext.completeNow()
@@ -105,7 +105,7 @@ class ImagesTests {
         .given()
         .multiPart("gallery_id", 1)
         .multiPart("file", File(filePath))
-        .cookie("auth-token", sessionValue)
+        .header("Authorization", "Bearer ${sessionValue}")
         .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
         .post("/api/images")
         .then()
@@ -121,7 +121,7 @@ class ImagesTests {
         .given()
         .multiPart("gallery_id", 2)
         .multiPart("file", File(filePath))
-        .cookie("auth-token", sessionValue)
+        .header("Authorization", "Bearer ${sessionValue}")
         .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
         .post("/api/images")
         .then()
@@ -141,7 +141,7 @@ class ImagesTests {
   fun getImagesForGalleryOne() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("gallery_id", 1)
       .get("/api/images")
@@ -179,7 +179,7 @@ class ImagesTests {
   fun getImagesForGalleryTwo() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("gallery_id", 2)
       .get("/api/images")
@@ -212,7 +212,7 @@ class ImagesTests {
   fun invalidNoFiles() {
     val response = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .multiPart("gallery_id", 2)
       .post("/api/images")
@@ -231,7 +231,7 @@ class ImagesTests {
   fun invalidNoGalleryId() {
     val response = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .multiPart("file", File(galleryOneImages.get(0)))
       .post("/api/images")
@@ -255,7 +255,7 @@ class ImagesTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/images/update-order")
       .then()
@@ -273,7 +273,7 @@ class ImagesTests {
   fun getRatesAfterUpdate() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("gallery_id", 1)
       .get("/api/images/")
@@ -297,7 +297,7 @@ class ImagesTests {
   fun deleteImage() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .delete("/api/images/1")
       .then()
@@ -315,7 +315,7 @@ class ImagesTests {
   fun getImagesAfterDelete() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .queryParam("gallery_id", 1)
       .get("/api/images/")

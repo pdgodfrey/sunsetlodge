@@ -88,9 +88,8 @@ class AuthTests {
       vertx.deployVerticle(MainVerticle(), testContext.succeeding<String> { _ ->
         GetSession().setPassword()
         val response = GetSession().loginResponse()
-        val cookies = response.cookies()
         val jsonPath = response.jsonPath()
-        sessionValue = cookies["auth-token"]
+        sessionValue = jsonPath.getString("token")
         refreshValue = jsonPath.getString("refresh_token")
 
         testContext.completeNow()
@@ -110,7 +109,7 @@ class AuthTests {
   fun getUser() {
     val response = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .get("/api/auth/user")
       .then()
       .assertThat()
@@ -153,7 +152,7 @@ class AuthTests {
 
     logger.info("old token ${refreshValue}")
 
-    sessionValue = cookies["auth-token"]
+    sessionValue = jsonPath.getString("token")
     refreshValue = jsonPath.getString("refresh_token")
     logger.info("new token ${refreshValue}")
   }
@@ -165,7 +164,7 @@ class AuthTests {
   fun testLogout() {
     val response = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .post("/api/auth/logout")
       .then()
       .assertThat()
@@ -259,7 +258,7 @@ class AuthTests {
     val response = GetSession().loginResponse()
     val cookies = response.cookies()
     val jsonPath = response.jsonPath()
-    sessionValue = cookies["auth-token"]
+    sessionValue = jsonPath.getString("token")
     refreshValue = jsonPath.getString("refresh_token")
     Thread.sleep(1500)
 

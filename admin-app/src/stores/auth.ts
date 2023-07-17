@@ -11,6 +11,7 @@ export const useAuthStore = defineStore({
         // initialize state from local storage to enable user to stay logged in
         // @ts-ignore
         user: useStorage('user', '{}'),
+        authToken: useStorage('authToken', ''),
         refreshToken: useStorage('refreshToken', ''),
         returnUrl: useStorage('returnUrl', ''),
         isRefreshing: useStorage('isRefreshing', false),
@@ -23,28 +24,33 @@ export const useAuthStore = defineStore({
       }
     },
     actions: {
+        async getLoggedInUser() {
+          const userResponse = await fetchWrapper.get(`${baseUrl}/api/auth/user`);
+
+          this.user = JSON.stringify(userResponse.user);
+        },
         async login(username: string, password: string) {
             const authResponse = await fetchWrapper.post(`${baseUrl}/api/auth/authenticate`, {
               email: username,
               password: password
             })
 
+            this.authToken = authResponse.token;
             this.refreshToken = authResponse.refresh_token;
 
-            const userResponse = await fetchWrapper.get(`${baseUrl}/api/auth/user`);
-
-            this.user = JSON.stringify(userResponse.user);
+            this.getLoggedInUser()
 
             this.startRefreshTokenTimer();
 
             this.lastRefreshTime = new Date()
 
             // redirect to previous url or default to home page
-            if(this.returnUrl != '') {
-              router.push(this.returnUrl);
-            } else {
-              router.push('/');
-            }
+            // if(this.returnUrl != '') {
+            //   router.push(this.returnUrl);
+            // } else {
+             router.push('/bookings');
+
+            // }
 
         },
         logout() {
@@ -77,7 +83,6 @@ export const useAuthStore = defineStore({
           if(this.user === '{}'){
             this.logout()
           } else {
-            this.stopRefreshTokenTimer()
             const lastRefresh = this.lastRefreshTime;
             const now = new Date()
 
@@ -88,11 +93,11 @@ export const useAuthStore = defineStore({
               if(lastUpdatedInSeconds > 120) {
                 this.isRefreshing = true;
 
-
                 await fetchWrapper.post(`${baseUrl}/api/auth/refresh`, {
                   refresh_token: this.refreshToken
                 })
                   .then((refreshResponse) => {
+                    this.authToken = refreshResponse.token;
                     this.refreshToken = refreshResponse.refresh_token;
 
                     fetchWrapper.get(`${baseUrl}/api/auth/user`);
@@ -100,9 +105,6 @@ export const useAuthStore = defineStore({
                     this.isRefreshing = false
 
                     this.lastRefreshTime = now
-
-                    console.log("foo3")
-                    this.startRefreshTokenTimer();
                   })
                   .catch((err) => {
 
@@ -111,21 +113,19 @@ export const useAuthStore = defineStore({
                     console.log(err)
                     this.logout()
                   });
-              } else {
-                this.startRefreshTokenTimer();
               }
 
-            } else {
-              this.startRefreshTokenTimer();
             }
           }
 
 
         },
         startRefreshTokenTimer() {
+          console.log("startRefreshTokenTimer")
           if(this.refreshTokenTimeout == -1){
+            console.log("ACUTAL startRefreshTokenTimer")
             const timeout = (60 * 1000);
-            this.refreshTokenTimeout = setTimeout(this.refreshAuthToken, timeout);
+            this.refreshTokenTimeout = setInterval(this.refreshAuthToken, timeout);
           }
         },
         stopRefreshTokenTimer() {

@@ -7,7 +7,14 @@ import HorizontalSidebar from './horizontal-sidebar/HorizontalSidebar.vue';
 import Customizer from './customizer/Customizer.vue';
 import { useCustomizerStore } from '../../stores/customizer';
 import { pl, zhHans } from 'vuetify/locale'
+import {useAuthStore} from "@/stores/auth";
 const customizer = useCustomizerStore();
+
+
+const authStore = useAuthStore();
+if(authStore.user !== "{}"){
+  authStore.startRefreshTokenTimer()
+}
 </script>
 
 <template>
@@ -32,16 +39,6 @@ const customizer = useCustomizerStore();
                 <v-container fluid class="page-wrapper pb-sm-15 pb-10">
                     <div :class="customizer.boxed ? 'maxWidth' : ''">
                         <RouterView />
-                        <v-btn
-                            class="customizer-btn"
-                            size="large"
-                            icon
-                            variant="flat"
-                            color="primary"
-                            @click.stop="customizer.SET_CUSTOMIZER_DRAWER(!customizer.Customizer_drawer)"
-                        >
-                            <SettingsIcon />
-                        </v-btn>
                     </div>
                 </v-container>
             </v-main>

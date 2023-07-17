@@ -211,11 +211,12 @@ class AuthSubRouter(vertx: Vertx, pgPool: PgPool, sqlAuthentication: SqlAuthenti
 
         val fullUserObj = fullUser.toJson()
 
-        issueJwtToken(ctx, fullUserObj)
+        val authToken = issueJwtToken(ctx, fullUserObj)
         val refreshToken = issueRefreshToken(ctx, fullUserObj, JWT_REFRESH_EXPIRE_MINS)
 
         sendJsonPayload(ctx, json {
           obj(
+            "token" to authToken,
             "refresh_token" to refreshToken
           )
         })
@@ -319,11 +320,12 @@ class AuthSubRouter(vertx: Vertx, pgPool: PgPool, sqlAuthentication: SqlAuthenti
 
           val fullUserObj = fullUser.toJson()
 
-          issueJwtToken(ctx, fullUserObj)
+          val authToken = issueJwtToken(ctx, fullUserObj)
           val refreshToken = issueRefreshToken(ctx, fullUserObj, JWT_REFRESH_EXPIRE_MINS)
 
           sendJsonPayload(ctx, json {
             obj(
+              "token" to authToken,
               "refresh_token" to refreshToken
             )
           })
@@ -695,7 +697,7 @@ class AuthSubRouter(vertx: Vertx, pgPool: PgPool, sqlAuthentication: SqlAuthenti
     }
   }
 
-  private fun issueJwtToken(context: RoutingContext, user: JsonObject) {
+  private fun issueJwtToken(context: RoutingContext, user: JsonObject): String {
     logger.info("make auth token")
 
     val jwtOptions = JWTOptions()
@@ -706,16 +708,12 @@ class AuthSubRouter(vertx: Vertx, pgPool: PgPool, sqlAuthentication: SqlAuthenti
 
     val claims = JsonObject()
       .put("name", user.getString("name"))
+      .put("role", user.getString("role_name"))
 
 
     val token = jwtAuth.generateToken(claims, jwtOptions)
 
-    val cookie = Cookie.cookie("auth-token", token)
-    cookie.setHttpOnly(true)
-    cookie.setMaxAge((JWT_EXPIRE_MINS * 60).toLong())
-    cookie.setSameSite(CookieSameSite.NONE)
-
-    context.response().addCookie(cookie)
+    return token
   }
 
   private suspend fun issueRefreshToken(context: RoutingContext, user: JsonObject, expirationMinutes: Int): String {

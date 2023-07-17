@@ -6,12 +6,16 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "allowJs": true
+    "allowJs": true,
+
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
 
   "references": [
     {
       "path": "./tsconfig.vite-config.json"
     }
-  ]
+  ],
+
 }

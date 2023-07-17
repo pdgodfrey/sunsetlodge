@@ -12,13 +12,12 @@ function request(method: string) {
         const requestOptions: any = {
             method,
             headers: authHeader(url),
+            credentials: 'include'
         };
         if (body) {
             requestOptions.headers['Content-Type'] = 'application/json';
             requestOptions.body = JSON.stringify(body);
         }
-
-        requestOptions.credentials = 'include'
 
         return fetch(url, requestOptions).then(handleResponse);
     };
@@ -28,11 +27,11 @@ function request(method: string) {
 
 function authHeader(url: any) {
     // return auth header with jwt if user is logged in and request is to the api url
-    const { getUser } = useAuthStore();
-    const isLoggedIn = !!getUser?.token;
+    const { authToken } = useAuthStore();
+    const isLoggedIn = (authToken != '');
     const isApiUrl = url.startsWith(import.meta.env.VITE_API_URL);
     if (isLoggedIn && isApiUrl) {
-        return { Authorization: `Bearer ${getUser.token}` };
+        return { Authorization: `Bearer ${authToken}` };
     } else {
         return { };
     }

@@ -24,6 +24,10 @@ import 'vue3-easy-data-table/dist/style.css';
 import { createI18n } from 'vue-i18n';
 import messages from '@/utils/locales/messages';
 
+
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css'
+
 const i18n = createI18n({
     locale: 'en',
     messages: messages,
@@ -47,4 +51,7 @@ app.use(VueRecaptcha, {
 app.use(i18n);
 app.use(Maska);
 app.use(VueApexCharts);
+
+app.component('VueDatePicker', VueDatePicker);
+
 app.use(vuetify).mount('#app');

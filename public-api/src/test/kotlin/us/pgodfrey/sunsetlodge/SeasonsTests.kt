@@ -90,7 +90,7 @@ class SeasonsTests {
         val response = GetSession().loginResponse()
         val cookies = response.cookies()
         val jsonPath = response.jsonPath()
-        sessionValue = cookies["auth-token"]
+        sessionValue = jsonPath.getString("token")
         refreshValue = jsonPath.getString("refresh_token")
 
         testContext.completeNow()
@@ -109,7 +109,7 @@ class SeasonsTests {
   fun getSeasons() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .get("/api/seasons")
       .then()
@@ -139,7 +139,7 @@ class SeasonsTests {
         .given()
         .contentType(ContentType.JSON)
         .body(data.encode())
-        .cookie("auth-token", sessionValue)
+        .header("Authorization", "Bearer ${sessionValue}")
         .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
         .post("/api/seasons")
         .then()
@@ -164,7 +164,7 @@ class SeasonsTests {
   fun invalidBodyCreateSeason() {
     val response = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/seasons")
       .then()
@@ -191,7 +191,7 @@ class SeasonsTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/seasons")
       .then()
@@ -214,7 +214,7 @@ class SeasonsTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .post("/api/seasons")
       .then()
@@ -234,7 +234,7 @@ class SeasonsTests {
   fun getSeasonsAfterCreate() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .get("/api/seasons")
       .then()
@@ -264,7 +264,7 @@ class SeasonsTests {
   fun getCurrentSeason() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .get("/api/seasons/current")
       .then()
@@ -296,7 +296,7 @@ class SeasonsTests {
       .given()
       .contentType(ContentType.JSON)
       .body(data.encode())
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .put("/api/seasons/1")
       .then()
@@ -314,7 +314,7 @@ class SeasonsTests {
   fun getSeasonAfterUpdate() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .get("/api/seasons/1")
       .then()
@@ -340,7 +340,7 @@ class SeasonsTests {
   fun deleteSeason() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .delete("/api/seasons/2")
       .then()
@@ -358,7 +358,7 @@ class SeasonsTests {
   fun getSeasonsAfterDelete() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
-      .cookie("auth-token", sessionValue)
+      .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
       .get("/api/seasons")
       .then()
