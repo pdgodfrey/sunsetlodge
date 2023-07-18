@@ -100,8 +100,6 @@ export const useAuthStore = defineStore({
                     this.authToken = refreshResponse.token;
                     this.refreshToken = refreshResponse.refresh_token;
 
-                    fetchWrapper.get(`${baseUrl}/api/auth/user`);
-
                     this.isRefreshing = false
 
                     this.lastRefreshTime = now

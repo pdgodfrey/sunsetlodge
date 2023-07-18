@@ -12,6 +12,8 @@ data class RateSqlQueries(
 
   val createRate: String = "insert into rates (season_id, building_id, high_season_rate, low_season_rate) values " +
     "($1, $2, $3, $4) returning *",
-  val updateRate: String = "update rates set high_season_rate = $1, low_season_rate = $1 where id = $3 returning *",
-  val deleteRate: String = "delete from rates where id = $1"
+  val updateRate: String = "update rates set high_season_rate = $1, low_season_rate = $2 where id = $3 returning *",
+  val deleteRate: String = "delete from rates where id = $1",
+
+  val deleteRatesForSeason: String = "delete from rates where season_id = $1"
 )

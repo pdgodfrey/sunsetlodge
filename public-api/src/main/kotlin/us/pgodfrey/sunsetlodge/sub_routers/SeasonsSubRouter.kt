@@ -12,6 +12,8 @@ import io.vertx.sqlclient.Tuple
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import us.pgodfrey.sunsetlodge.BaseSubRouter
+import us.pgodfrey.sunsetlodge.sql.MiscSqlQueries
+import us.pgodfrey.sunsetlodge.sql.RateSqlQueries
 import us.pgodfrey.sunsetlodge.sql.SeasonSqlQueries
 import java.security.InvalidParameterException
 import java.time.LocalDate
@@ -20,6 +22,8 @@ import java.time.LocalDate
 class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
 
   private val seasonSqlQueries = SeasonSqlQueries();
+  private val rateSqlQueries = RateSqlQueries();
+  private val miscSqlQueries = MiscSqlQueries();
 
   init {
 
@@ -357,11 +361,24 @@ class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSub
         params.addLocalDate(LocalDate.parse(data.getString("high_season_end_date")))
         params.addBoolean(data.getBoolean("is_open"))
 
-        val season = execQuery(seasonSqlQueries.createSeason, params)
+        val seasonResult = execQuery(seasonSqlQueries.createSeason, params)
+        val season = seasonResult.first()
+
+        val buildings = execQuery(miscSqlQueries.getBuildings)
+        buildings.forEach { building ->
+          val rateParams = Tuple.of(
+            season.getInteger("id"),
+            building.getInteger("id"),
+            null,
+            null
+          )
+          execQuery(rateSqlQueries.createRate, rateParams)
+        }
+
 
         sendJsonPayload(ctx, json {
           obj(
-            "data" to season.first().toJson()
+            "data" to season.toJson()
           )
         })
       } catch (e: InvalidParameterException) {
@@ -539,6 +556,8 @@ class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSub
     GlobalScope.launch(vertx.dispatcher()) {
       try {
         val id = ctx.request().getParam("id").toInt()
+
+        execQuery(rateSqlQueries.deleteRatesForSeason, Tuple.of(id))
 
         execQuery(seasonSqlQueries.deleteSeason, Tuple.of(id))
 

@@ -1,27 +1,29 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useSeasonsStore } from '@/stores/seasons';
+import { useRatesStore } from "@/stores/rates";
+import { Form } from 'vee-validate';
+
 
 import dayjs from "dayjs";
-import {useBuildingsStore} from "@/stores/buildings";
 
 const store = useSeasonsStore();
-const buildingsStore = useBuildingsStore();
+const ratesStore = useRatesStore();
 
 onMounted(() => {
     store.getAll();
-    buildingsStore.getAll();
 });
 const getSeasons: any = computed(() => {
     return store.seasons;
 });
 
-const getBuildings: any = computed(() => {
-  return buildingsStore.buildings;
+const getRates: any = computed(() => {
+  return ratesStore.rates;
 });
 
 
 const valid = ref(true);
+const rateValid = ref(false);
 const dialog = ref(false);
 const ratesDialog = ref(false);
 const search = ref('');
@@ -62,7 +64,7 @@ function deleteItem(item: any) {
     if(confirm('Are you sure you want to delete this item?') == true) {
       store.deleteSeason(item.id)
         .then(() => {
-          store.getAll()
+          setTimeout(store.getAll, 500)
         })
     }
 }
@@ -89,12 +91,40 @@ function save() {
     } else {
       store.createSeason(season)
         .then(() => {
-          store.getAll()
+          setTimeout(store.getAll, 500)
         })
     }
     close();
 }
 
+function editItemRates(item: any) {
+  ratesStore.getRatesForSeason(item.id)
+    .then(() => {
+      ratesDialog.value = true
+    })
+}
+function closeRatesDialog() {
+  ratesDialog.value = false
+}
+function saveRates() {
+
+  const promiseList: any[] = [];
+
+  getRates.value.forEach((rate: any) => {
+    const rateCopy = Object.assign({}, rate);
+    if(rate.high_season_rate && rate.high_season_rate != '') {
+      rateCopy.high_season_rate = parseInt(rate.high_season_rate)
+    }
+    if(rate.low_season_rate && rate.low_season_rate != '') {
+      rateCopy.low_season_rate = parseInt(rate.low_season_rate)
+    }
+
+    ratesStore.updateRate(rateCopy)
+
+  })
+
+  ratesDialog.value = false
+}
 
 //Computed Property
 const formTitle = computed(() => {
@@ -220,73 +250,49 @@ const isValid = computed(() => {
     </v-row>
     <v-row>
       <v-col cols="12" class="text-right">
-        <v-dialog v-model="ratesDialog" max-width="600" min-height="600" persistent>
+        <v-dialog v-model="ratesDialog" max-width="600" persistent>
           <v-card height="100vh">
             <v-card-title class="pa-4 bg-secondary">
               <span class="title text-white">Set Season Rates</span>
             </v-card-title>
 
             <v-card-text>
-              <v-form ref="form" lazy-validation>
+              <v-form  v-model="rateValid" >
                 <v-row>
-                  <v-col cols="12" sm="6">
-                    <v-label>Season Name</v-label>
+                  <v-col cols="6"><span class="title">Building</span></v-col>
+                  <v-col cols="3">High Rate</v-col>
+                  <v-col cols="3">Low Rate</v-col>
+                </v-row>
+                <v-row v-for="rate in getRates">
+                  <v-col cols="6">
+                    <v-label>{{ rate.building_name }}</v-label>
+                  </v-col>
+                  <v-col cols="3"
+                         v-if="rate.building_id === 1"
+                  >
                     <v-text-field
-                      variant="outlined"
-                      hide-details
-                      v-model="editedItem.name"
+                      v-model="rate.high_season_rate"
+                      type="number"
                       :rules="requiredFieldRules"
+                      required
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6">
-                    <v-checkbox
-                      label="Open For Bookings?"
-                      v-model="editedItem.is_open"
-                    ></v-checkbox>
-                  </v-col>
-                  <v-col cols="12" sm="6">
-                    <v-label>Start Date</v-label>
-                    <VueDatePicker
-                      v-model="editedItem.start_date"
-                      format="MM/dd/yyyy"
-                      :enable-time-picker="false"
+                  <v-col cols="3"
+                         v-else
+                  >
+                    <v-text-field
+                      v-model="rate.high_season_rate"
+                      type="number"
                       required
-                      auto-apply
-                      text-input
-                    ></VueDatePicker>
+                    ></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6">
-                    <v-label>End Date</v-label>
-                    <VueDatePicker
-                      v-model="editedItem.end_date"
-                      format="MM/dd/yyyy"
-                      :enable-time-picker="false"
+                  <v-col cols="3">
+                    <VTextField
+                      v-model="rate.low_season_rate"
+                      type="number"
+                      :rules="requiredFieldRules"
                       required
-                      auto-apply
-                      text-input
-                    ></VueDatePicker>
-                  </v-col>
-                  <v-col cols="12" sm="6">
-                    <v-label>High Season Start Date</v-label>
-                    <VueDatePicker
-                      v-model="editedItem.high_season_start_date"
-                      format="MM/dd/yyyy"
-                      :enable-time-picker="false"
-                      required
-                      auto-apply
-                      text-input
-                    ></VueDatePicker>
-                  </v-col>
-                  <v-col cols="12" sm="6">
-                    <v-label>High Season End Date</v-label>
-                    <VueDatePicker
-                      v-model="editedItem.high_season_end_date"
-                      format="MM/dd/yyyy"
-                      :enable-time-picker="false"
-                      required
-                      auto-apply
-                      text-input
-                    ></VueDatePicker>
+                    ></VTextField>
                   </v-col>
                 </v-row>
               </v-form>
@@ -294,14 +300,14 @@ const isValid = computed(() => {
 
             <v-card-actions class="pa-4">
               <v-spacer></v-spacer>
-              <v-btn color="error" @click="close">Cancel</v-btn>
+              <v-btn color="error" @click="closeRatesDialog">Cancel</v-btn>
               <v-btn
                 color="secondary"
-                :disabled="!isValid"
+                @click="saveRates"
+                :disabled="(rateValid === false)"
                 variant="flat"
-                @click="save"
-              >Save</v-btn
-              >
+                type="submit"
+              >Save</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -347,6 +353,13 @@ const isValid = computed(() => {
                                     ><PencilIcon stroke-width="1.5" size="20" class="text-primary"
                                 /></v-btn>
                             </template>
+                        </v-tooltip>
+                        <v-tooltip text="Edit Rates">
+                          <template v-slot:activator="{ props }">
+                            <v-btn icon flat @click="editItemRates(item)" v-bind="props"
+                            ><CashIcon stroke-width="1.5" size="20" class="text-primary"
+                            /></v-btn>
+                          </template>
                         </v-tooltip>
                         <v-tooltip text="Delete">
                             <template v-slot:activator="{ props }">
