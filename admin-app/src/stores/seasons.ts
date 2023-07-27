@@ -9,17 +9,25 @@ const baseUrl = `${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL :
 export const useSeasonsStore = defineStore({
     id: 'Seasons',
     state: () => ({
-      seasons: {}
+      seasons: [],
+      currentSeason: {},
     }),
     actions: {
         async getAll() {
-            this.seasons = { loading: true };
+            // this.seasons = { loading: true };
             fetchWrapper
                 .get(`${baseUrl}/api/seasons`)
                 .then((seasonsResponse) => {
                   this.seasons = seasonsResponse.rows
+
+                  seasonsResponse.rows.forEach((season: any) => {
+                    if(season.is_current) {
+                      this.currentSeason = season
+                    }
+                  })
+
                 })
-                .catch((error) => (this.seasons = { error }));
+                .catch((error) => (this.seasons = []));
         },
         async createSeason(season: any) {
           fetchWrapper

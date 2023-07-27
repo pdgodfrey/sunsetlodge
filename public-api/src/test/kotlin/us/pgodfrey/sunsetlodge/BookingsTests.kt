@@ -407,9 +407,9 @@ class BookingsTests {
     assertThat(jsonPath.getBoolean("success")).isTrue()
 
     assertThat(jsonPath.getString("rows[0].name")).isEqualTo("Updated Name")
-    assertThat(jsonPath.getList<Any>("rows[0].buildings").size).isEqualTo(2)
-    assertThat(jsonPath.getInt("rows[0].buildings[0].id")).isEqualTo(2)
-    assertThat(jsonPath.getInt("rows[0].buildings[1].id")).isEqualTo(3)
+    assertThat(jsonPath.getList<Any>("rows[0].building_ids").size).isEqualTo(2)
+    assertThat(jsonPath.getInt("rows[0].building_ids[0]")).isEqualTo(2)
+    assertThat(jsonPath.getInt("rows[0].building_ids[1]")).isEqualTo(3)
 
   }
 

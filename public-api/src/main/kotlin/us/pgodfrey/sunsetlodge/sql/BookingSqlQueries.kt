@@ -5,7 +5,8 @@ data class BookingSqlQueries(
   val getBookingsForSeason: String = "select bookings.*, seasons.name as season_name, " +
     "(select array_to_json(array_agg(row_to_json((building)))) from (select buildings.* from buildings " +
       "inner join bookings_buildings bb on bb.building_id = buildings.id "+
-      "where bb.booking_id = bookings.id order by buildings.id) building) as buildings " +
+      "where bb.booking_id = bookings.id order by buildings.id) building) as buildings, " +
+    "array(select building_id from bookings_buildings where booking_id = bookings.id) as building_ids " +
     "from bookings " +
     "inner join seasons on seasons.id = season_id " +
     "where season_id = $1 order by start_date",
