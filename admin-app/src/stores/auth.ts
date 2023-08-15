@@ -48,8 +48,9 @@ export const useAuthStore = defineStore({
             // if(this.returnUrl != '') {
             //   router.push(this.returnUrl);
             // } else {
-             router.push('/bookings');
-
+            setTimeout(function() {
+              router.push('/bookings');
+            }, 500)
             // }
 
         },
@@ -122,6 +123,9 @@ export const useAuthStore = defineStore({
           console.log("startRefreshTokenTimer")
           if(this.refreshTokenTimeout == -1){
             console.log("ACUTAL startRefreshTokenTimer")
+
+            this.isRefreshing = false
+
             const timeout = (60 * 1000);
             this.refreshTokenTimeout = setInterval(this.refreshAuthToken, timeout);
           }

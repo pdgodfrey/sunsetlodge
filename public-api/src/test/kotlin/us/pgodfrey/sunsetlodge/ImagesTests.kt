@@ -99,7 +99,7 @@ class ImagesTests {
   @Test
   @Order(1)
   @DisplayName("Create Images")
-  fun createRates() {
+  fun createImages() {
     galleryOneImages.forEach { filePath ->
       val jsonPath = RestAssured.given(requestSpecification)
         .given()

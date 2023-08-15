@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth';
 export const fetchWrapper = {
     get: request('GET'),
     post: request('POST'),
+    postForm: formDataRequest('POST'),
     put: request('PUT'),
     delete: request('DELETE')
 };
@@ -14,13 +15,30 @@ function request(method: string) {
             headers: authHeader(url),
             credentials: 'include'
         };
-        if (body) {
+        if (body && body != {}) {
             requestOptions.headers['Content-Type'] = 'application/json';
             requestOptions.body = JSON.stringify(body);
         }
 
         return fetch(url, requestOptions).then(handleResponse);
     };
+}
+
+function formDataRequest(method: String) {
+  return (url: any, formData?: FormData) => {
+    const requestOptions: any = {
+      method,
+      headers: authHeader(url),
+      credentials: 'include'
+    };
+
+    if(formData){
+      // requestOptions.headers['Content-Type'] = "application/x-www-form-urlencoded";
+      requestOptions.body = formData;
+    }
+
+    return fetch(url, requestOptions).then(handleResponse);
+  };
 }
 
 // helper functions

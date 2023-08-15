@@ -24,6 +24,7 @@ import us.pgodfrey.sunsetlodge.handler.impl.JsonBodyLoginHandlerImpl
 import us.pgodfrey.sunsetlodge.sub_routers.*
 import us.pgodfrey.sunsetlodge.verticles.EmailerVerticle
 import java.io.FileNotFoundException
+import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -189,9 +190,12 @@ class MainVerticle : CoroutineVerticle() {
 
   private fun serveUpload(ctx: RoutingContext) {
     try {
-      var path = ctx.normalizedPath()
+      logger.info("=====serve upload ${ctx.normalizedPath()}")
+      var path = URLDecoder.decode(ctx.normalizedPath(), "UTF-8")
+      logger.info("=====serve upload ${path}")
       path = path.replace("/gallery-images", "")
 
+      logger.info("=====serve upload $uploadsDir${path}")
       if(!vertx.fileSystem().existsBlocking("$uploadsDir$path")) {
         ctx.fail(404, FileNotFoundException("File does not exist"))
       } else {

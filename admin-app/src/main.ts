@@ -28,6 +28,8 @@ import messages from '@/utils/locales/messages';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 
+import draggable from "vuedraggable";
+
 const i18n = createI18n({
     locale: 'en',
     messages: messages,

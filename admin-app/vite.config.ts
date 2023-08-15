@@ -35,6 +35,13 @@ export default defineConfig({
           // ws: true,
           // rewrite: (path) => path.replace(/^\/api/, ''),
         },
+        '/gallery-images': {
+          target: 'http://localhost:8081',
+          changeOrigin: false,
+          secure: false,
+          // ws: true,
+          // rewrite: (path) => path.replace(/^\/api/, ''),
+        },
       },
       cors: true
     },

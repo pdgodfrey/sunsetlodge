@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, shallowRef } from 'vue';
+import {ref, shallowRef, onMounted, computed} from 'vue';
 import { useCustomizerStore } from '@/stores/customizer';
 import sidebarItems from './sidebarItem';
 
@@ -11,6 +11,12 @@ import { useAuthStore } from '@/stores/auth';
 const customizer = useCustomizerStore();
 const sidebarMenu = shallowRef(sidebarItems);
 const authStore = useAuthStore();
+
+const getUser: any = computed(() => {
+  return authStore.getUser;
+});
+
+
 </script>
 
 <template>
@@ -24,6 +30,7 @@ const authStore = useAuthStore();
             <v-list class="py-6 px-4">
                 <!---Menu Loop -->
                 <template v-for="(item, i) in sidebarMenu">
+                  <template v-if="!item.adminOnly || getUser.role_name === 'Administrator'">
                     <!---Item Sub Header -->
                     <NavGroup :item="item" v-if="item.header" :key="item.title" />
                     <!---If Has Child -->
@@ -31,6 +38,7 @@ const authStore = useAuthStore();
                     <!---Single Item-->
                     <NavItem :item="item" v-else class="leftPadding" />
                     <!---End Single Item-->
+                  </template>
                 </template>
             </v-list>
         </perfect-scrollbar>

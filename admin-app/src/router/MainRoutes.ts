@@ -16,6 +16,16 @@ const MainRoutes = {
           path: '/seasons',
           component: () => import('@/views/Seasons.vue')
         },
+        {
+          name: 'Galleries',
+          path: '/galleries',
+          component: () => import('@/views/Galleries.vue')
+        },
+        {
+          name: 'Users',
+          path: '/users',
+          component: () => import('@/views/Users.vue')
+        },
     ]
 };
 

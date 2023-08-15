@@ -123,6 +123,7 @@ class AuthSubRouter(vertx: Vertx, pgPool: PgPool, sqlAuthentication: SqlAuthenti
         val returnUser = JsonObject()
           .put("name", user.getString("name"))
           .put("email", user.getString("email"))
+          .put("role_name", user.getString("role_name"))
 
         sendJsonPayload(ctx, json {
           obj(

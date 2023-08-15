@@ -5,7 +5,14 @@ import {
   BrandChromeIcon,
   MoodSmileIcon,
   StarIcon,
-  AwardIcon, AnkhIcon, BooksIcon, CalendarEventIcon, SunHighIcon
+  AwardIcon,
+  AnkhIcon,
+  BooksIcon,
+  CalendarEventIcon,
+  SunHighIcon,
+  BrandAppgalleryIcon,
+  PictureInPictureOffIcon,
+  PictureInPictureIcon, PhotoIcon, UsersIcon
 } from 'vue-tabler-icons';
 
 export interface menu {
@@ -22,6 +29,7 @@ export interface menu {
     disabled?: boolean;
     type?: string;
     subCaption?: string;
+    adminOnly?: boolean;
 }
 
 const sidebarItem: menu[] = [
@@ -32,9 +40,20 @@ const sidebarItem: menu[] = [
       to: '/bookings'
     },
     {
-        title: 'Seasons',
-        icon: SunHighIcon,
-        to: '/seasons'
+      title: 'Seasons',
+      icon: SunHighIcon,
+      to: '/seasons'
+    },
+    {
+      title: 'Galleries',
+      icon: PhotoIcon,
+      to: '/galleries'
+    },
+    {
+      title: 'Users',
+      icon: UsersIcon,
+      to: '/users',
+      adminOnly: true,
     },
     // { header: 'Others' },
     // {

@@ -41,7 +41,7 @@
         "vue3-perfect-scrollbar": "1.6.0",
         "vue3-print-nb": "^0.1.4",
         "vue3-recaptcha-v2": "1.0.1",
-        "vuedraggable": "^2.24.3",
+        "vuedraggable": "^4.1.0",
         "vuetify": "3.0.1",
         "yup": "^0.32.11"
     },

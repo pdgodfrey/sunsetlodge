@@ -188,17 +188,21 @@ class ImagesSubRouter(vertx: Vertx, pgPool: PgPool, uploadsDir: String, jwtAuth:
   fun handleCreateImage(ctx: RoutingContext) {
     GlobalScope.launch(vertx.dispatcher()) {
       try {
-        if(ctx.request().getParam("gallery_id").isNullOrBlank()){
-          throw InvalidParameterException("Gallery Id is required")
-        }
-        val galleryId: Int = ctx.request().getParam("gallery_id").toInt()
+        logger.info("handleCreateImage")
         val uploads = ctx.fileUploads()
+
+        logger.info("handleCreateImag uploads length ${uploads.size}")
 
         if(uploads.size == 0){
           throw InvalidParameterException("Must have one file upload")
         }
 
-        val maxOrderBy = execQuery(imageSqlQueries.getMaxOrderByForImagesInGallery, Tuple.of(galleryId)).first().getInteger("max")
+        if(ctx.request().getParam("gallery_id").isNullOrBlank()){
+          throw InvalidParameterException("Gallery Id is required")
+        }
+        val galleryId: Int = ctx.request().getParam("gallery_id").toInt()
+
+        var maxOrderBy = execQuery(imageSqlQueries.getMaxOrderByForImagesInGallery, Tuple.of(galleryId)).first().getInteger("max")
 
         ctx.fileUploads().forEach { fileUpload ->
           val fileName = fileUpload.fileName()
@@ -206,6 +210,9 @@ class ImagesSubRouter(vertx: Vertx, pgPool: PgPool, uploadsDir: String, jwtAuth:
           val contentType = fileUpload.contentType()
 
           val images = execQuery(imageSqlQueries.insertImage, Tuple.of(galleryId, maxOrderBy+1, fileName, contentType, size))
+
+          maxOrderBy += 1
+
           val image = images.first()
 
 
@@ -266,18 +273,25 @@ class ImagesSubRouter(vertx: Vertx, pgPool: PgPool, uploadsDir: String, jwtAuth:
           ImageIO.write(img2, "png", outputfile)
 
 
-        val jsonObj = image.toJson()
-        jsonObj.put("url", getUrl(jsonObj))
-        jsonObj.put("thumbnail_url", getThumbnailUrl(jsonObj))
 
-
-          sendJsonPayload(ctx, json {
-            obj(
-            "data" to jsonObj
-            )
-          })
+//          val jsonObj = image.toJson()
+//          jsonObj.put("url", getUrl(jsonObj))
+//          jsonObj.put("thumbnail_url", getThumbnailUrl(jsonObj))
+//
+//
+//          sendJsonPayload(ctx, json {
+//            obj(
+//              "data" to jsonObj
+//            )
+//          })
         }
 
+
+        sendJsonPayload(ctx, json {
+          obj(
+//            "data" to jsonObj
+          )
+        })
       } catch (e: InvalidParameterException) {
         logger.error(e.printStackTrace())
         fail400(ctx, e)
@@ -426,7 +440,7 @@ class ImagesSubRouter(vertx: Vertx, pgPool: PgPool, uploadsDir: String, jwtAuth:
 
         vertx.fileSystem().deleteRecursiveBlocking("$uploadsDir/$id", true)
 
-        val remainingImages = execQuery(imageSqlQueries.getImagesForGallery, Tuple.of(deletedImage.getInteger("id")))
+        val remainingImages = execQuery(imageSqlQueries.getImagesForGallery, Tuple.of(deletedImage.getInteger("gallery_id")))
 
         remainingImages.forEachIndexed { index, row ->
           execQuery(imageSqlQueries.updateImageOrderBy, Tuple.of(index+1, row.getInteger("id")))
