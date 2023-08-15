@@ -48,6 +48,14 @@ function editItem(item: any) {
     editedItem.value = Object.assign({}, item);
     dialog.value = true;
 }
+function resetPassword(item: any) {
+  if(confirm('Are you sure you want to send a reset password email to this user?') == true) {
+    store.resetUserPassword(item.id)
+      .then(() => {
+        alert("Email Sent")
+      })
+  }
+}
 function deleteItem(item: any) {
     if(confirm('Are you sure you want to delete this user?') == true) {
       store.deleteuser(item.id)
@@ -187,6 +195,13 @@ const isValid = computed(() => {
                                     ><PencilIcon stroke-width="1.5" size="20" class="text-primary"
                                 /></v-btn>
                             </template>
+                        </v-tooltip>
+                        <v-tooltip text="Reset User Password">
+                          <template v-slot:activator="{ props }">
+                            <v-btn icon flat @click="resetPassword(item)" v-bind="props"
+                            ><MailIcon stroke-width="1.5" size="20" class="text-error"
+                            /></v-btn>
+                          </template>
                         </v-tooltip>
                         <v-tooltip text="Delete">
                             <template v-slot:activator="{ props }">

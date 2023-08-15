@@ -35,9 +35,7 @@ export const useUsersStore = defineStore({
         },
         async resetUserPassword(userId: number) {
           fetchWrapper
-            .post(`${baseUrl}/api/users/reset-password`, {
-              id: userId
-            })
+            .post(`${baseUrl}/api/users/reset-password?id=${userId}`)
         }
     }
 });
