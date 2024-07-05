@@ -6,11 +6,8 @@ import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
-import io.vertx.kotlin.coroutines.dispatcher
-import io.vertx.pgclient.PgPool
+import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.Tuple
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import us.pgodfrey.sunsetlodge.BaseSubRouter
 import us.pgodfrey.sunsetlodge.sql.BookingSqlQueries
 import us.pgodfrey.sunsetlodge.sql.SeasonSqlQueries
@@ -18,17 +15,17 @@ import java.security.InvalidParameterException
 import java.time.LocalDate
 
 
-class BookingsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
+class BookingsSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pool, jwtAuth) {
 
-  private val bookingSqlQueries = BookingSqlQueries();
-  private val seasonSqlQueries = SeasonSqlQueries();
+  private val bookingSqlQueries = BookingSqlQueries()
+  private val seasonSqlQueries = SeasonSqlQueries()
 
   init {
 
-    router.get("/").handler(this::handleGetBookingsForSeason)
-    router.post("/").handler(this::handleCreateBooking)
-    router.put("/:id").handler(this::handleUpdateBooking)
-    router.delete("/:id").handler(this::handleDeleteBooking)
+    router.get("/").coroutineHandler(this::handleGetBookingsForSeason)
+    router.post("/").coroutineHandler(this::handleCreateBooking)
+    router.put("/:id").coroutineHandler(this::handleUpdateBooking)
+    router.delete("/:id").coroutineHandler(this::handleDeleteBooking)
   }
 
 
@@ -90,21 +87,19 @@ class BookingsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSu
    *
    * @param context RoutingContext
    */
-  fun handleGetBookingsForSeason(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val id = ctx.request().getParam("season_id").toInt()
-        val bookings = execQuery(bookingSqlQueries.getBookingsForSeason, Tuple.of(id))
+  private suspend fun handleGetBookingsForSeason(ctx: RoutingContext) {
+    try {
+      val id = ctx.request().getParam("season_id").toInt()
+      val bookings = execQuery(bookingSqlQueries.getBookingsForSeason, Tuple.of(id))
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "rows" to bookings.map { it.toJson() }
-          )
-        })
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "rows" to bookings.map { it.toJson() }
+        )
+      })
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
@@ -178,47 +173,45 @@ class BookingsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSu
    *
    * @param context RoutingContext
    */
-  fun handleCreateBooking(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val data = ctx.body().asJsonObject()
+  private suspend fun handleCreateBooking(ctx: RoutingContext) {
+    try {
+      val data = ctx.body().asJsonObject()
 
-        validateBookingData(data)
+      validateBookingData(data)
 
-        validateBookingDates(data)
+      validateBookingDates(data)
 
-        val params = Tuple.tuple()
-        params.addInteger(data.getInteger("season_id"))
-        params.addString(data.getString("name"))
-        params.addLocalDate(LocalDate.parse(data.getString("start_date")))
-        params.addLocalDate(LocalDate.parse(data.getString("end_date")))
+      val params = Tuple.tuple()
+      params.addInteger(data.getInteger("season_id"))
+      params.addString(data.getString("name"))
+      params.addLocalDate(LocalDate.parse(data.getString("start_date")))
+      params.addLocalDate(LocalDate.parse(data.getString("end_date")))
 
-        val booking = execQuery(bookingSqlQueries.createBooking, params)
+      val booking = execQuery(bookingSqlQueries.createBooking, params)
 
-        val buildingIds = data.getJsonArray("building_ids")
+      val buildingIds = data.getJsonArray("building_ids")
 
-        buildingIds.forEach {
-          val buildingId = it as Int
-          execQuery(bookingSqlQueries.createBookingBuilding,
-            Tuple.of(booking.first().getInteger("id"), buildingId))
-        }
-
-
-        sendJsonPayload(ctx, json {
-          obj(
-            "data" to booking.first().toJson()
-          )
-        })
-      } catch (e: InvalidParameterException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: IllegalArgumentException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
+      buildingIds.forEach {
+        val buildingId = it as Int
+        execQuery(bookingSqlQueries.createBookingBuilding,
+          Tuple.of(booking.first().getInteger("id"), buildingId))
       }
+
+
+      sendJsonPayload(ctx, json {
+        obj(
+          "data" to booking.first().toJson()
+        )
+      })
+    } catch (e: InvalidParameterException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: IllegalArgumentException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
@@ -292,47 +285,45 @@ class BookingsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSu
    *
    * @param context RoutingContext
    */
-  fun handleUpdateBooking(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val data = ctx.body().asJsonObject()
+  private suspend fun handleUpdateBooking(ctx: RoutingContext) {
+    try {
+      val data = ctx.body().asJsonObject()
 
-        validateBookingData(data)
+      validateBookingData(data)
 
-        validateBookingDates(data)
+      validateBookingDates(data)
 
-        val id = ctx.request().getParam("id").toInt()
+      val id = ctx.request().getParam("id").toInt()
 
-        val params = Tuple.tuple()
-        params.addString(data.getString("name"))
-        params.addLocalDate(LocalDate.parse(data.getString("start_date")))
-        params.addLocalDate(LocalDate.parse(data.getString("end_date")))
-        params.addInteger(id)
+      val params = Tuple.tuple()
+      params.addString(data.getString("name"))
+      params.addLocalDate(LocalDate.parse(data.getString("start_date")))
+      params.addLocalDate(LocalDate.parse(data.getString("end_date")))
+      params.addInteger(id)
 
-        val booking = execQuery(bookingSqlQueries.updateBooking, params)
+      val booking = execQuery(bookingSqlQueries.updateBooking, params)
 
-        execQuery(bookingSqlQueries.deleteBookingBuildingForBooking, Tuple.of(id))
+      execQuery(bookingSqlQueries.deleteBookingBuildingForBooking, Tuple.of(id))
 
-        val buildingIds = data.getJsonArray("building_ids")
+      val buildingIds = data.getJsonArray("building_ids")
 
-        buildingIds.forEach {
-          val buildingId = it as Int
-          execQuery(bookingSqlQueries.createBookingBuilding,
-            Tuple.of(booking.first().getInteger("id"), buildingId))
-        }
-
-        sendJsonPayload(ctx, json {
-          obj(
-            "data" to booking.first().toJson()
-          )
-        })
-      } catch (e: InvalidParameterException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
+      buildingIds.forEach {
+        val buildingId = it as Int
+        execQuery(bookingSqlQueries.createBookingBuilding,
+          Tuple.of(booking.first().getInteger("id"), buildingId))
       }
+
+      sendJsonPayload(ctx, json {
+        obj(
+          "data" to booking.first().toJson()
+        )
+      })
+    } catch (e: InvalidParameterException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
@@ -385,27 +376,25 @@ class BookingsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSu
    *
    * @param context RoutingContext
    */
-  fun handleDeleteBooking(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val id = ctx.request().getParam("id").toInt()
+  private suspend fun handleDeleteBooking(ctx: RoutingContext) {
+    try {
+      val id = ctx.request().getParam("id").toInt()
 
-        execQuery(bookingSqlQueries.deleteBookingBuildingForBooking, Tuple.of(id))
-        execQuery(bookingSqlQueries.deleteBooking, Tuple.of(id))
+      execQuery(bookingSqlQueries.deleteBookingBuildingForBooking, Tuple.of(id))
+      execQuery(bookingSqlQueries.deleteBooking, Tuple.of(id))
 
-        sendJsonPayload(ctx, json {
-          obj(
+      sendJsonPayload(ctx, json {
+        obj(
 
-          )
-        })
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
-      }
+        )
+      })
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
-  fun validateBookingData(data: JsonObject?){
+  private fun validateBookingData(data: JsonObject?){
     if (data == null) {
       throw InvalidParameterException("No request body")
     } else {
@@ -432,7 +421,7 @@ class BookingsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSu
     }
   }
 
-  suspend fun validateBookingDates(data: JsonObject){
+  private suspend fun validateBookingDates(data: JsonObject){
     val params = Tuple.tuple()
     params.addLocalDate(LocalDate.parse(data.getString("start_date")))
 

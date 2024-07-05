@@ -28,7 +28,7 @@ import java.io.File
 import java.time.LocalDate
 import java.util.*
 
-@DisplayName("RatesTest")
+@DisplayName("ImagesTest")
 @ExtendWith(VertxExtension::class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

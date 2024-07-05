@@ -6,26 +6,25 @@ import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
-import io.vertx.kotlin.coroutines.dispatcher
-import io.vertx.pgclient.PgPool
+import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.Tuple
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import us.pgodfrey.sunsetlodge.BaseSubRouter
 import us.pgodfrey.sunsetlodge.sql.RateSqlQueries
+import us.pgodfrey.sunsetlodge.sql.SeasonSqlQueries
 import java.security.InvalidParameterException
 
 
-class RatesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
+class RatesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pool, jwtAuth) {
 
-  private val rateSqlQueries = RateSqlQueries();
+  private val rateSqlQueries = RateSqlQueries()
+  private val seasonSqlQueries = SeasonSqlQueries()
 
   init {
 
-    router.get("/").handler(this::handleGetRatesForSeason)
-    router.post("/").handler(this::handleCreateRate)
-    router.put("/:id").handler(this::handleUpdateRate)
-    router.delete("/:id").handler(this::handleDeleteRate)
+    router.get("/").coroutineHandler(this::handleGetRatesForSeason)
+    router.post("/").coroutineHandler(this::handleCreateRate)
+    router.put("/:id").coroutineHandler(this::handleUpdateRate)
+    router.delete("/:id").coroutineHandler(this::handleDeleteRate)
   }
 
 
@@ -89,21 +88,19 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRo
    *
    * @param context RoutingContext
    */
-  fun handleGetRatesForSeason(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val id = ctx.request().getParam("season_id").toInt()
-        val rates = execQuery(rateSqlQueries.getRatesForSeason, Tuple.of(id))
+  private suspend fun handleGetRatesForSeason(ctx: RoutingContext) {
+    try {
+      val id = ctx.request().getParam("season_id").toInt()
+      val rates = execQuery(rateSqlQueries.getRatesForSeason, Tuple.of(id))
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "rows" to rates.map { it.toJson() }
-          )
-        })
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "rows" to rates.map { it.toJson() }
+        )
+      })
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
@@ -175,38 +172,36 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRo
    *
    * @param context RoutingContext
    */
-  fun handleCreateRate(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val data = ctx.body().asJsonObject()
+  private suspend fun handleCreateRate(ctx: RoutingContext) {
+    try {
+      val data = ctx.body().asJsonObject()
 
-        validateRateData(data)
+      validateRateData(data)
 
-        checkForExistingRate(data)
+      checkForExistingRate(data)
 
-        val params = Tuple.tuple()
-        params.addInteger(data.getInteger("season_id"))
-        params.addInteger(data.getInteger("building_id"))
-        params.addInteger(data.getInteger("high_season_rate"))
-        params.addInteger(data.getInteger("low_season_rate"))
+      val params = Tuple.tuple()
+      params.addInteger(data.getInteger("season_id"))
+      params.addInteger(data.getInteger("building_id"))
+      params.addInteger(data.getInteger("high_season_rate"))
+      params.addInteger(data.getInteger("low_season_rate"))
 
-        val rate = execQuery(rateSqlQueries.createRate, params)
+      val rate = execQuery(rateSqlQueries.createRate, params)
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "data" to rate.first().toJson()
-          )
-        })
-      } catch (e: InvalidParameterException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: IllegalArgumentException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "data" to rate.first().toJson()
+        )
+      })
+    } catch (e: InvalidParameterException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: IllegalArgumentException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
@@ -281,34 +276,32 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRo
    *
    * @param context RoutingContext
    */
-  fun handleUpdateRate(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val data = ctx.body().asJsonObject()
+  private suspend fun handleUpdateRate(ctx: RoutingContext) {
+    try {
+      val data = ctx.body().asJsonObject()
 
-        validateRateData(data)
+      validateRateData(data)
 
-        val id = ctx.request().getParam("id").toInt()
+      val id = ctx.request().getParam("id").toInt()
 
-        val params = Tuple.tuple()
-        params.addInteger(data.getInteger("high_season_rate"))
-        params.addInteger(data.getInteger("low_season_rate"))
-        params.addInteger(id)
+      val params = Tuple.tuple()
+      params.addInteger(data.getInteger("high_season_rate"))
+      params.addInteger(data.getInteger("low_season_rate"))
+      params.addInteger(id)
 
-        val rate = execQuery(rateSqlQueries.updateRate, params)
+      val rate = execQuery(rateSqlQueries.updateRate, params)
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "data" to rate.first().toJson()
-          )
-        })
-      } catch (e: InvalidParameterException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "data" to rate.first().toJson()
+        )
+      })
+    } catch (e: InvalidParameterException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
@@ -361,26 +354,24 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRo
    *
    * @param context RoutingContext
    */
-  fun handleDeleteRate(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val id = ctx.request().getParam("id").toInt()
+  private suspend fun handleDeleteRate(ctx: RoutingContext) {
+    try {
+      val id = ctx.request().getParam("id").toInt()
 
-        execQuery(rateSqlQueries.deleteRate, Tuple.of(id))
+      execQuery(rateSqlQueries.deleteRate, Tuple.of(id))
 
-        sendJsonPayload(ctx, json {
-          obj(
+      sendJsonPayload(ctx, json {
+        obj(
 
-          )
-        })
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
-      }
+        )
+      })
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
-  fun validateRateData(data: JsonObject?){
+  private fun validateRateData(data: JsonObject?){
     if (data == null) {
       throw InvalidParameterException("No request body")
     } else {
@@ -398,7 +389,7 @@ class RatesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRo
     }
   }
 
-  suspend fun checkForExistingRate(data: JsonObject){
+  private suspend fun checkForExistingRate(data: JsonObject){
     val params = Tuple.tuple()
     params.addInteger(data.getInteger("season_id"))
     params.addInteger(data.getInteger("building_id"))

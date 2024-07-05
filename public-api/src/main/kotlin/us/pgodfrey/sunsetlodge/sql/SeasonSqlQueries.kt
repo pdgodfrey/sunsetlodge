@@ -19,5 +19,7 @@ data class SeasonSqlQueries(
     "high_season_end_date = $5, is_open = $6 where id = $7 returning *",
   val deleteSeason: String = "delete from seasons where id = $1",
 
-  val getSeasonForDates: String = "select * from seasons where $1 between start_date and end_date"
+  val getSeasonForDates: String = "select * from seasons where $1 between start_date and end_date",
+
+  val getOpenSeasons: String = "select * from seasons where is_open is true and end_date > now() order by start_date limit 2"
 )

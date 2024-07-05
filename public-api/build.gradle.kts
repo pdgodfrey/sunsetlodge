@@ -55,6 +55,8 @@ dependencies {
   implementation("org.postgresql:postgresql:42.5.0")
   implementation("org.flywaydb:flyway-core:$flywayVersion")
 
+  implementation("com.google.code.gson:gson:2.11.0")
+
 
   testImplementation("io.vertx:vertx-junit5")
   testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")

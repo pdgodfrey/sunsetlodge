@@ -6,11 +6,8 @@ import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
-import io.vertx.kotlin.coroutines.dispatcher
-import io.vertx.pgclient.PgPool
+import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.Tuple
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import us.pgodfrey.sunsetlodge.BaseSubRouter
 import us.pgodfrey.sunsetlodge.sql.MiscSqlQueries
 import us.pgodfrey.sunsetlodge.sql.RateSqlQueries
@@ -19,21 +16,21 @@ import java.security.InvalidParameterException
 import java.time.LocalDate
 
 
-class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
+class SeasonsSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pool, jwtAuth) {
 
-  private val seasonSqlQueries = SeasonSqlQueries();
-  private val rateSqlQueries = RateSqlQueries();
-  private val miscSqlQueries = MiscSqlQueries();
+  private val seasonSqlQueries = SeasonSqlQueries()
+  private val rateSqlQueries = RateSqlQueries()
+  private val miscSqlQueries = MiscSqlQueries()
 
   init {
 
-    router.get("/current").handler(this::handleGetCurrentSeason)
+    router.get("/current").coroutineHandler(this::handleGetCurrentSeason)
 
-    router.get("/").handler(this::handleGetSeasons)
-    router.get("/:id").handler(this::handleGetSeason)
-    router.post("/").handler(this::handleCreateSeason)
-    router.put("/:id").handler(this::handleUpdateSeason)
-    router.delete("/:id").handler(this::handleDeleteSeason)
+    router.get("/").coroutineHandler(this::handleGetSeasons)
+    router.get("/:id").coroutineHandler(this::handleGetSeason)
+    router.post("/").coroutineHandler(this::handleCreateSeason)
+    router.put("/:id").coroutineHandler(this::handleUpdateSeason)
+    router.delete("/:id").coroutineHandler(this::handleDeleteSeason)
   }
 
   /**
@@ -96,20 +93,18 @@ class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSub
    *
    * @param context RoutingContext
    */
-  fun handleGetCurrentSeason(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val seasons = execQuery(seasonSqlQueries.getCurrentSeason)
+  private suspend fun handleGetCurrentSeason(ctx: RoutingContext) {
+    try {
+      val seasons = execQuery(seasonSqlQueries.getCurrentSeason)
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "season" to seasons.map { it.toJson() }.first()
-          )
-        })
-      } catch (e: Exception) {
-        e.printStackTrace()
-        fail500(ctx, e)
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "season" to seasons.map { it.toJson() }.first()
+        )
+      })
+    } catch (e: Exception) {
+      e.printStackTrace()
+      fail500(ctx, e)
     }
   }
 
@@ -174,20 +169,18 @@ class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSub
    *
    * @param context RoutingContext
    */
-  fun handleGetSeasons(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val seasons = execQuery(seasonSqlQueries.getSeasons)
+  private suspend fun handleGetSeasons(ctx: RoutingContext) {
+    try {
+      val seasons = execQuery(seasonSqlQueries.getSeasons)
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "rows" to seasons.map { it.toJson() }
-          )
-        })
-      } catch (e: Exception) {
-        e.printStackTrace()
-        fail500(ctx, e)
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "rows" to seasons.map { it.toJson() }
+        )
+      })
+    } catch (e: Exception) {
+      e.printStackTrace()
+      fail500(ctx, e)
     }
   }
 
@@ -252,21 +245,19 @@ class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSub
    *
    * @param context RoutingContext
    */
-  fun handleGetSeason(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val id = ctx.request().getParam("id").toInt()
-        val seasons = execQuery(seasonSqlQueries.getSeason, Tuple.of(id))
+  private suspend fun handleGetSeason(ctx: RoutingContext) {
+    try {
+      val id = ctx.request().getParam("id").toInt()
+      val seasons = execQuery(seasonSqlQueries.getSeason, Tuple.of(id))
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "season" to seasons.map { it.toJson() }.first()
-          )
-        })
-      } catch (e: Exception) {
-        e.printStackTrace()
-        fail500(ctx, e)
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "season" to seasons.map { it.toJson() }.first()
+        )
+      })
+    } catch (e: Exception) {
+      e.printStackTrace()
+      fail500(ctx, e)
     }
   }
 
@@ -346,48 +337,46 @@ class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSub
    *
    * @param context RoutingContext
    */
-  fun handleCreateSeason(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val data = ctx.body().asJsonObject()
+  private suspend fun handleCreateSeason(ctx: RoutingContext) {
+    try {
+      val data = ctx.body().asJsonObject()
 
-        validateSeasonData(data)
+      validateSeasonData(data)
 
-        val params = Tuple.tuple()
-        params.addString(data.getString("name"))
-        params.addLocalDate(LocalDate.parse(data.getString("start_date")))
-        params.addLocalDate(LocalDate.parse(data.getString("end_date")))
-        params.addLocalDate(LocalDate.parse(data.getString("high_season_start_date")))
-        params.addLocalDate(LocalDate.parse(data.getString("high_season_end_date")))
-        params.addBoolean(data.getBoolean("is_open"))
+      val params = Tuple.tuple()
+      params.addString(data.getString("name"))
+      params.addLocalDate(LocalDate.parse(data.getString("start_date")))
+      params.addLocalDate(LocalDate.parse(data.getString("end_date")))
+      params.addLocalDate(LocalDate.parse(data.getString("high_season_start_date")))
+      params.addLocalDate(LocalDate.parse(data.getString("high_season_end_date")))
+      params.addBoolean(data.getBoolean("is_open"))
 
-        val seasonResult = execQuery(seasonSqlQueries.createSeason, params)
-        val season = seasonResult.first()
+      val seasonResult = execQuery(seasonSqlQueries.createSeason, params)
+      val season = seasonResult.first()
 
-        val buildings = execQuery(miscSqlQueries.getBuildings)
-        buildings.forEach { building ->
-          val rateParams = Tuple.of(
-            season.getInteger("id"),
-            building.getInteger("id"),
-            null,
-            null
-          )
-          execQuery(rateSqlQueries.createRate, rateParams)
-        }
-
-
-        sendJsonPayload(ctx, json {
-          obj(
-            "data" to season.toJson()
-          )
-        })
-      } catch (e: InvalidParameterException) {
-        e.printStackTrace()
-        fail400(ctx, e)
-      } catch (e: Exception) {
-        e.printStackTrace()
-        fail500(ctx, e)
+      val buildings = execQuery(miscSqlQueries.getBuildings)
+      buildings.forEach { building ->
+        val rateParams = Tuple.of(
+          season.getInteger("id"),
+          building.getInteger("id"),
+          null,
+          null
+        )
+        execQuery(rateSqlQueries.createRate, rateParams)
       }
+
+
+      sendJsonPayload(ctx, json {
+        obj(
+          "data" to season.toJson()
+        )
+      })
+    } catch (e: InvalidParameterException) {
+      e.printStackTrace()
+      fail400(ctx, e)
+    } catch (e: Exception) {
+      e.printStackTrace()
+      fail500(ctx, e)
     }
   }
 
@@ -469,38 +458,36 @@ class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSub
    *
    * @param context RoutingContext
    */
-  fun handleUpdateSeason(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val data = ctx.body().asJsonObject()
+  private suspend fun handleUpdateSeason(ctx: RoutingContext) {
+    try {
+      val data = ctx.body().asJsonObject()
 
-        validateSeasonData(data)
+      validateSeasonData(data)
 
-        val id = ctx.request().getParam("id").toInt()
+      val id = ctx.request().getParam("id").toInt()
 
-        val params = Tuple.tuple()
-        params.addString(data.getString("name"))
-        params.addLocalDate(LocalDate.parse(data.getString("start_date")))
-        params.addLocalDate(LocalDate.parse(data.getString("end_date")))
-        params.addLocalDate(LocalDate.parse(data.getString("high_season_start_date")))
-        params.addLocalDate(LocalDate.parse(data.getString("high_season_end_date")))
-        params.addBoolean(data.getBoolean("is_open"))
-        params.addInteger(id)
+      val params = Tuple.tuple()
+      params.addString(data.getString("name"))
+      params.addLocalDate(LocalDate.parse(data.getString("start_date")))
+      params.addLocalDate(LocalDate.parse(data.getString("end_date")))
+      params.addLocalDate(LocalDate.parse(data.getString("high_season_start_date")))
+      params.addLocalDate(LocalDate.parse(data.getString("high_season_end_date")))
+      params.addBoolean(data.getBoolean("is_open"))
+      params.addInteger(id)
 
-        val season = execQuery(seasonSqlQueries.updateSeason, params)
+      val season = execQuery(seasonSqlQueries.updateSeason, params)
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "data" to season.first().toJson()
-          )
-        })
-      } catch (e: InvalidParameterException) {
-        e.printStackTrace()
-        fail400(ctx, e)
-      } catch (e: Exception) {
-        e.printStackTrace()
-        fail500(ctx, e)
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "data" to season.first().toJson()
+        )
+      })
+    } catch (e: InvalidParameterException) {
+      e.printStackTrace()
+      fail400(ctx, e)
+    } catch (e: Exception) {
+      e.printStackTrace()
+      fail500(ctx, e)
     }
   }
 
@@ -552,28 +539,26 @@ class SeasonsSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSub
    *
    * @param context RoutingContext
    */
-  fun handleDeleteSeason(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val id = ctx.request().getParam("id").toInt()
+  private suspend fun handleDeleteSeason(ctx: RoutingContext) {
+    try {
+      val id = ctx.request().getParam("id").toInt()
 
-        execQuery(rateSqlQueries.deleteRatesForSeason, Tuple.of(id))
+      execQuery(rateSqlQueries.deleteRatesForSeason, Tuple.of(id))
 
-        execQuery(seasonSqlQueries.deleteSeason, Tuple.of(id))
+      execQuery(seasonSqlQueries.deleteSeason, Tuple.of(id))
 
-        sendJsonPayload(ctx, json {
-          obj(
+      sendJsonPayload(ctx, json {
+        obj(
 
-          )
-        })
-      } catch (e: Exception) {
-        e.printStackTrace()
-        fail500(ctx, e)
-      }
+        )
+      })
+    } catch (e: Exception) {
+      e.printStackTrace()
+      fail500(ctx, e)
     }
   }
 
-  fun validateSeasonData(data: JsonObject?){
+  private fun validateSeasonData(data: JsonObject?){
     if (data == null) {
       throw InvalidParameterException("No request body")
     } else {

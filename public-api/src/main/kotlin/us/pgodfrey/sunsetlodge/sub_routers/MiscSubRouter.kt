@@ -5,25 +5,21 @@ import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
-import io.vertx.kotlin.coroutines.dispatcher
-import io.vertx.pgclient.PgPool
-import io.vertx.sqlclient.Tuple
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import io.vertx.sqlclient.Pool
 import us.pgodfrey.sunsetlodge.BaseSubRouter
 import us.pgodfrey.sunsetlodge.sql.MiscSqlQueries
 import us.pgodfrey.sunsetlodge.sql.SeasonSqlQueries
 
 
-class MiscSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
+class MiscSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pool, jwtAuth) {
 
 
-  private val miscSqlQueries = MiscSqlQueries();
-  private val seasonSqlQueries = SeasonSqlQueries();
+  private val miscSqlQueries = MiscSqlQueries()
+  private val seasonSqlQueries = SeasonSqlQueries()
 
   init {
-    router.get("/buildings").handler(this::handleGetBuildings)
-    router.get("/roles").handler(this::handleGetRoles)
+    router.get("/buildings").coroutineHandler(this::handleGetBuildings)
+    router.get("/roles").coroutineHandler(this::handleGetRoles)
   }
 
 
@@ -82,19 +78,17 @@ class MiscSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRou
    *
    * @param context RoutingContext
    */
-  fun handleGetBuildings(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val buildings = execQuery(miscSqlQueries.getBuildings)
+  private suspend fun handleGetBuildings(ctx: RoutingContext) {
+    try {
+      val buildings = execQuery(miscSqlQueries.getBuildings)
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "rows" to buildings.map { it.toJson() }
-          )
-        })
-      } catch (e: Exception) {
-        e.printStackTrace()
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "rows" to buildings.map { it.toJson() }
+        )
+      })
+    } catch (e: Exception) {
+      e.printStackTrace()
     }
   }
 
@@ -154,19 +148,17 @@ class MiscSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRou
    *
    * @param context RoutingContext
    */
-  fun handleGetRoles(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val roles = execQuery(miscSqlQueries.getRoles)
+  private suspend fun handleGetRoles(ctx: RoutingContext) {
+    try {
+      val roles = execQuery(miscSqlQueries.getRoles)
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "rows" to roles.map { it.toJson() }
-          )
-        })
-      } catch (e: Exception) {
-        e.printStackTrace()
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "rows" to roles.map { it.toJson() }
+        )
+      })
+    } catch (e: Exception) {
+      e.printStackTrace()
     }
   }
 

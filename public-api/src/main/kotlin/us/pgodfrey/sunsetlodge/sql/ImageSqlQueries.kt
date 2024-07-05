@@ -11,6 +11,8 @@ data class ImageSqlQueries (
 
   val deleteImage: String = "delete from images where id = $1 returning *",
 
-  val getMaxOrderByForImagesInGallery: String = "select coalesce(max(order_by), 0) as max from images where gallery_id = $1"
+  val getMaxOrderByForImagesInGallery: String = "select coalesce(max(order_by), 0) as max from images where gallery_id = $1",
+
+  val getRandomImageForGallery: String = "select * from images where gallery_id = $1 order by random() limit 1"
 
 )

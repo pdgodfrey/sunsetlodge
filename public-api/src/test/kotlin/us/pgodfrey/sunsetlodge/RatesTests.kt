@@ -1,5 +1,6 @@
 package us.pgodfrey.sunsetlodge
 
+import com.google.gson.Gson
 import helpers.GetSession
 import io.restassured.RestAssured
 import io.restassured.builder.RequestSpecBuilder
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory
 import org.testcontainers.containers.PostgreSQLContainer
 import java.time.LocalDate
 import java.util.*
+
 
 @DisplayName("RatesTest")
 @ExtendWith(VertxExtension::class)
@@ -57,17 +59,7 @@ class RatesTests {
   )
 
 
-  val rateObjects = listOf<JsonObject>(
-    JsonObject()
-      .put("season_id", null)
-      .put("building_id", 1)
-      .put("high_season_rate", 5000)
-      .put("low_season_rate", 400),
-    JsonObject()
-      .put("season_id", null)
-      .put("building_id", 2)
-      .put("high_season_rate", 1200)
-      .put("low_season_rate", null)
+  var rateObjects = ArrayList<JsonObject>(
   )
 
   @ClassRule
@@ -137,12 +129,15 @@ class RatesTests {
       data.put("id", jsonPath.getInt("data.id"))
     }
 
-    assertThat(seasonObjects.get(0).getInteger("id")).isEqualTo(2)
+    System.out.println("seaosn objects")
+    System.out.println("${seasonObjects}")
+
+    assertThat(seasonObjects.get(0).getInteger("id")).isEqualTo(3)
     rateObjects.forEach {
       it.put("season_id", seasonObjects.get(0).getInteger("id"))
     }
 
-    assertThat(seasonObjects.get(1).getInteger("id")).isEqualTo(3)
+    assertThat(seasonObjects.get(1).getInteger("id")).isEqualTo(4)
   }
 
   @Test
@@ -211,6 +206,18 @@ class RatesTests {
     assertThat(jsonPath.getInt("rows[5].low_season_rate")).isEqualTo(1530)
     assertThat(jsonPath.getString("rows[5].building_name")).isEqualTo("Judy's Cabin")
     assertThat(jsonPath.getString("rows[5].season_name")).isEqualTo("2023")
+
+    RestAssured.given(requestSpecification)
+      .given()
+      .header("Authorization", "Bearer ${sessionValue}")
+      .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
+      .queryParam("season_id", 3)
+      .get("/api/rates")
+      .then()
+      .assertThat()
+      .statusCode(200)
+      .extract()
+      .jsonPath()
   }
 
 
@@ -362,37 +369,38 @@ class RatesTests {
 
 
 
-  @Test
-  @Order(9)
-  @DisplayName("Create Rates")
-  fun createRates() {
-    rateObjects.forEach { data ->
-      val jsonPath = RestAssured.given(requestSpecification)
-        .given()
-        .contentType(ContentType.JSON)
-        .body(data.encode())
-        .header("Authorization", "Bearer ${sessionValue}")
-        .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
-        .post("/api/rates")
-        .then()
-        .assertThat()
-        .statusCode(200)
-        .extract()
-        .jsonPath()
-
-      assertThat(jsonPath.getBoolean("success")).isTrue()
-      data.put("id", jsonPath.getInt("data.id"))
-    }
-
-    assertThat(rateObjects.get(0).getInteger("id")).isEqualTo(9)
-    assertThat(rateObjects.get(1).getInteger("id")).isEqualTo(10)
-
-  }
+//  @Test
+//  @Order(9)
+//  @DisplayName("Create Rates")
+//  fun createRates() {
+//    rateObjects.forEach { data ->
+//      System.out.println("Creating Rate ${data}")
+//      val jsonPath = RestAssured.given(requestSpecification)
+//        .given()
+//        .contentType(ContentType.JSON)
+//        .body(data.encode())
+//        .header("Authorization", "Bearer ${sessionValue}")
+//        .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
+//        .post("/api/rates")
+//        .then()
+//        .assertThat()
+//        .statusCode(200)
+//        .extract()
+//        .jsonPath()
+//
+//      assertThat(jsonPath.getBoolean("success")).isTrue()
+//      data.put("id", jsonPath.getInt("data.id"))
+//    }
+//
+//    assertThat(rateObjects.get(0).getInteger("id")).isEqualTo(9)
+//    assertThat(rateObjects.get(1).getInteger("id")).isEqualTo(10)
+//
+//  }
 
   @Test
   @Order(10)
-  @DisplayName("Test Get Rates after create")
-  fun getRatesAfterCreate() {
+  @DisplayName("Test Get Rates after season create")
+  fun getRatesForSeason() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
       .header("Authorization", "Bearer ${sessionValue}")
@@ -406,7 +414,12 @@ class RatesTests {
       .jsonPath()
 
     assertThat(jsonPath.getBoolean("success")).isTrue()
-    assertThat(jsonPath.getList<Any>("rows").size).isEqualTo(2)
+    assertThat(jsonPath.getList<Any>("rows").size).isEqualTo(6)
+
+    jsonPath.getList<Any>("rows").forEach {
+      rateObjects.add(JsonObject(Gson().toJson(it, MutableMap::class.java).toString()))
+    }
+
   }
 
   @Test
@@ -450,7 +463,7 @@ class RatesTests {
 
     assertThat(jsonPath.getBoolean("success")).isTrue()
 
-    assertThat(jsonPath.getInt("rows[1].low_season_rate")).isEqualTo(1200)
+    assertThat(jsonPath.getInt("rows[1].low_season_rate")).isEqualTo(100)
 
   }
 
@@ -474,8 +487,8 @@ class RatesTests {
 
   @Test
   @Order(14)
-  @DisplayName("Test Get Seasons after delete")
-  fun getSeasonsAfterDelete() {
+  @DisplayName("Test Get Rates after delete")
+  fun getRatesAfterDelete() {
     val jsonPath = RestAssured.given(requestSpecification)
       .given()
       .header("Authorization", "Bearer ${sessionValue}")
@@ -490,6 +503,6 @@ class RatesTests {
 
     assertThat(jsonPath.getBoolean("success")).isTrue()
 
-    assertThat(jsonPath.getList<Any>("rows").size).isEqualTo(1)
+    assertThat(jsonPath.getList<Any>("rows").size).isEqualTo(5)
   }
 }

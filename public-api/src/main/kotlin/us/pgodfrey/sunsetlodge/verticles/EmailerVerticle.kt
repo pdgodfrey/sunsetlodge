@@ -10,7 +10,7 @@ import io.vertx.ext.mail.MailMessage
 import io.vertx.ext.web.client.WebClient
 import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
 import io.vertx.kotlin.coroutines.CoroutineVerticle
-import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.coAwait
 
 class EmailerVerticle: CoroutineVerticle() {
   private val logger = LoggerFactory.getLogger(javaClass)
@@ -70,12 +70,12 @@ class EmailerVerticle: CoroutineVerticle() {
         mailMessage.setHtml(it.result().toString())
 
         mailClient.sendMail(mailMessage)
-          .onComplete {
-            if(it.succeeded()){
+          .onComplete { mailResult ->
+            if(mailResult.succeeded()){
               logger.info("sent")
             } else {
               logger.info("not sent")
-              it.cause().printStackTrace()
+              mailResult.cause().printStackTrace()
             }
 
             message.reply("done")

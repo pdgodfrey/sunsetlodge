@@ -5,27 +5,24 @@ import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
-import io.vertx.kotlin.coroutines.dispatcher
-import io.vertx.pgclient.PgPool
+import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.Tuple
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import us.pgodfrey.sunsetlodge.BaseSubRouter
 import us.pgodfrey.sunsetlodge.sql.GallerySqlQueries
 import java.security.InvalidParameterException
 
 
-class GalleriesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
+class GalleriesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pool, jwtAuth) {
 
 
-  private val galleriesSqlQueries = GallerySqlQueries();
+  private val galleriesSqlQueries = GallerySqlQueries()
 
   init {
-    router.get("/gallery-categories").handler(this::handleGetGalleryCategories)
-    router.put("/gallery-categories/:id").handler(this::handleUpdateGalleryCategory)
+    router.get("/gallery-categories").coroutineHandler(this::handleGetGalleryCategories)
+    router.put("/gallery-categories/:id").coroutineHandler(this::handleUpdateGalleryCategory)
 
-    router.get("/").handler(this::handleGetGalleries)
-    router.put("/:id").handler(this::handleUpdateGallery)
+    router.get("/").coroutineHandler(this::handleGetGalleries)
+    router.put("/:id").coroutineHandler(this::handleUpdateGallery)
   }
 
 
@@ -85,19 +82,17 @@ class GalleriesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseS
    *
    * @param context RoutingContext
    */
-  fun handleGetGalleryCategories(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val galleryCategories = execQuery(galleriesSqlQueries.getGalleryCategories)
+  private suspend fun handleGetGalleryCategories(ctx: RoutingContext) {
+    try {
+      val galleryCategories = execQuery(galleriesSqlQueries.getGalleryCategories)
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "rows" to galleryCategories.map { it.toJson() }
-          )
-        })
-      } catch (e: Exception) {
-        e.printStackTrace()
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "rows" to galleryCategories.map { it.toJson() }
+        )
+      })
+    } catch (e: Exception) {
+      e.printStackTrace()
     }
   }
 
@@ -160,32 +155,30 @@ class GalleriesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseS
    *
    * @param context RoutingContext
    */
-  fun handleUpdateGalleryCategory(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val data = ctx.body().asJsonObject()
+  private suspend fun handleUpdateGalleryCategory(ctx: RoutingContext) {
+    try {
+      val data = ctx.body().asJsonObject()
 
 
-        val id = ctx.request().getParam("id").toInt()
+      val id = ctx.request().getParam("id").toInt()
 
-        val params = Tuple.tuple()
-        params.addString(data.getString("description"))
-        params.addInteger(id)
+      val params = Tuple.tuple()
+      params.addString(data.getString("description"))
+      params.addInteger(id)
 
-        val updatedCategory = execQuery(galleriesSqlQueries.updateGalleryCategoryDescription, params)
+      val updatedCategory = execQuery(galleriesSqlQueries.updateGalleryCategoryDescription, params)
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "data" to updatedCategory.first().toJson()
-          )
-        })
-      } catch (e: InvalidParameterException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "data" to updatedCategory.first().toJson()
+        )
+      })
+    } catch (e: InvalidParameterException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
@@ -247,21 +240,19 @@ class GalleriesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseS
    *
    * @param context RoutingContext
    */
-  fun handleGetGalleries(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val galleryCategoryId = ctx.request().getParam("gallery_category_id").toInt()
+  private suspend fun handleGetGalleries(ctx: RoutingContext) {
+    try {
+      val galleryCategoryId = ctx.request().getParam("gallery_category_id").toInt()
 
-        val galleries = execQuery(galleriesSqlQueries.getGalleriesForCategory, Tuple.of(galleryCategoryId))
+      val galleries = execQuery(galleriesSqlQueries.getGalleriesForCategory, Tuple.of(galleryCategoryId))
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "rows" to galleries.map { it.toJson() }
-          )
-        })
-      } catch (e: Exception) {
-        e.printStackTrace()
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "rows" to galleries.map { it.toJson() }
+        )
+      })
+    } catch (e: Exception) {
+      e.printStackTrace()
     }
   }
 
@@ -325,32 +316,30 @@ class GalleriesSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseS
    *
    * @param context RoutingContext
    */
-  fun handleUpdateGallery(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val data = ctx.body().asJsonObject()
+  private suspend fun handleUpdateGallery(ctx: RoutingContext) {
+    try {
+      val data = ctx.body().asJsonObject()
 
 
-        val id = ctx.request().getParam("id").toInt()
+      val id = ctx.request().getParam("id").toInt()
 
-        val params = Tuple.tuple()
-        params.addString(data.getString("description"))
-        params.addInteger(id)
+      val params = Tuple.tuple()
+      params.addString(data.getString("description"))
+      params.addInteger(id)
 
-        val updatedGallery = execQuery(galleriesSqlQueries.updateGalleryDescription, params)
+      val updatedGallery = execQuery(galleriesSqlQueries.updateGalleryDescription, params)
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "data" to updatedGallery.first().toJson()
-          )
-        })
-      } catch (e: InvalidParameterException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "data" to updatedGallery.first().toJson()
+        )
+      })
+    } catch (e: InvalidParameterException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 

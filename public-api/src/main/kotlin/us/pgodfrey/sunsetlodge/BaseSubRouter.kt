@@ -6,26 +6,29 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.auth.sqlclient.SqlAuthentication
 import io.vertx.ext.auth.sqlclient.SqlAuthenticationOptions
+import io.vertx.ext.web.Route
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
-import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.coAwait
+import io.vertx.kotlin.coroutines.coAwait
 import io.vertx.kotlin.coroutines.dispatcher
-import io.vertx.pgclient.PgPool
+import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.Tuple
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 
-open class BaseSubRouter(val vertx: Vertx, val pgPool: PgPool, jwtAuth: JWTAuth) {
+open class BaseSubRouter(val vertx: Vertx, val Pool: Pool, jwtAuth: JWTAuth) {
   val logger = LoggerFactory.getLogger(javaClass)
 
   val router: Router = Router.router(vertx)
 
   var displaySqlErrors = false;
+
+  val scope = CoroutineScope(vertx.dispatcher().asExecutor().asCoroutineDispatcher())
 
   init {
     val env = System.getenv()
@@ -34,13 +37,14 @@ open class BaseSubRouter(val vertx: Vertx, val pgPool: PgPool, jwtAuth: JWTAuth)
 
   }
 
-  fun getSubRouter(): Router {
+
+  open fun getSubRouter(): Router {
     return this.router
   }
 
 
   fun readinessCheck(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
+    scope.launch {
       try {
         execQuery("select 1")
         sendJsonPayload(ctx, json { obj( "status" to "UP")})
@@ -51,12 +55,25 @@ open class BaseSubRouter(val vertx: Vertx, val pgPool: PgPool, jwtAuth: JWTAuth)
     }
   }
 
+  fun Route.coroutineHandler(fn: suspend (RoutingContext) -> Unit): Route {
+    return handler {
+      scope.launch {
+        try {
+          fn(it)
+        } catch (e: Exception) {
+          it.fail(e)
+        }
+      }
+    }
+  }
+
+
   suspend fun execQuery(queryStr: String, args: Tuple? = null): RowSet<Row> {
     try {
       return if (args != null) {
-        pgPool.preparedQuery(queryStr).execute(args).await()
+        Pool.preparedQuery(queryStr).execute(args).coAwait()
       } else {
-        pgPool.preparedQuery(queryStr).execute().await()
+        Pool.preparedQuery(queryStr).execute().coAwait()
       }
     } catch (e: Exception) {
       if(displaySqlErrors) {

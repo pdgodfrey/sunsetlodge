@@ -3,15 +3,11 @@ package us.pgodfrey.sunsetlodge.sub_routers
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.jwt.JWTAuth
-import io.vertx.ext.web.FileUpload
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
-import io.vertx.kotlin.coroutines.dispatcher
-import io.vertx.pgclient.PgPool
+import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.Tuple
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import us.pgodfrey.sunsetlodge.BaseSubRouter
 import us.pgodfrey.sunsetlodge.sql.ImageSqlQueries
 import java.awt.Image
@@ -21,17 +17,17 @@ import java.security.InvalidParameterException
 import javax.imageio.ImageIO
 
 
-class ImagesSubRouter(vertx: Vertx, pgPool: PgPool, uploadsDir: String, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
+class ImagesSubRouter(vertx: Vertx, pool: Pool, uploadsDir: String, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pool, jwtAuth) {
 
-  private val imageSqlQueries = ImageSqlQueries();
+  private val imageSqlQueries = ImageSqlQueries()
   private var uploadsDir = ""
 
   init {
 
-    router.get("/").handler(this::handleGetImagesForGallery)
-    router.post("/").handler(this::handleCreateImage)
-    router.post("/update-order").handler(this::handleUpdateOrder)
-    router.delete("/:id").handler(this::handleDeleteImage)
+    router.get("/").coroutineHandler(this::handleGetImagesForGallery)
+    router.post("/").coroutineHandler(this::handleCreateImage)
+    router.post("/update-order").coroutineHandler(this::handleUpdateOrder)
+    router.delete("/:id").coroutineHandler(this::handleDeleteImage)
 
     this.uploadsDir = uploadsDir
   }
@@ -97,28 +93,26 @@ class ImagesSubRouter(vertx: Vertx, pgPool: PgPool, uploadsDir: String, jwtAuth:
    *
    * @param context RoutingContext
    */
-  fun handleGetImagesForGallery(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val id = ctx.request().getParam("gallery_id").toInt()
-        val images = execQuery(imageSqlQueries.getImagesForGallery, Tuple.of(id))
+  private suspend fun handleGetImagesForGallery(ctx: RoutingContext) {
+    try {
+      val id = ctx.request().getParam("gallery_id").toInt()
+      val images = execQuery(imageSqlQueries.getImagesForGallery, Tuple.of(id))
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "rows" to images.map {
-              val jsonObj = it.toJson()
+      sendJsonPayload(ctx, json {
+        obj(
+          "rows" to images.map {
+            val jsonObj = it.toJson()
 
-              jsonObj.put("url", getUrl(jsonObj))
-              jsonObj.put("thumbnail_url", getThumbnailUrl(jsonObj))
+            jsonObj.put("url", getUrl(jsonObj))
+            jsonObj.put("thumbnail_url", getThumbnailUrl(jsonObj))
 
-              jsonObj
-            }
-          )
-        })
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
-      }
+            jsonObj
+          }
+        )
+      })
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
@@ -185,92 +179,91 @@ class ImagesSubRouter(vertx: Vertx, pgPool: PgPool, uploadsDir: String, jwtAuth:
    *
    * @param context RoutingContext
    */
-  fun handleCreateImage(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        logger.info("handleCreateImage")
-        val uploads = ctx.fileUploads()
+  private suspend fun handleCreateImage(ctx: RoutingContext) {
+    try {
+      logger.info("handleCreateImage")
+      val uploads = ctx.fileUploads()
 
-        logger.info("handleCreateImag uploads length ${uploads.size}")
+      logger.info("handleCreateImag uploads length ${uploads.size}")
 
-        if(uploads.size == 0){
-          throw InvalidParameterException("Must have one file upload")
+      if(uploads.size == 0){
+        throw InvalidParameterException("Must have one file upload")
+      }
+
+      if(ctx.request().getParam("gallery_id").isNullOrBlank()){
+        throw InvalidParameterException("Gallery Id is required")
+      }
+      val galleryId: Int = ctx.request().getParam("gallery_id").toInt()
+
+      var maxOrderBy = execQuery(imageSqlQueries.getMaxOrderByForImagesInGallery, Tuple.of(galleryId)).first().getInteger("max")
+
+      ctx.fileUploads().forEach { fileUpload ->
+        val fileName = fileUpload.fileName()
+        val size = fileUpload.size()
+        val contentType = fileUpload.contentType()
+
+        val images = execQuery(imageSqlQueries.insertImage, Tuple.of(galleryId, maxOrderBy+1, fileName, contentType, size))
+
+        maxOrderBy += 1
+
+        val image = images.first()
+
+
+        val id = image.getInteger("id")
+        val location = "$uploadsDir/$id/${fileName}"
+
+        if(vertx.fileSystem().existsBlocking("$uploadsDir/$id")){
+          vertx.fileSystem().deleteRecursiveBlocking("$uploadsDir/$id", true)
         }
+        val locationParts = location.split("/")
+        var folderStructure = ""
+        for (locationPart in locationParts) {
+          if(locationPart != fileName) {
+            folderStructure += locationPart + "/"
 
-        if(ctx.request().getParam("gallery_id").isNullOrBlank()){
-          throw InvalidParameterException("Gallery Id is required")
-        }
-        val galleryId: Int = ctx.request().getParam("gallery_id").toInt()
-
-        var maxOrderBy = execQuery(imageSqlQueries.getMaxOrderByForImagesInGallery, Tuple.of(galleryId)).first().getInteger("max")
-
-        ctx.fileUploads().forEach { fileUpload ->
-          val fileName = fileUpload.fileName()
-          val size = fileUpload.size()
-          val contentType = fileUpload.contentType()
-
-          val images = execQuery(imageSqlQueries.insertImage, Tuple.of(galleryId, maxOrderBy+1, fileName, contentType, size))
-
-          maxOrderBy += 1
-
-          val image = images.first()
-
-
-          var id = image.getInteger("id")
-          var location = "$uploadsDir/$id/${fileName}"
-
-          if(vertx.fileSystem().existsBlocking("$uploadsDir/$id")){
-            vertx.fileSystem().deleteRecursiveBlocking("$uploadsDir/$id", true)
-          }
-          var locationParts = location.split("/")
-          var folderStructure = ""
-          for (locationPart in locationParts) {
-            if(locationPart != fileName) {
-              folderStructure += locationPart + "/";
-
-              if(!vertx.fileSystem().existsBlocking(folderStructure)){
-                vertx.fileSystem().mkdirBlocking(folderStructure);
-              }
+            if(!vertx.fileSystem().existsBlocking(folderStructure)){
+              vertx.fileSystem().mkdirBlocking(folderStructure)
             }
           }
-          vertx.fileSystem().copyBlocking(fileUpload.uploadedFileName(), location)
+        }
+        vertx.fileSystem().copyBlocking(fileUpload.uploadedFileName(), location)
 
-          val maxw = 200
-          val maxh = 200
-          val uploadedFile: File = File(fileUpload.uploadedFileName())
-          val img = ImageIO.read(uploadedFile)
-          val w = img.getWidth(null)
-          val h = img.getHeight(null)
-          var scaledw = w
-          var scaledh = h
+        val maxw = 200
+        val maxh = 200
+        val uploadedFile = File(fileUpload.uploadedFileName())
+        val img = ImageIO.read(uploadedFile)
+        val w = img.getWidth(null)
+        val h = img.getHeight(null)
+        var scaledw = w
+        var scaledh = h
 
-          if (w > maxw) {
-            //scale width to fit
-            scaledw = maxw
-            scaledh = maxw * h / w
-          }
+        if (w > maxw) {
+          //scale width to fit
+          scaledw = maxw
+          scaledh = maxw * h / w
+        }
 
-          if (h > maxh) {
-            scaledh = maxh
-            scaledw = maxh * w / h
-          }
-          val scaledImg = img.getScaledInstance(scaledw, scaledh, Image.SCALE_SMOOTH)
+        if (h > maxh) {
+          scaledh = maxh
+          scaledw = maxh * w / h
+        }
+        val scaledImg = img.getScaledInstance(scaledw, scaledh, Image.SCALE_SMOOTH)
 
-          val img2 = BufferedImage(
-            scaledw,
-            scaledh,
-            if (img.colorModel.hasAlpha()) BufferedImage.TYPE_INT_ARGB else BufferedImage.TYPE_INT_RGB
-          )
+        val img2 = BufferedImage(
+          scaledw,
+          scaledh,
+          if (img.colorModel.hasAlpha()) BufferedImage.TYPE_INT_ARGB else BufferedImage.TYPE_INT_RGB
+        )
 
-          val g = img2.graphics
-          g.drawImage(scaledImg, 0, 0, null)
-          g.dispose()
+        val g = img2.graphics
+        g.drawImage(scaledImg, 0, 0, null)
+        g.dispose()
 
-          val thumbFile = "${fileName.substringBeforeLast(".")}_thumb.png"
+        val thumbFile = "${fileName.substringBeforeLast(".")}_thumb.png"
 
-          var thumbLocation = "$uploadsDir/$id/${thumbFile}"
-          val outputfile = File(thumbLocation)
-          ImageIO.write(img2, "png", outputfile)
+        val thumbLocation = "$uploadsDir/$id/${thumbFile}"
+        val outputfile = File(thumbLocation)
+        ImageIO.write(img2, "png", outputfile)
 
 
 
@@ -284,24 +277,23 @@ class ImagesSubRouter(vertx: Vertx, pgPool: PgPool, uploadsDir: String, jwtAuth:
 //              "data" to jsonObj
 //            )
 //          })
-        }
-
-
-        sendJsonPayload(ctx, json {
-          obj(
-//            "data" to jsonObj
-          )
-        })
-      } catch (e: InvalidParameterException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: IllegalArgumentException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
       }
+
+
+      sendJsonPayload(ctx, json {
+        obj(
+//            "data" to jsonObj
+        )
+      })
+    } catch (e: InvalidParameterException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: IllegalArgumentException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
@@ -354,31 +346,29 @@ class ImagesSubRouter(vertx: Vertx, pgPool: PgPool, uploadsDir: String, jwtAuth:
    *
    * @param context RoutingContext
    */
-  fun handleUpdateOrder(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val data = ctx.body().asJsonObject()
+  private suspend fun handleUpdateOrder(ctx: RoutingContext) {
+    try {
+      val data = ctx.body().asJsonObject()
 
-        val imageIds = data.getJsonArray("image_ids")
+      val imageIds = data.getJsonArray("image_ids")
 
-        imageIds.forEachIndexed { index, it ->
-          val imageId = it as Int
+      imageIds.forEachIndexed { index, it ->
+        val imageId = it as Int
 
-          execQuery(imageSqlQueries.updateImageOrderBy, Tuple.of(index+1, imageId))
-        }
-
-        sendJsonPayload(ctx, json {
-          obj(
-
-          )
-        })
-      } catch (e: InvalidParameterException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
+        execQuery(imageSqlQueries.updateImageOrderBy, Tuple.of(index+1, imageId))
       }
+
+      sendJsonPayload(ctx, json {
+        obj(
+
+        )
+      })
+    } catch (e: InvalidParameterException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
@@ -431,31 +421,29 @@ class ImagesSubRouter(vertx: Vertx, pgPool: PgPool, uploadsDir: String, jwtAuth:
    *
    * @param context RoutingContext
    */
-  fun handleDeleteImage(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val id = ctx.request().getParam("id").toInt()
+  private suspend fun handleDeleteImage(ctx: RoutingContext) {
+    try {
+      val id = ctx.request().getParam("id").toInt()
 
-        val deletedImage = execQuery(imageSqlQueries.deleteImage, Tuple.of(id)).first()
+      val deletedImage = execQuery(imageSqlQueries.deleteImage, Tuple.of(id)).first()
 
-        vertx.fileSystem().deleteRecursiveBlocking("$uploadsDir/$id", true)
+      vertx.fileSystem().deleteRecursiveBlocking("$uploadsDir/$id", true)
 
-        val remainingImages = execQuery(imageSqlQueries.getImagesForGallery, Tuple.of(deletedImage.getInteger("gallery_id")))
+      val remainingImages = execQuery(imageSqlQueries.getImagesForGallery, Tuple.of(deletedImage.getInteger("gallery_id")))
 
-        remainingImages.forEachIndexed { index, row ->
-          execQuery(imageSqlQueries.updateImageOrderBy, Tuple.of(index+1, row.getInteger("id")))
-        }
-
-
-        sendJsonPayload(ctx, json {
-          obj(
-
-          )
-        })
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
+      remainingImages.forEachIndexed { index, row ->
+        execQuery(imageSqlQueries.updateImageOrderBy, Tuple.of(index+1, row.getInteger("id")))
       }
+
+
+      sendJsonPayload(ctx, json {
+        obj(
+
+        )
+      })
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 

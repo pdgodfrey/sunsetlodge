@@ -6,11 +6,8 @@ import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
-import io.vertx.kotlin.coroutines.dispatcher
-import io.vertx.pgclient.PgPool
+import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.Tuple
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import us.pgodfrey.sunsetlodge.BaseSubRouter
 import us.pgodfrey.sunsetlodge.sql.AuthSqlQueries
 import us.pgodfrey.sunsetlodge.sql.UserSqlQueries
@@ -19,19 +16,19 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class UsersSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pgPool, jwtAuth) {
+class UsersSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pool, jwtAuth) {
 
-  private val userSqlQueries = UserSqlQueries();
-  private val authSqlQueries = AuthSqlQueries();
+  private val userSqlQueries = UserSqlQueries()
+  private val authSqlQueries = AuthSqlQueries()
   private val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\$"
 
   init {
 
-    router.get("/").handler(this::handleGetUsers)
-    router.post("/").handler(this::handleCreateUser)
-    router.post("/reset-password").handler(this::handleResetPassword)
-    router.put("/:id").handler(this::handleUpdateUser)
-    router.delete("/:id").handler(this::handleDeleteUser)
+    router.get("/").coroutineHandler(this::handleGetUsers)
+    router.post("/").coroutineHandler(this::handleCreateUser)
+    router.post("/reset-password").coroutineHandler(this::handleResetPassword)
+    router.put("/:id").coroutineHandler(this::handleUpdateUser)
+    router.delete("/:id").coroutineHandler(this::handleDeleteUser)
   }
 
 
@@ -95,20 +92,18 @@ class UsersSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRo
    *
    * @param context RoutingContext
    */
-  fun handleGetUsers(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val users = execQuery(userSqlQueries.getUsers)
+  private suspend fun handleGetUsers(ctx: RoutingContext) {
+    try {
+      val users = execQuery(userSqlQueries.getUsers)
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "rows" to users.map { it.toJson() }
-          )
-        })
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "rows" to users.map { it.toJson() }
+        )
+      })
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
@@ -179,37 +174,35 @@ class UsersSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRo
    *
    * @param context RoutingContext
    */
-  fun handleCreateUser(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val data = ctx.body().asJsonObject()
+  private suspend fun handleCreateUser(ctx: RoutingContext) {
+    try {
+      val data = ctx.body().asJsonObject()
 
-        validateUserData(data)
+      validateUserData(data)
 
-        val params = Tuple.tuple()
-        params.addString(data.getString("name"))
-        params.addString(data.getString("email").lowercase())
-        params.addInteger(data.getInteger("role_id"))
+      val params = Tuple.tuple()
+      params.addString(data.getString("name"))
+      params.addString(data.getString("email").lowercase())
+      params.addInteger(data.getInteger("role_id"))
 
-        val insertedUser = execQuery(userSqlQueries.insertUser, params)
+      val insertedUser = execQuery(userSqlQueries.insertUser, params)
 
-        val user = execQuery(userSqlQueries.getUserById, Tuple.of(insertedUser.first().getInteger("id")))
+      val user = execQuery(userSqlQueries.getUserById, Tuple.of(insertedUser.first().getInteger("id")))
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "data" to user.first().toJson()
-          )
-        })
-      } catch (e: InvalidParameterException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: IllegalArgumentException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "data" to user.first().toJson()
+        )
+      })
+    } catch (e: InvalidParameterException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: IllegalArgumentException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
@@ -263,42 +256,40 @@ class UsersSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRo
    *
    * @param context RoutingContext
    */
-  fun handleResetPassword(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val id = ctx.request().getParam("id").toInt()
-        val users = execQuery(userSqlQueries.getUserById, Tuple.of(id))
-        val user = users.first()
+  private suspend fun handleResetPassword(ctx: RoutingContext) {
+    try {
+      val id = ctx.request().getParam("id").toInt()
+      val users = execQuery(userSqlQueries.getUserById, Tuple.of(id))
+      val user = users.first()
 
-        val resetToken = UUID.randomUUID()
+      val resetToken = UUID.randomUUID()
 
-        execQuery(userSqlQueries.setResetPassword, Tuple.of(resetToken.toString(), id))
+      execQuery(userSqlQueries.setResetPassword, Tuple.of(resetToken.toString(), id))
 
-        val emailObj = JsonObject()
-          .put("recipient_email", user.getString("email"))
-          .put("subject", "Sunset Lodge: Password Reset")
-          .put("name", user.getString("name"))
-          .put("reset_token", resetToken.toString())
-          .put("template", "password-reset.hbs")
+      val emailObj = JsonObject()
+        .put("recipient_email", user.getString("email"))
+        .put("subject", "Sunset Lodge: Password Reset")
+        .put("name", user.getString("name"))
+        .put("reset_token", resetToken.toString())
+        .put("template", "password-reset.hbs")
 
-        vertx.eventBus().request<Any>("email.send", emailObj) {
+      vertx.eventBus().request<Any>("email.send", emailObj) {
 
-          sendJsonPayload(ctx, json {
-            obj(
+        sendJsonPayload(ctx, json {
+          obj(
 
-            )
-          })
-        }
-      } catch (e: InvalidParameterException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: IllegalArgumentException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
+          )
+        })
       }
+    } catch (e: InvalidParameterException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: IllegalArgumentException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
@@ -371,37 +362,35 @@ class UsersSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRo
    *
    * @param context RoutingContext
    */
-  fun handleUpdateUser(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val data = ctx.body().asJsonObject()
+  private suspend fun handleUpdateUser(ctx: RoutingContext) {
+    try {
+      val data = ctx.body().asJsonObject()
 
-        validateUserData(data)
+      validateUserData(data)
 
-        val id = ctx.request().getParam("id").toInt()
+      val id = ctx.request().getParam("id").toInt()
 
-        val params = Tuple.tuple()
-        params.addString(data.getString("name"))
-        params.addString(data.getString("email"))
-        params.addInteger(data.getInteger("role_id"))
-        params.addInteger(id)
+      val params = Tuple.tuple()
+      params.addString(data.getString("name"))
+      params.addString(data.getString("email"))
+      params.addInteger(data.getInteger("role_id"))
+      params.addInteger(id)
 
-        val updateUser = execQuery(userSqlQueries.updateUser, params)
+      execQuery(userSqlQueries.updateUser, params)
 
-        val user = execQuery(userSqlQueries.getUserById, Tuple.of(id))
+      val user = execQuery(userSqlQueries.getUserById, Tuple.of(id))
 
-        sendJsonPayload(ctx, json {
-          obj(
-            "data" to user.first().toJson()
-          )
-        })
-      } catch (e: InvalidParameterException) {
-        logger.error(e.printStackTrace())
-        fail400(ctx, e)
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
-      }
+      sendJsonPayload(ctx, json {
+        obj(
+          "data" to user.first().toJson()
+        )
+      })
+    } catch (e: InvalidParameterException) {
+      logger.error(e.printStackTrace())
+      fail400(ctx, e)
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 
@@ -454,23 +443,21 @@ class UsersSubRouter(vertx: Vertx, pgPool: PgPool, jwtAuth: JWTAuth) : BaseSubRo
    *
    * @param context RoutingContext
    */
-  fun handleDeleteUser(ctx: RoutingContext) {
-    GlobalScope.launch(vertx.dispatcher()) {
-      try {
-        val id = ctx.request().getParam("id").toInt()
+  private suspend fun handleDeleteUser(ctx: RoutingContext) {
+    try {
+      val id = ctx.request().getParam("id").toInt()
 
-        execQuery(authSqlQueries.revokeRefreshTokensForUser, Tuple.of(id))
-        execQuery(userSqlQueries.deleteUser, Tuple.of(id))
+      execQuery(authSqlQueries.revokeRefreshTokensForUser, Tuple.of(id))
+      execQuery(userSqlQueries.deleteUser, Tuple.of(id))
 
-        sendJsonPayload(ctx, json {
-          obj(
+      sendJsonPayload(ctx, json {
+        obj(
 
-          )
-        })
-      } catch (e: Exception) {
-        logger.error(e.printStackTrace())
-        fail500(ctx, e)
-      }
+        )
+      })
+    } catch (e: Exception) {
+      logger.error(e.printStackTrace())
+      fail500(ctx, e)
     }
   }
 

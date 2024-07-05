@@ -119,15 +119,15 @@ class SeasonsTests {
       .jsonPath()
 
     assertThat(jsonPath.getBoolean("success")).isTrue()
-    assertThat(jsonPath.getList<Any>("rows").size).isEqualTo(1)
+    assertThat(jsonPath.getList<Any>("rows").size).isEqualTo(2)
 
-    assertThat(jsonPath.getInt("rows[0].id")).isEqualTo(1)
-    assertThat(jsonPath.getString("rows[0].name")).isEqualTo("2023")
-    assertThat(jsonPath.getString("rows[0].start_date")).isEqualTo("2023-06-01")
-    assertThat(jsonPath.getString("rows[0].end_date")).isEqualTo("2023-10-08")
-    assertThat(jsonPath.getString("rows[0].high_season_start_date")).isEqualTo("2023-06-10")
-    assertThat(jsonPath.getString("rows[0].high_season_end_date")).isEqualTo("2023-09-15")
-    assertThat(jsonPath.getBoolean("rows[0].is_open")).isFalse()
+    assertThat(jsonPath.getInt("rows[1].id")).isEqualTo(1)
+    assertThat(jsonPath.getString("rows[1].name")).isEqualTo("2023")
+    assertThat(jsonPath.getString("rows[1].start_date")).isEqualTo("2023-06-01")
+    assertThat(jsonPath.getString("rows[1].end_date")).isEqualTo("2023-10-08")
+    assertThat(jsonPath.getString("rows[1].high_season_start_date")).isEqualTo("2023-06-10")
+    assertThat(jsonPath.getString("rows[1].high_season_end_date")).isEqualTo("2023-09-15")
+    assertThat(jsonPath.getBoolean("rows[1].is_open")).isFalse()
   }
 
   @Test
@@ -153,8 +153,8 @@ class SeasonsTests {
       data.put("id", jsonPath.getInt("data.id"))
     }
 
-    assertThat(seasonObjects.get(0).getInteger("id")).isEqualTo(2)
-    assertThat(seasonObjects.get(1).getInteger("id")).isEqualTo(3)
+    assertThat(seasonObjects.get(0).getInteger("id")).isEqualTo(3)
+    assertThat(seasonObjects.get(1).getInteger("id")).isEqualTo(4)
   }
 
 
@@ -244,7 +244,7 @@ class SeasonsTests {
       .jsonPath()
 
     assertThat(jsonPath.getBoolean("success")).isTrue()
-    assertThat(jsonPath.getList<Any>("rows").size).isEqualTo(3)
+    assertThat(jsonPath.getList<Any>("rows").size).isEqualTo(4)
 
     var currentCount = 0
     val seasons = jsonPath.getList<LinkedHashMap<String, Any>>("rows")
@@ -342,7 +342,7 @@ class SeasonsTests {
       .given()
       .header("Authorization", "Bearer ${sessionValue}")
       .config(RestAssured.config().redirect(RedirectConfig().followRedirects(true)))
-      .delete("/api/seasons/2")
+      .delete("/api/seasons/1")
       .then()
       .assertThat()
       .statusCode(200)
@@ -368,7 +368,7 @@ class SeasonsTests {
       .jsonPath()
 
     assertThat(jsonPath.getBoolean("success")).isTrue()
-    assertThat(jsonPath.getList<Any>("rows").size).isEqualTo(2)
+    assertThat(jsonPath.getList<Any>("rows").size).isEqualTo(3)
 
     var currentCount = 0
     val seasons = jsonPath.getList<LinkedHashMap<String, Any>>("rows")
