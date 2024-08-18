@@ -74,7 +74,7 @@ function onSubmit() {
 
         <v-btn size="large" :loading="isSubmitting" :disabled="!valid" color="primary" block type="submit" flat>Set Password</v-btn>
 
-        <div v-if="errors && errors.length" class="mt-2">
+        <div v-if="errors" class="mt-2">
           <v-alert color="error">{{ errors }}</v-alert>
         </div>
       </template>

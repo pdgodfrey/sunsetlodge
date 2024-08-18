@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import Table from '@/components/seasons/Table.vue';
 
 const page = ref({ title: 'Seasons' });
-
-import Table from '@/components/seasons/Table.vue';
 </script>
 
 <template>

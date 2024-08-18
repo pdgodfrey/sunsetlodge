@@ -48,7 +48,7 @@ function onSubmit() {
             class="pwdInput mb-6"
         ></VTextField>
         <v-btn size="large" :loading="isSubmitting" :disabled="!valid" color="primary" block type="submit" flat>Sign In</v-btn>
-        <div v-if="errors && errors.length" class="mt-2">
+        <div v-if="errors" class="mt-2">
             <v-alert color="error">{{ errors }}</v-alert>
         </div>
         <div class="d-flex flex-wrap align-center my-3 ml-n2">

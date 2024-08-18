@@ -25,6 +25,7 @@ export const useAuthStore = defineStore({
     },
     actions: {
         async getLoggedInUser() {
+          console.log(`auth token2: ${this.authToken}`)
           const userResponse = await fetchWrapper.get(`${baseUrl}/api/auth/user`);
 
           this.user = JSON.stringify(userResponse.user);
@@ -44,14 +45,14 @@ export const useAuthStore = defineStore({
 
             this.lastRefreshTime = new Date()
 
-            // redirect to previous url or default to home page
-            // if(this.returnUrl != '') {
-            //   router.push(this.returnUrl);
-            // } else {
+            const returnUrl = this.returnUrl;
             setTimeout(function() {
-              router.push('/bookings');
+              if(returnUrl != '') {
+                router.push(returnUrl);
+              } else {
+                router.push('/bookings');
+              }
             }, 500)
-            // }
 
         },
         logout() {

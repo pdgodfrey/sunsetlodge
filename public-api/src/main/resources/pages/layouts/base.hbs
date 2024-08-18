@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-  <title>Sunset Lodge | Home</title>
+  <title>Sunset Lodge | {{ title }}</title>
 
   <link href="//fonts.googleapis.com/css?family=PT+Sans|PT+Sans+Caption|PT+Sans+Narrow|PT+Serif|PT+Serif+Caption|Open+Sans:800" rel="stylesheet">
   <!--<link href="https://fonts.googleapis.com/css?family=Alex+Brush|Allura|Miltonian+Tattoo|Mountains+of+Christmas|Sacramento|Sail" rel="stylesheet">-->
@@ -25,14 +25,14 @@
 
   <style>
     html {
-      background: url('/images/backgrounds/background_05.jpg') no-repeat center center fixed;
+      background: url('{{ background_url }}') no-repeat center center fixed;
     }
   </style>
 </head>
 <body>
 
 <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
-  <a class="navbar-brand" href="#"><img src="/images/logo-205.png" alt="Sunset Lodge"/></a>
+  <a class="navbar-brand" href="/"><img src="/images/logo-205.png" alt="Sunset Lodge"/></a>
   <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuItems" aria-controls="menuItems" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
 
@@ -43,31 +43,31 @@
 
     <ul class="navbar-nav ms-auto mb-2 mb-md-0">
       <li class="nav-item">
-        <a class="nav-link" href="#">The Lodge & Cabins</a>
+        <a class="nav-link" href="/lodge-and-cabins">The Lodge & Cabins</a>
       </li>
       <li class="nav-item d-block d-sm-none d-lg-block">
-        <a class="nav-link" href="#">Rates & Availability</a>
+        <a class="nav-link" href="/rates-and-availability">Rates & Availability</a>
       </li>
       <li class="nav-item  d-block d-sm-none d-xl-block">
-        <a class="nav-link" href="#">Weddings</a>
+        <a class="nav-link" href="/weddings">Weddings</a>
       </li>
       <li class="nav-item  d-block d-sm-none d-xl-block">
-        <a class="nav-link" href="#">Location</a>
+        <a class="nav-link" href="/things-to-do">Things To Do</a>
       </li>
       <li class="nav-item  d-block d-sm-none d-xl-block">
-        <a class="nav-link" href="#">Sunsets</a>
+        <a class="nav-link" href="/sunsets">Sunsets</a>
       </li>
       <li class="nav-item  d-block d-sm-none d-lg-block">
-        <a class="nav-link">Contact</a>
+        <a class="nav-link" href="/contact-us">Contact</a>
       </li>
       <li class="nav-item dropdown d-none d-sm-block d-xl-none">
         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">More</a>
         <ul class="dropdown-menu">
-          <li><a class="dropdown-item d-none d-md-block d-lg-none" href="#">Rates & Availability</a></li>
-          <li><a class="dropdown-item d-block" href="#">Weddings</a></li>
-          <li><a class="dropdown-item d-block" href="#">Location</a></li>
-          <li><a class="dropdown-item d-block" href="#">Sunsets</a></li>
-          <li><a class="dropdown-item d-none d-md-block d-lg-none" href="#">Contact</a></li>
+          <li><a class="dropdown-item d-none d-md-block d-lg-none" href="/rates-and-availability">Rates & Availability</a></li>
+          <li><a class="dropdown-item d-block" href="/weddings">Weddings</a></li>
+          <li><a class="dropdown-item d-block" href="/things-to-do">Things To Do</a></li>
+          <li><a class="dropdown-item d-block" href="/sunsets">Sunsets</a></li>
+          <li><a class="dropdown-item d-none d-md-block d-lg-none" href="/contact-us">Contact</a></li>
         </ul>
       </li>
     </ul>

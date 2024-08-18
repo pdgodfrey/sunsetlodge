@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import ImageSorter from '@/components/galleries/ImageSorter.vue';
 
 const page = ref({ title: 'Galleries' });
 
-import ImageSorter from '@/components/galleries/ImageSorter.vue';
 </script>
 
 <template>

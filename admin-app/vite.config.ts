@@ -45,4 +45,8 @@ export default defineConfig({
       },
       cors: true
     },
+    build: {
+      outDir: "../public-api/webroot/admin",
+      emptyOutDir: true
+    }
 });

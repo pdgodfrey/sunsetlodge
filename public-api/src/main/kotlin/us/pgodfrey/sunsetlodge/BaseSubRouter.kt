@@ -4,14 +4,11 @@ import io.vertx.core.Vertx
 import io.vertx.core.impl.logging.LoggerFactory
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.jwt.JWTAuth
-import io.vertx.ext.auth.sqlclient.SqlAuthentication
-import io.vertx.ext.auth.sqlclient.SqlAuthenticationOptions
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
-import io.vertx.kotlin.coroutines.coAwait
 import io.vertx.kotlin.coroutines.coAwait
 import io.vertx.kotlin.coroutines.dispatcher
 import io.vertx.sqlclient.Pool
@@ -21,12 +18,12 @@ import io.vertx.sqlclient.Tuple
 import kotlinx.coroutines.*
 
 
-open class BaseSubRouter(val vertx: Vertx, val Pool: Pool, jwtAuth: JWTAuth) {
+open class BaseSubRouter(val vertx: Vertx, val pool: Pool, jwtAuth: JWTAuth) {
   val logger = LoggerFactory.getLogger(javaClass)
 
   val router: Router = Router.router(vertx)
 
-  var displaySqlErrors = false;
+  var displaySqlErrors = false
 
   val scope = CoroutineScope(vertx.dispatcher().asExecutor().asCoroutineDispatcher())
 
@@ -71,9 +68,9 @@ open class BaseSubRouter(val vertx: Vertx, val Pool: Pool, jwtAuth: JWTAuth) {
   suspend fun execQuery(queryStr: String, args: Tuple? = null): RowSet<Row> {
     try {
       return if (args != null) {
-        Pool.preparedQuery(queryStr).execute(args).coAwait()
+        pool.preparedQuery(queryStr).execute(args).coAwait()
       } else {
-        Pool.preparedQuery(queryStr).execute().coAwait()
+        pool.preparedQuery(queryStr).execute().coAwait()
       }
     } catch (e: Exception) {
       if(displaySqlErrors) {

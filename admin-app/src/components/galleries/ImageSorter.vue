@@ -8,6 +8,8 @@ import { Form } from 'vee-validate';
 
 
 import dayjs from "dayjs";
+import GalleryDescriptionCard from '@/components/galleries/GalleryDescriptionCard.vue';
+import GalleryImagesCard from '@/components/galleries/GalleryImagesCard.vue';
 
 const galleriesStore = useGalleriesStore();
 
@@ -168,8 +170,6 @@ function truncate(text: string, length: number, suffix: string) {
   }
 }
 
-import GalleryDescriptionCard from '@/components/galleries/GalleryDescriptionCard.vue';
-import GalleryImagesCard from '@/components/galleries/GalleryImagesCard.vue';
 </script>
 <template>
   <v-dialog v-model="galleryDialog" max-width="600" min-height="600" persistent>
@@ -200,7 +200,8 @@ import GalleryImagesCard from '@/components/galleries/GalleryImagesCard.vue';
           ></v-select>
         </v-col>
         <v-col cols="3" sm="6">
-          <v-dialog v-model="categoryDialog" max-width="600" min-height="600" persistent>
+          <v-dialog v-model="categoryDialog" max-width="600" min-height="600" persistent
+          v-if="editedCategoryItem && editedCategoryItem.name != 'Backgrounds'">
             <template v-slot:activator="{ props }">
               <v-btn color="primary" v-bind="props" flat class="ml-auto">
                 <v-icon class="mr-2">mdi-account-multiple-plus</v-icon>Edit Category Description
@@ -212,7 +213,7 @@ import GalleryImagesCard from '@/components/galleries/GalleryImagesCard.vue';
               </v-card-title>
 
               <v-card-text>
-                <v-form ref="form" v-model="valid" lazy-validation>
+                <v-form ref="form" lazy-validation>
                   <v-row>
 
                     <v-col cols="12">

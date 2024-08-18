@@ -26,7 +26,7 @@ html {
 
 :root {
   --bs-body-bg: transparent;
-  --bs-body-font-size: #{$font-size-sm};
+  --bs-body-font-size: #{$font-size-base};
   --bs-body-color: #ccc;
   --bs-font-sans-serif: #{$pt-sans};
   --bs-body-font-family: #{$pt-sans};
@@ -463,7 +463,7 @@ now override the 3.3 new styles for modern browsers & apply opacity
   width: 5% !important;
 }
 
-.thumbnail-carousel .item {
+.carousel-item {
 
   .row {
     margin-top:0px !important;
@@ -472,6 +472,14 @@ now override the 3.3 new styles for modern browsers & apply opacity
     .thumbnail {
       margin-bottom: 0px;
       border: 0px;
+      width: 100px;
+      height: 100px;
+
+      img {
+        width: 98px;
+        height: 98px;
+        object-fit: contain;
+      }
 
       &.current-image {
         border: 1px solid $dark-orange;
@@ -496,6 +504,42 @@ now override the 3.3 new styles for modern browsers & apply opacity
     padding-top: 5px;
     left: 0px;
     right: 0px;
+  }
+}
+.image-carousel {
+  .carousel-control-prev-icon, .carousel-control-next-icon {
+    background-color: black;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+.carousel-control-prev, .carousel-control-next {
+  opacity: 0.75;
+  width: 2rem;
+}
+
+.thumbnail-carousel {
+  .carousel-control-prev-icon, .carousel-control-next-icon {
+    background-color: black;
+  }
+  .carousel-control-prev-icon {
+    margin-left: -2rem;
+  }
+  .carousel-control-next-icon {
+    margin-right: -2rem;
+  }
+}
+
+.image-carousel {
+  .carousel-inner {
+    .carousel-item {
+      img {
+        height: 650px;
+        width: 100%;
+        object-fit: contain;
+      }
+    }
   }
 }
 

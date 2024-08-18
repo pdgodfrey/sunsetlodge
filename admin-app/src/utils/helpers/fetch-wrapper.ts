@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/stores/auth';
+import {jwtDecode} from "jwt-decode";
 
 export const fetchWrapper = {
     get: request('GET'),
@@ -15,7 +16,7 @@ function request(method: string) {
             headers: authHeader(url),
             credentials: 'include'
         };
-        if (body && body != {}) {
+        if (body) {
             requestOptions.headers['Content-Type'] = 'application/json';
             requestOptions.body = JSON.stringify(body);
         }
@@ -46,9 +47,12 @@ function formDataRequest(method: String) {
 function authHeader(url: any) {
     // return auth header with jwt if user is logged in and request is to the api url
     const { authToken } = useAuthStore();
+    console.log(`authToken: ${authToken}`)
     const isLoggedIn = (authToken != '');
+  console.log(`isLoggedIn: ${isLoggedIn}`)
     const isApiUrl = url.startsWith(import.meta.env.VITE_API_URL);
-    if (isLoggedIn && isApiUrl) {
+  console.log(`isApiUrl: ${isApiUrl}`)
+    if (isLoggedIn && (isApiUrl || import.meta.env.PROD)) {
         return { Authorization: `Bearer ${authToken}` };
     } else {
         return { };

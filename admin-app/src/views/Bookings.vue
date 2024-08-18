@@ -1,14 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-
-import UiParentCard from '@/components/shared/UiParentCard.vue';
-import {useAuthStore} from "@/stores/auth";
+import Table from '@/components/bookings/Table.vue';
 
 
 const page = ref({ title: 'Bookings' });
-
-import Table from '@/components/bookings/Table.vue';
-
 </script>
 
 <template>

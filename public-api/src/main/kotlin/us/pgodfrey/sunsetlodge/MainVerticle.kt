@@ -88,7 +88,7 @@ class MainVerticle : CoroutineVerticle() {
 
     val router = Router.router(vertx)
 
-    router.route().handler(BodyHandler.create())
+    router.route().handler(BodyHandler.create().setBodyLimit(52428800L))
 
     router.route().handler(StaticHandler.create().setCachingEnabled(false))
 
@@ -170,8 +170,19 @@ class MainVerticle : CoroutineVerticle() {
 
       logger.info("status code ${statusCode}")
       val response = failureRoutingContext.response()
-      failureRoutingContext.failure().printStackTrace()
-      response.setStatusCode(statusCode).end(failureRoutingContext.failure().message)
+
+      var message: String?
+      if(statusCode == 413) {
+        message = "One or more uploaded files is too big"
+      } else {
+        message = failureRoutingContext.failure().message
+
+        failureRoutingContext.failure().printStackTrace()
+        if(failureRoutingContext.failure().cause != null){
+          message = "${failureRoutingContext.failure().cause!!.message}\n${message}"
+        }
+      }
+      response.setStatusCode(statusCode).end(message)
     }
 
     val httpServer = vertx.createHttpServer()
@@ -199,6 +210,7 @@ class MainVerticle : CoroutineVerticle() {
     try {
       var path = URLDecoder.decode(ctx.normalizedPath(), "UTF-8")
       path = path.replace("/gallery-images", "")
+      logger.info("PATH ${path}")
 
       if(!vertx.fileSystem().existsBlocking("$uploadsDir$path")) {
         ctx.fail(404, FileNotFoundException("File does not exist"))

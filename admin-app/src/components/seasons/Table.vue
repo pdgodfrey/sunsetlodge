@@ -171,12 +171,13 @@ const isValid = computed(() => {
                         <v-form ref="form" v-model="valid" lazy-validation>
                             <v-row>
                                 <v-col cols="12" sm="6">
-                                    <v-label>Season Name</v-label>
+                                    <v-label>Season Year</v-label>
                                     <v-text-field
                                         variant="outlined"
                                         hide-details
                                         v-model="editedItem.name"
                                         :rules="requiredFieldRules"
+                                        type="number"
                                     ></v-text-field>
                                 </v-col>
                                 <v-col cols="12" sm="6">

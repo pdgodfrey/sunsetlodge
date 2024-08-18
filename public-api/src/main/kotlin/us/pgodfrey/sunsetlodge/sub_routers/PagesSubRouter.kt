@@ -2,6 +2,7 @@ package us.pgodfrey.sunsetlodge.sub_routers
 
 import com.github.jknack.handlebars.Handlebars
 import io.vertx.core.Vertx
+import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.web.RoutingContext
@@ -143,15 +144,48 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
         .put("background_url", getBackgroundImageUrl())
 
       val galleryCategory = execQuery(gallerySqlQueries.getGalleryCategoryByName, Tuple.of("The Lodge And Cabins")).first()
-      data.put("gallery_category_description", galleryCategory.getString("description"))
+      data.put("gallery_category_description", galleryCategory.getString("description").replace("\n", "<br/>"))
 
       val galleries = execQuery(gallerySqlQueries.getGalleriesForCategory, Tuple.of(galleryCategory.getInteger("id")))
 
-//        val galleryData = JsonObject()
+      val galleriesData = JsonArray()
       galleries.forEach { gallery ->
+        val galleryData = JsonObject()
+        galleryData.put("name", gallery.getString("identifier"))
+        galleryData.put("anchor", gallery.getString("identifier").lowercase().replace(" ", "-").replace("'", ""))
+        if(gallery.getString("description") != null){
+          galleryData.put("description", gallery.getString("description").replace("\n", "<br/>").trim())
+        }
 
+        val images = execQuery(imageSqlQueries.getImagesForGallery, Tuple.of(gallery.getInteger("id")))
+
+        val imagesData = images.map { image ->
+          val obj = JsonObject()
+          obj.put("large_url", getLargeUrl(image))
+          obj
+        }
+
+        val thumbsData = images.map { image ->
+          val obj = JsonObject()
+          obj.put("thumb_url", getThumbnailUrl(image))
+          obj
+        }.chunked(6).mapIndexed { index, jsonObjects ->
+          val obj = JsonObject()
+            .put("first", index == 0)
+            .put("thumbs", jsonObjects)
+
+          obj
+        }
+
+        galleryData.put("images", imagesData)
+        galleryData.put("thumbs", thumbsData)
+
+        galleriesData.add(galleryData)
       }
 
+      logger.info("DATA")
+      logger.info("${galleriesData}")
+      data.put("galleries", galleriesData)
 
       engine.render(data, "pages/lodge-and-cabins.hbs") { res ->
         if (res.succeeded()) {
@@ -211,7 +245,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
 
   private suspend fun getBackgroundImageUrl(): String {
     val backgroundImage = selectBackgroundImage()
-    return getImageUrl(backgroundImage)
+    return getLargeUrl(backgroundImage)
   }
 
   private fun getImageUrl(image: Row): String {
@@ -222,5 +256,11 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
     val filename = image.getString("filename").substringBeforeLast(".")
 
     return "/gallery-images/${image.getInteger("id")}/${filename}_thumb.png"
+  }
+
+  private fun getLargeUrl(image: Row): String {
+    val filename = image.getString("filename").substringBeforeLast(".")
+
+    return "/gallery-images/${image.getInteger("id")}/${filename}_large.png"
   }
 }

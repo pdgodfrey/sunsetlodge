@@ -191,11 +191,15 @@ class AuthSubRouter(vertx: Vertx, pool: Pool, sqlAuthentication: SqlAuthenticati
 
       val credentials = UsernamePasswordCredentials(authInfo)
 
-      val authUser = sqlAuthentication.authenticate(credentials)
-        .onFailure {
-          fail500(ctx, it)
-        }
-        .coAwait()
+
+      val authUserResult = kotlin.runCatching { sqlAuthentication.authenticate(credentials).coAwait() }.onFailure {
+        sendJsonPayload(ctx, json {
+          obj( "authenticated" to false )
+        })
+        return
+      }
+
+      val authUser = authUserResult.getOrThrow()
 
       val fullUser = execQuery(userSqlQueries.getUserByEmail, Tuple.of(authUser.principal().getString("username"))).first()
 

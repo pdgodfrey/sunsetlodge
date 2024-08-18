@@ -11,12 +11,20 @@
         <p class="home-paragraph"><span class="h2">Sunset Lodge</span> is a waterfront family compound located on the eastern shore of Lake Damariscotta, Maine. The lodge, along with four surrounding cabins,
           is able to sleep up to 26 people, making the rental property ideal for larger groups, family reunions, or weddings.
         </p>
-        <p class="home-paragraph">We are currently accepting bookings for the 2018 season, please check our <a href="/rates-and-availability">rates & availability</a> page for more information.</p>
+        {{#if open_seasons}}
+          <p class="home-paragraph">We are currently accepting bookings for the
+            {{#each open_seasons}}
+              {{name}} {{#unless @last}} and {{/unless}}
+            {{/each}} season{{#checkListLengthIsGreaterThan open_seasons 1}}s{{/checkListLengthIsGreaterThan}},
+            please check our <a href="/rates-and-availability">rates & availability</a> page for more information.</p>
+        {{else}}
+          <p class="home-paragraph">We are not currently accepting bookings come back soon to check for more information.</p>
+        {{/if}}
       </article>
     </div>
   </div>
 
-  <div class="container" id="latest-news">
+  <!--<div class="container" id="latest-news">
     <div class="row">
       <div class="col-sm-10 offset-sm-1">
         <p><span class="h3">Latest News:</span> lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean at dui turpis. Pellentesque at egestas metus, nec
@@ -24,7 +32,7 @@
           augue dui, lacinia condimentum mi sollicitudin sit amet. Etiam dapibus cursus est, sit amet congue purus mattis sed. </p>
       </div>
     </div>
-  </div>
+  </div>-->
 
   <div class="container">
 
@@ -35,7 +43,7 @@
             <a href="/rates-and-availability">
               <div class="tile-container">
                 <img src="/images/home/vacation_tile_2.jpg"/>
-                <h3>Vacation</h3>
+                <h2>Vacation</h2>
               </div>
             </a>
           </div>
@@ -44,10 +52,10 @@
       <div class="col-sm-4 offset-sm-0">
         <div class="row">
           <div class="col-xs-8 offset-xs-2">
-            <a href="/weddings.html">
+            <a href="/weddings">
               <div class="tile-container">
                 <img src="/images/home/weddings_tile.jpg"/>
-                <h3>Weddings</h3>
+                <h2>Weddings</h2>
               </div>
             </a>
           </div>
@@ -56,10 +64,10 @@
       <div class="col-sm-4 offset-sm-0">
         <div class="row">
           <div class="col-xs-8 offset-xs-2">
-            <a href="/sunsets.html">
+            <a href="/sunsets">
               <div class="tile-container">
                 <img src="/images/home/sunset_tile.jpg"/>
-                <h3>Sunsets</h3>
+                <h2>Sunsets</h2>
               </div>
             </a>
           </div>

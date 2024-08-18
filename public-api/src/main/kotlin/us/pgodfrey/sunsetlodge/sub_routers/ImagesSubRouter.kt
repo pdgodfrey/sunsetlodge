@@ -226,14 +226,47 @@ class ImagesSubRouter(vertx: Vertx, pool: Pool, uploadsDir: String, jwtAuth: JWT
             }
           }
         }
-        vertx.fileSystem().copyBlocking(fileUpload.uploadedFileName(), location)
-
-        val maxw = 200
-        val maxh = 200
+//        vertx.fileSystem().copyBlocking(fileUpload.uploadedFileName(), location)
         val uploadedFile = File(fileUpload.uploadedFileName())
         val img = ImageIO.read(uploadedFile)
         val w = img.getWidth(null)
         val h = img.getHeight(null)
+
+        val largeMaxW = 1200
+        val largeMaxH = 1200
+        var largeScaledw = w
+        var largeScaledh = h
+
+        if (w > largeMaxW) {
+          //scale width to fit
+          largeScaledw = largeMaxW
+          largeScaledh = largeMaxW * h / w
+        }
+
+        if (h > largeMaxH) {
+          largeScaledh = largeMaxH
+          largeScaledw = largeMaxH * w / h
+        }
+        val largeScaledImg = img.getScaledInstance(largeScaledw, largeScaledh, Image.SCALE_SMOOTH)
+
+        val img1 = BufferedImage(
+          largeScaledw,
+          largeScaledh,
+          if (img.colorModel.hasAlpha()) BufferedImage.TYPE_INT_ARGB else BufferedImage.TYPE_INT_RGB
+        )
+
+        val lg = img1.graphics
+        lg.drawImage(largeScaledImg, 0, 0, null)
+        lg.dispose()
+
+        val largeFilename = "${fileName.substringBeforeLast(".")}_large.png"
+
+        val largeLocation = "$uploadsDir/$id/${largeFilename}"
+        val largeOutputfile = File(largeLocation)
+        ImageIO.write(img1, "png", largeOutputfile)
+
+        val maxw = 200
+        val maxh = 200
         var scaledw = w
         var scaledh = h
 
