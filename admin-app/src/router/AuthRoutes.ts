@@ -6,9 +6,9 @@ const AuthRoutes = {
     },
     children: [
         {
-            name: 'Login',
-            path: '/auth/login',
-            component: () => import('@/views/authentication/SideLogin.vue')
+          name: 'Login',
+          path: '/auth/login',
+          component: () => import('@/views/authentication/SideLogin.vue')
         },
         {
           name: 'Forgot Password',

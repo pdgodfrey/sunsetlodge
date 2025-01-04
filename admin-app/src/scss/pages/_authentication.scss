@@ -33,7 +33,7 @@
     &::before{
         position: absolute;
         width: 100%;
-        border-top: thin solid rgb(229, 234, 239);
+        border-top: thin solid rgb(var(--v-theme-borderColor));
         top: 50%;
         content: "";
         transform: translateY(50%);
@@ -43,7 +43,7 @@
     {
         position: absolute;
         width: 100%;
-        border-top: thin solid rgb(229, 234, 239);
+        border-top: thin solid rgb(var(--v-theme-borderColor));
         top: 50%;
         content: "";
         transform: translateY(50%);

@@ -17,4 +17,14 @@
     .v-list-item__overlay {
         background-color: rgb(var(--v-theme-hoverColor));
     }
+    .v-list-item.v-list-item--active{
+        .v-list-item__overlay{
+            opacity: 1;
+        }
+    } 
+
+    .mail-items{
+        min-height: 40px !important;
+        margin-bottom: 5px !important;
+       }
 }

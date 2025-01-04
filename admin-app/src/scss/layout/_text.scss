@@ -9,10 +9,25 @@ $sizes: (
     'h5': 16px,
     'h6': 14px,
     'text-10': 10px,
+    'text-12': 12px,
     'text-13': 13px,
+    'text-14': 14px,
+    'text-15': 15px,
+    'text-16': 16px,
+    'text-17': 17px,
     'text-18': 18px,
     'text-20': 20px,
+    'text-22': 22px,
     'text-24': 24px,
+    'text-28': 28px,
+    'text-34': 34px,
+    'text-40': 40px,
+    'text-44': 44px,
+    'text-48': 48px,
+    'text-50': 50px,
+    'text-52': 52px,
+    'text-56': 56px,
+    'text-64': 64px,
     'body-text-1': 10px
 );
 
@@ -20,6 +35,19 @@ $sizes: (
     .#{$pixel} {
         font-size: $size;
         line-height: $size + 10;
+    }
+}
+
+$height: (
+    'h-10': 10px,
+    'h-12': 12px,
+    'h-15': 15px,
+);
+
+@each $pixel, $size in $height {
+    .#{$pixel} {
+        height: $size;
+        width: $size ;
     }
 }
 
@@ -36,6 +64,9 @@ $sizes: (
 .lh-md {
     line-height: 1.57;
 }
+.lh-normal{
+    line-height: normal;
+}
 
 .font-weight-semibold {
     font-weight: 600;
@@ -44,6 +75,7 @@ $sizes: (
 // hover text
 .text-hover-primary {
     color: rgb(var(--v-theme-textPrimary));
+
     &:hover {
         color: rgb(var(--v-theme-primary));
     }
@@ -52,7 +84,15 @@ $sizes: (
 .link {
     color: rgb(var(--v-theme-textSecondary));
     text-decoration: none;
+
     &:hover {
         color: rgb(var(--v-theme-primary));
+    }
+}
+
+.hover-primary {
+    &:hover {
+        color: rgb(var(--v-theme-primary)) !important;
+        opacity: 1;
     }
 }

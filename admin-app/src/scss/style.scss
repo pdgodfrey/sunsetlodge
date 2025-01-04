@@ -1,18 +1,20 @@
 @import './variables';
-@import 'vuetify/styles/main.sass';
+@import 'vuetify/styles.scss';
 @import './override';
 @import './layout/text';
 @import './layout/reboot';
 @import './layout/container';
 @import './layout/sidebar';
+@import './layout/rtl';
 @import './layout/topbar';
 @import './layout/horizontal';
 @import './layout/dark';
 @import './layout/customizer';
 
-@import './components/VBreadcrumb';
+@import './components/VDatatable';
 @import './components/VAlert';
 @import './components/VButtons';
+@import './components/VBreadcrumb';
 @import './components/VCard';
 @import './components/VCarousel';
 @import './components/VField';
@@ -27,10 +29,13 @@
 @import './components/VTabs';
 @import './components/VTable';
 @import './components/VExpansionpanel';
+@import './components/VDatatables';
+@import './components/VStepper';
+@import './components/VLabs';
 
-/*Landing page css*/
-@import 'landingpage/header';
-@import 'landingpage/general';
+
+@import './front/header';
+@import './front/general';
 
 @import './pages/datatable';
 @import './pages/dashboards';
@@ -39,7 +44,3 @@
 @import './pages/apps';
 
 @import 'vue3-perfect-scrollbar/dist/vue3-perfect-scrollbar.css';
-
-.bg-white {
-  background-color: white;
-}

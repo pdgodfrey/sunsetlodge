@@ -1,20 +1,18 @@
 <script setup lang="ts">
-import Logo from '@/layouts/full/logo/LogoDark.vue';
+import Logo from '@/layouts/full/logo/LogoAuth.vue';
 /* Login form */
 import LoginForm from '@/components/auth/LoginForm.vue';
 import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm.vue';
 import SetPasswordForm from '@/components/auth/SetPasswordForm.vue';
+
 import {computed} from "vue";
 import {useRoute} from "vue-router";
-import {useAuthStore} from "@/stores/auth";
 
 const getCurrentRoute: any = computed(() => {
   const route = useRoute()
   const currentRouteName = computed(() => route.name)
   return currentRouteName
 });
-
-
 </script>
 
 <template>
@@ -28,7 +26,7 @@ const getCurrentRoute: any = computed(() => {
                     </div>
                 </div>
                 <div class="">
-                    <img src="@/assets/images/backgrounds/login-bg.svg" class="position-relative d-none d-lg-flex"
+                    <img src="@/assets/images/backgrounds/login-bg.png" class="position-relative d-none d-lg-flex"
                         alt="login-background" />
                 </div>
             </v-col>

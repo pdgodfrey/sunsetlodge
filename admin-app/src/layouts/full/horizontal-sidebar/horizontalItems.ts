@@ -22,14 +22,23 @@ export interface menu {
 }
 
 const horizontalItems: menu[] = [
+    
     {
-        title: 'Sample Page',
-        icon: CircleIcon,
-        to: '/'
+        title: 'Starterkit',
+        icon: 'screencast-2-linear',
+        to: '#',
+        children: [
+            {
+                title: 'Sample Page',
+                icon: CircleIcon,
+                to: '/'
+            },
+        ]
     },
+
     {
-        title: 'Menu Level',
-        icon: MenuIcon,
+        title: 'Multilevel',
+        icon: 'align-left-line-duotone',
         to: '#',
         children: [
             {

@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import {appsLink} from '@/_mockApis/headerData';
+import { appsLink } from '@/_mockApis/headerData';
 </script>
 <template>
     <!-- ---------------------------------------------- -->
     <!-- apps link -->
     <!-- ---------------------------------------------- -->
     <v-row>
-        <v-col cols="12" lg="6" v-for="(item, i) in appsLink" :key="i">
-            <router-link :to="item.href" class="text-decoration-none custom-text-primary">
+        <v-col cols="12" md="6" v-for="(item, i) in appsLink" :key="i">
+            <RouterLink :to="item.href" class="text-decoration-none ">
                 <div class="d-flex align-center">
-                    <v-avatar size="45" color="grey100" rounded="md">
-                        <v-img :src="item.avatar" width="24" height="24" :alt="item.avatar" />
+                    <v-avatar size="40" :color="'light' + item.color" rounded="circle">
+                        <Icon :icon="'solar:' + item.avatar" height="18" :class="'text-' + item.color" />
                     </v-avatar>
                     <div class="ml-3">
-                        <h6 class="text-subtitle-1 mb-1 textPrimary font-weight-semibold custom-title">{{ item.title }}</h6>
+                        <h6 class="text-subtitle-1 heading textPrimary hover-primary font-weight-medium">{{ item.title }}</h6>
                         <p class="text-subtitle-2 textSecondary">{{ item.subtext }}</p>
                     </div>
                 </div>
-            </router-link>
+            </RouterLink>
         </v-col>
     </v-row>
 </template>

@@ -11,7 +11,7 @@ $white: #fff !default;
 $card-title-size: 18px !default;
 
 $body-font-family: 'Poppins', sans-serif !default;
-$border-radius-root: 7px;
+$border-radius-root: 10px;
 $btn-font-weight: 400 !default;
 $btn-letter-spacing: 0 !default;
 
@@ -27,6 +27,7 @@ $box-shadow: rgba(145 158 171 / 30%) 0px 0px 2px 0px, rgba(145 158 171 / 12%) 0p
     $border-radius-root: $border-radius-root,
     $body-font-family: $body-font-family,
     $heading-font-family: $body-font-family !default,
+    $button-height: 40px,
     // 👉 Typography
     $typography:
         (

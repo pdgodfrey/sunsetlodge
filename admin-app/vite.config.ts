@@ -1,52 +1,41 @@
-import { fileURLToPath, URL } from 'url';
-import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue';
-import vuetify from 'vite-plugin-vuetify';
 
-// https://vitejs.dev/config/
+
+import { fileURLToPath, URL } from 'node:url'
+
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+// https://vite.dev/config/
 export default defineConfig({
-    plugins: [
-        vue(),
-        vuetify({
-            autoImport: true,
-            styles: { configFile: 'src/scss/variables.scss' }
-        })
-    ],
-    resolve: {
-        alias: {
-            '@': fileURLToPath(new URL('./src', import.meta.url))
-        }
-    },
-    css: {
-        preprocessorOptions: {
-            scss: {}
-        }
-    },
-    optimizeDeps: {
-        exclude: ['vuetify'],
-        entries: ['./src/**/*.vue']
-    },
-    server: {
-      proxy: {
-        '/api': {
-          target: 'http://localhost:8081',
-          changeOrigin: false,
-          secure: false,
-          // ws: true,
-          // rewrite: (path) => path.replace(/^\/api/, ''),
-        },
-        '/gallery-images': {
-          target: 'http://localhost:8081',
-          changeOrigin: false,
-          secure: false,
-          // ws: true,
-          // rewrite: (path) => path.replace(/^\/api/, ''),
-        },
-      },
-      cors: true
-    },
-    build: {
-      outDir: "../public-api/webroot/admin",
-      emptyOutDir: true
+  plugins: [
+    vue(),
+  ],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
     }
-});
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8081',
+        changeOrigin: false,
+        secure: false,
+        // ws: true,
+        // rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      '/gallery-images': {
+        target: 'http://localhost:8081',
+        changeOrigin: false,
+        secure: false,
+        // ws: true,
+        // rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+    cors: true
+  },
+  build: {
+    outDir: "../public-api/webroot/admin",
+    emptyOutDir: true
+  }
+})

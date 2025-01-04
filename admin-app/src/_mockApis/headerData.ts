@@ -1,7 +1,16 @@
 // project imports
 import mock from './mockAdapter';
 
-import type { notificationType, profileType, languageType, appsLinkType, quickLinksType,searchType } from '@/types/HeaderTypes'
+import type {
+    notificationType,
+    profileType,
+    languageType,
+    searchType,
+    quickLinksType,
+    appsLinkType,
+    MessagesType,
+    SideProfielType
+} from '@/types/HeaderTypes';
 //
 // Notification
 //
@@ -10,52 +19,119 @@ import user2 from '@/assets/images/profile/user-2.jpg';
 import user3 from '@/assets/images/profile/user-3.jpg';
 import user4 from '@/assets/images/profile/user-4.jpg';
 import user5 from '@/assets/images/profile/user-5.jpg';
+import user6 from '@/assets/images/profile/user-6.jpg';
 
-const notifications:notificationType[] = [
+const Messages: MessagesType[] = [
     {
         avatar: user1,
-        title: 'Roman Joined the Team!',
-        subtitle: 'Congratulate him'
+        title: 'Launch Admin',
+        subtitle: 'Just see the my new admin!',
+        time: '9:30 AM'
     },
     {
         avatar: user2,
-        title: 'New message received',
-        subtitle: 'Salma sent you new message'
+        title: 'Event Today',
+        subtitle: 'Just a reminder that you have event',
+        time: '9:15 AM'
     },
     {
         avatar: user3,
-        title: 'New Payment received',
-        subtitle: 'Check your earnings'
+        title: 'Settings',
+        subtitle: 'You can customize this template as you want',
+        time: '4:36 PM'
     },
     {
         avatar: user4,
-        title: 'Jolly completed tasks',
-        subtitle: 'Assign her new tasks'
+        title: 'Launch Admin',
+        subtitle: 'Just see the my new admin!',
+        time: '9:30 AM'
     },
     {
         avatar: user5,
-        title: 'New Payment received',
-        subtitle: 'Check your earnings'
+        title: 'Event Today',
+        subtitle: 'Just a reminder that you have event',
+        time: '9:15 AM'
     },
     {
-        avatar: user1,
-        title: 'Roman Joined the Team!',
-        subtitle: 'Congratulate him'
+        avatar: user6,
+        title: 'Settings',
+        subtitle: 'You can customize this template as you want',
+        time: '4:36 PM'
     }
 ];
 
-//
+const notifications: notificationType[] = [
+    {
+        avatar: 'widget-3-line-duotone',
+        color: 'primary',
+        title: 'Launch Admin',
+        subtitle: 'Just see the my new admin!',
+        time: '9:30 AM'
+    },
+    {
+        avatar: 'calendar-line-duotone',
+        color: 'secondary',
+        title: 'Event Today',
+        subtitle: 'Just a reminder that you have event',
+        time: '9:15 AM'
+    },
+    {
+        avatar: 'settings-line-duotone',
+        color: 'error',
+        title: 'Settings',
+        subtitle: 'You can customize this template as you want',
+        time: '4:36 PM'
+    },
+    {
+        avatar: 'widget-4-line-duotone',
+        color: 'warning',
+        title: 'Launch Admin',
+        subtitle: 'Just see the my new admin!',
+        time: '9:30 AM'
+    },
+    {
+        avatar: 'calendar-line-duotone',
+        color: 'success',
+        title: 'Event Today',
+        subtitle: 'Just a reminder that you have event',
+        time: '9:15 AM'
+    },
+    {
+        avatar: 'settings-line-duotone',
+        color: 'info',
+        title: 'Settings',
+        subtitle: 'You can customize this template as you want',
+        time: '4:36 PM'
+    }
+];
+
 // Profile
 //
-import proUser1 from '@/assets/images/svgs/icon-account.svg';
-import proUser2 from '@/assets/images/svgs/icon-inbox.svg';
-import proUser3 from '@/assets/images/svgs/icon-tasks.svg';
 const profileDD: profileType[] = [
+    // {
+    //     title: 'My Profile',
+    //     href: '/apps/user/profile',
+    //     badge: false
+    // },
+    // {
+    //     title: 'My Subscription',
+    //     href: '/pages/pricing',
+    //     badge: false
+    // },
+    // {
+    //     title: 'My Notes',
+    //     href: '/apps/notes',
+    //     badge: true
+    // },
+    // {
+    //     title: 'Account Settings',
+    //     href: '/pages/account-settings',
+    //     badge: false
+    // },
     {
-        avatar: proUser1,
-        title: 'My Profile',
-        subtitle: 'Account settings',
-        href: '/apps/profile'
+        title: 'Sign Out',
+        href: '/auth/logout',
+        badge: false
     }
 ];
 
@@ -66,6 +142,7 @@ import flag1 from '@/assets/images/flag/icon-flag-en.svg';
 import flag2 from '@/assets/images/flag/icon-flag-fr.svg';
 import flag3 from '@/assets/images/flag/icon-flag-ro.svg';
 import flag4 from '@/assets/images/flag/icon-flag-zh.svg';
+
 const languageDD: languageType[] = [
     { title: 'English', subtext: 'UK', value: 'en', avatar: flag1 },
     { title: 'français', subtext: 'French', value: 'fr', avatar: flag2 },
@@ -76,64 +153,99 @@ const languageDD: languageType[] = [
 //
 // AppsLink
 //
-import img1 from '@/assets/images/svgs/icon-dd-chat.svg';
-import img2 from '@/assets/images/svgs/icon-dd-cart.svg';
-import img3 from '@/assets/images/svgs/icon-dd-invoice.svg';
-import img4 from '@/assets/images/svgs/icon-dd-date.svg';
-import img5 from '@/assets/images/svgs/icon-dd-mobile.svg';
-import img6 from '@/assets/images/svgs/icon-dd-lifebuoy.svg';
-import img7 from '@/assets/images/svgs/icon-dd-message-box.svg';
-import img8 from '@/assets/images/svgs/icon-dd-application.svg';
 const appsLink: appsLinkType[] = [
     {
-        avatar: img1,
+        avatar: 'chat-line-linear',
+        color: 'primary',
         title: 'Chat Application',
         subtext: 'New messages arrived',
         href: '/apps/chats'
     },
     {
-        avatar: img2,
-        title: 'eCommerce App',
-        subtext: 'learn more information',
-        href: '/ecommerce/products'
-    },
-    {
-        avatar: img3,
+        avatar: 'user-linear',
+        color: 'success',
         title: 'User Profile App',
         subtext: 'Get profile details',
         href: '/apps/user/profile'
     },
     {
-        avatar: img4,
+        avatar: 'bill-list-linear',
+        color: 'secondary',
+        title: 'eCommerce App',
+        subtext: 'learn more information',
+        href: '/ecommerce/products'
+    },
+
+    {
+        avatar: 'calendar-minimalistic-linear',
+        color: 'primary',
         title: 'Calendar App',
         subtext: 'Get dates',
         href: '/apps/calendar'
     },
     {
-        avatar: img5,
+        avatar: 'phone-calling-rounded-linear',
+        color: 'warning',
         title: 'Contact Application',
         subtext: '2 Unsaved Contacts',
         href: '/apps/contacts'
     },
     {
-        avatar: img6,
-        title: 'Account Setting App',
-        subtext: 'Account settings',
-        href: '/pages/account-settings'
+        avatar: 'bill-check-broken',
+        color: 'success',
+        title: 'Invoice App',
+        subtext: 'Get Latest Invoice',
+        href: '/apps/invoice'
     },
     {
-        avatar: img7,
-        title: 'Email App',
-        subtext: 'Get new emails',
-        href: '/apps/email'
+        avatar: 'checklist-minimalistic-linear',
+        color: 'error',
+        title: 'Kanban App',
+        subtext: 'Get new Task',
+        href: '/apps/kanban'
     },
     {
-        avatar: img8,
+        avatar: 'notes-linear',
+        color: 'warning',
         title: 'Notes Application',
         subtext: 'To-do and Daily tasks',
         href: '/apps/notes'
     }
 ];
+
+// Side Profile
+const SideProfile: SideProfielType[] = [
+    {
+        icon: 'user-circle-outline',
+        color: 'primary',
+        title: 'My Profile',
+        href: '/apps/user/profile'
+    },
+    {
+        icon: 'notification-unread-lines-outline',
+        color: 'secondary',
+        title: 'My Notes',
+        href: '/apps/notes'
+    },
+    {
+        icon: 'inbox-line-outline',
+        color: 'success',
+        title: 'Inbox',
+        href: '/apps/email'
+    },
+    {
+        icon: 'settings-linear',
+        color: 'warning',
+        title: 'Account Settings',
+        href: '/pages/account-settings'
+    },
+    {
+        icon: 'login-2-outline',
+        color: 'error',
+        title: 'Logout',
+        href: '/auth/login'
+    },
+]
 
 //
 // Quick Links
@@ -146,10 +258,6 @@ const quickLink: quickLinksType[] = [
     {
         title: 'Authentication Design',
         href: '/auth/login'
-    },
-    {
-        title: 'Register Now',
-        href: '/auth/register'
     },
     {
         title: '404 Error Page',
@@ -165,7 +273,7 @@ const quickLink: quickLinksType[] = [
     },
     {
         title: 'Blog Design',
-        href: '/auth/blog/posts'
+        href: '/apps/blog/posts'
     },
     {
         title: 'Shopping Cart',
@@ -212,8 +320,7 @@ const searchSugg: searchType[] = [
     {
         title: 'Account Setting',
         href: '/pages/account-settings'
-    },
+    }
 ];
 
-export { notifications, profileDD, languageDD, appsLink, quickLink, searchSugg };
-
+export { notifications, profileDD, languageDD, searchSugg, quickLink, appsLink, Messages,SideProfile };

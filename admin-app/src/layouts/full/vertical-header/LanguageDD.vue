@@ -10,14 +10,14 @@ import flag4 from '@/assets/images/flag/icon-flag-fr.svg';
     <!-- ---------------------------------------------- -->
     <!-- language DD -->
     <!-- ---------------------------------------------- -->
-    <v-menu :close-on-content-click="false" location="bottom">
+    <v-menu open-on-hover open-on-click location="bottom">
         <template v-slot:activator="{ props }">
-            <v-btn icon variant="text" color="primary" v-bind="props">
-                <v-avatar size="22">
-                    <img v-if="$i18n.locale === 'en'" :src="flag1" :alt="$i18n.locale" width="24" height="24" class="obj-cover" />
-                    <img v-if="$i18n.locale === 'fr'" :src="flag4" :alt="$i18n.locale" width="24" height="24" class="obj-cover" />
-                    <img v-if="$i18n.locale === 'ro'" :src="flag2" :alt="$i18n.locale" width="24" height="24" class="obj-cover" />
-                    <img v-if="$i18n.locale === 'zh'" :src="flag3" :alt="$i18n.locale" width="24" height="24" class="obj-cover" />
+            <v-btn icon variant="text" color="primary" v-bind="props" size="small" class="custom-hover-primary" >
+                <v-avatar  rounded="md">
+                    <img v-if="$i18n.locale === 'en'" :src="flag1" :alt="$i18n.locale" width="22" height="15" class="obj-cover" />
+                    <img v-if="$i18n.locale === 'fr'" :src="flag4" :alt="$i18n.locale" width="22" height="15" class="obj-cover" />
+                    <img v-if="$i18n.locale === 'ro'" :src="flag2" :alt="$i18n.locale" width="22" height="15" class="obj-cover" />
+                    <img v-if="$i18n.locale === 'zh'" :src="flag3" :alt="$i18n.locale" width="22" height="15" class="obj-cover" />
                 </v-avatar>
             </v-btn>
         </template>
@@ -26,14 +26,14 @@ import flag4 from '@/assets/images/flag/icon-flag-fr.svg';
                 <v-list-item
                     v-for="(item, index) in languageDD"
                     :key="index"
-                    active-color="primary"
+                    color="primary"
                     :active="$i18n.locale == item.value"
                     class="d-flex align-center"
                     @click="() => ($i18n.locale = item.value)"
                 >
                     <template v-slot:prepend>
-                        <v-avatar size="22">
-                            <img :src="item.avatar" :alt="item.avatar" width="22" height="22" class="obj-cover" />
+                        <v-avatar  rounded="md">
+                            <img :src="item.avatar" :alt="item.avatar" width="22" height="15" class="obj-cover" />
                         </v-avatar>
                     </template>
                     <v-list-item-title class="text-subtitle-1 font-weight-regular">

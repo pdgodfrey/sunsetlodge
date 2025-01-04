@@ -1,5 +1,5 @@
 <script setup>
-import Icon from '../Icon.vue';
+// import Icon from '../Icon.vue';
 
 const props = defineProps({ item: Object, level: Number });
 </script>
@@ -9,14 +9,15 @@ const props = defineProps({ item: Object, level: Number });
     <v-list-item
         :to="item.type === 'external' ? '' : item.to"
         :href="item.type === 'external' ? item.to : ''"
-        rounded
+        rounded="pill"
         class="mb-1"
         :disabled="item.disabled"
         :target="item.type === 'external' ? '_blank' : ''"
+        v-scroll-to="{ el: '#top' }"
     >
         <!---If icon-->
         <template v-slot:prepend>
-            <Icon :item="item.icon" :level="level" />
+            <Icon :icon="'solar:' + item.icon" height="19" class="dot" :class="'text-' + item.BgColor" :level="level"/>
         </template>
         <v-list-item-title>{{ $t(item.title) }}</v-list-item-title>
         <!---If Caption-->

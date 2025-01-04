@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 
 import { fetchWrapper } from '@/utils/helpers/fetch-wrapper';
 
-const baseUrl = `${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : ''}`;
+const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
 
 export const useUsersStore = defineStore({
     id: 'Authuser',

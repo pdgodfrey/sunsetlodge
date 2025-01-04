@@ -3,7 +3,238 @@
 // 
 
 .inside-left-sidebar {
-    .left-part {
-        width: 240px;
-    }
+	.left-part {
+		width: 240px;
+	}
+}
+
+//
+//Full Calendar
+.fc {
+	.fc-button-group {
+		>.fc-button {
+			display: flex;
+			align-items: center;
+			padding: 7px 10px;
+			border: 0;
+			font-size: 14px;
+			background-color: rgba(var(--v-theme-grey200));
+			color: rgba(var(--v-theme-textPrimary));
+			.fc-icon{
+				color: rgba(var(--v-theme-textPrimary));
+				font-size: 20px;
+			}
+			&:hover,&:focus{
+				background-color: rgba(var(--v-theme-textPrimary));
+				color: #fff;
+				.fc-icon{
+					color: #fff;	
+				}
+			}
+		}
+		.fc-button-primary:not(:disabled):active{
+			background-color: rgba(var(--v-theme-textPrimary));
+		}
+		.fc-button-primary:not(:disabled).fc-button-active {
+            background-color: rgb(var(--v-theme-textPrimary));
+        }
+	}
+	.fc-today-button{
+		padding: 7px 20px;
+		border: 0;
+		background-color: rgba(var(--v-theme-primary));
+	}
+
+	.fc-prev-button{
+		border-radius: 30px 0 0 30px;
+	}
+	.fc-toolbar-title{
+		font-weight: 600;
+	}
+	.fc-event-title{
+		font-size: 14px;
+		padding: 3px 6px;
+	}
+
+	.fc-button {
+		font-size: 14px;
+		font-weight: 500;
+		text-transform: capitalize;
+
+		.fc-icon {
+			font-size: 1.5em;
+			vertical-align: unset;
+		}
+	}
+	.fc-daygrid-day-number{
+		color: rgba(var(--v-theme-textSecondary));
+		font-size: 15px;
+	}
+
+	.fc-button-primary {
+		background: rgb(var(--v-theme-primary));
+		border-color: rgb(var(--v-theme-primary));
+
+		color: #fff;
+
+		&:hover {
+			background-color: rgb(var(--v-theme-primary));
+			border-color: rgb(var(--v-theme-primary));
+		}
+
+		&:not(:disabled).fc-button-active {
+			background-color: rgb(var(--v-theme-primary));
+			border-color: rgb(var(--v-theme-primary));
+
+			&:focus {
+				box-shadow: none;
+			}
+		}
+
+		&:not(:disabled) {
+			&:active {
+				background-color: rgb(var(--v-theme-primary));
+				border-color: rgb(var(--v-theme-primary));
+
+				&:focus {
+					box-shadow: none;
+				}
+			}
+		}
+
+		&:disabled {
+			background-color: rgb(var(--v-theme-primary));
+			border-color: rgb(var(--v-theme-primary));
+			opacity: 1;
+		}
+	}
+
+	.fc-col-header-cell-cushion {
+		display: inline-block;
+		padding: 10px 5px;
+		font-size: 14px;
+		font-weight: 600;
+	}
+	.fc-button-primary:not(:disabled).fc-button-active{
+		background-color: rgb(var(--v-theme-textPrimary));
+	}
+}
+
+.fc-theme-standard {
+	td {
+		border: 1px solid rgba(var(--v-border-color), 1) !important;
+	}
+
+	th {
+		border: 1px solid rgba(var(--v-border-color), 1) !important;
+		border-bottom: 0 !important;
+		background-color: rgba(var(--v-theme-grey200));
+		height: 56px;
+		vertical-align: middle;
+		color: rgba(var(--v-theme-textSecondary));
+	}
+
+	.fc-scrollgrid {
+		border: 0 !important;
+	}
+}
+
+.fc-h-event {
+	background-color: rgb(var(--v-theme-primary));
+	border: 0;
+	display: block;
+}
+
+.fc-direction-ltr {
+	.fc-button-group {
+		>.fc-button {
+			&:not(:last-child) {
+				border-bottom-left-radius: 30px;
+				border-top-left-radius: 30px;
+			}
+
+			&:not(:first-child) {
+				border-bottom-right-radius: 30px;
+				border-top-right-radius: 30px;
+				margin-left: -1px;
+			}
+		}
+	}
+}
+
+.fc-button-group {
+	.fc-dayGridMonth-button {
+		border-bottom-right-radius: 0px !important;
+		border-top-right-radius: 0px !important;
+		padding: 7px 20px !important;
+	}
+
+	.fc-timeGridDay-button {
+		border-bottom-left-radius: 0px !important;
+		border-top-left-radius: 0px !important;
+		padding: 7px 20px !important;
+	}
+
+	.fc-timeGridWeek-button {
+		border-radius: 0 !important;
+		padding: 7px 20px !important; 
+	}
+}
+
+.fc-today-button {
+	border-radius: 30px !important;
+	font-size: 14px;
+}
+
+@media screen and (max-width:600px) {
+	.fc {
+		.fc-toolbar {
+			display: block;
+			text-align: center;
+		}
+	}
+
+	.fc-toolbar-chunk {
+		.fc-toolbar-title {
+			margin: 15px 0;
+		}
+	}
+}
+
+.customTab {
+	.v-btn {
+		&.v-tab-item--selected {
+			background-color: rgb(var(--v-theme-lightprimary)) !important;
+
+			.icon {
+				background-color: rgb(var(--v-theme-primary)) !important;
+				color: #fff !important;
+			}
+		}
+	}
+}
+
+.email-items {
+	padding: 0px 24px 12px;
+
+	&.selected-email {
+		.email-title {
+			color: rgb(var(--v-theme-primary)) !important;
+		}
+	}
+
+	&:hover {
+		background-color: rgb(var(--v-theme-hoverColor));
+
+		.email-title {
+			color: rgb(var(--v-theme-primary)) !important;
+		}
+
+	}
+}
+
+.email-content {
+	p {
+		margin: 10px 0;
+	}
 }

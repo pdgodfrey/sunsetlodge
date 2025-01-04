@@ -10,6 +10,8 @@ export type ThemeTypes = {
         accent?: string;
         warning?: string;
         error?: string;
+        purple?: string;
+        indigo?: string;
         lightprimary?: string;
         lightsecondary?: string;
         lightsuccess?: string;

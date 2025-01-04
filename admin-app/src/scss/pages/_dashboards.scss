@@ -5,28 +5,72 @@
                 th:first-child {
                     padding-left: 0 !important;
                 }
+
                 th:last-child {
                     padding-right: 0 !important;
                 }
             }
         }
+
         tr.month-item {
             td:first-child {
                 padding-left: 0 !important;
             }
+
             td:last-child {
                 padding-right: 0 !important;
             }
         }
     }
+
     tr.month-item {
         td {
             padding-top: 16px !important;
             padding-bottom: 16px !important;
         }
+
         &:hover {
             background: transparent !important;
         }
+    }
+
+    tr.month-item-0 {
+        td {
+            padding-top: 12px !important;
+            padding-bottom: 12px !important;
+        }
+
+        &:hover {
+            background: transparent !important;
+        }
+    }
+
+    tr.month-item-hover {
+
+        td {
+            padding-top: 12px !important;
+            padding-bottom: 12px !important;
+        }
+
+        border-left: 4px solid transparent;
+
+        &:hover {
+            border-left: 4px solid rgba(var(--v-theme-primary)) !important;
+        }
+    }
+
+
+}
+
+
+.no-line {
+
+    .v-table .v-table__wrapper>table>tbody>tr:not(:last-child)>td {
+        border-bottom: 0 !important;
+    }
+
+    .v-table .v-table__wrapper>table>tbody>tr>td {
+        padding: 12px;
     }
 }
 
@@ -41,4 +85,133 @@
 .chip-label {
     width: 80px;
     justify-content: center;
+}
+
+//
+// Apex Chart
+//
+
+body {
+    .apexcharts-tooltip {
+        border-radius: 16px;
+    }
+
+    .apexcharts-tooltip-marker {
+        border-radius: 4px;
+        width: 12px;
+        height: 4px;
+    }
+
+    .apexcharts-tooltip.apexcharts-theme-dark {
+        background: rgba(17, 28, 45, 0.8);
+
+        .apexcharts-tooltip-title {
+            border-bottom: 0;
+            background: rgba(17, 28, 45, 0.7);
+        }
+    }
+
+    .apexcharts-tooltip-series-group {
+        padding: 0 14px;
+    }
+
+    .apexcharts-tooltip-title {
+        padding: 10px 14px;
+    }
+}
+
+.profile-activity {
+
+    .v-tab {
+
+        &.v-btn {
+            border: 1px dashed rgba(var(--v-theme-borderColor));
+            border-radius: 8px;
+            min-width: 90px;
+            overflow: hidden;
+            padding: 15px 20px;
+
+            .v-btn__content {
+                display: block;
+            }
+        }
+    }
+
+    .v-slide-group__content {
+        gap: 16px;
+    }
+}
+
+.comment-box {
+    border-bottom: 1px solid rgba(var(--v-theme-borderColor));
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    cursor: pointer;
+
+    &:last-child {
+        border-bottom: 0;
+        padding-bottom: 0px;
+        margin-bottom: 0px;
+    }
+
+    .comment-action {
+        opacity: 0;
+        transition: 0.5s;
+    }
+
+    &:hover {
+        .comment-action {
+            opacity: 1;
+        }
+    }
+}
+
+.todo-list {
+    border-bottom: 1px solid rgba(var(--v-theme-borderColor));
+    padding-bottom: 25px;
+    margin-bottom: 25px;
+    cursor: pointer;
+
+    &:last-child {
+        border-bottom: 0;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+
+}
+
+.progress-cards {
+    border-inline-end: 1px solid rgba(var(--v-theme-borderColor));
+
+    &:last-child {
+        border: 0;
+    }
+
+    @media screen and (max-width:991px) {
+        border-inline-end: 0 !important
+    }
+}
+
+.notification {
+    border-bottom: 1px solid rgba(var(--v-theme-borderColor));
+
+    &:last-child {
+        border: 0;
+    }
+}
+
+
+.earning-cards {
+  @media screen and (max-width:991px){
+    .w-25{
+        width: 100% !important;
+        &.border-e{
+            border: 0 !important;
+        }
+        .mobile-border{
+            border-bottom:1px solid rgba(var(--v-theme-borderColor));
+            padding-bottom: 8px !important;
+        }
+    }
+  }
 }

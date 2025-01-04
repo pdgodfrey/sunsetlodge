@@ -250,7 +250,7 @@ function onSeasonSelect() {
             </tr>
         </thead>
         <tbody>
-        <tr></tr>
+          <tr></tr>
             <tr v-for="item in getBookings" :key="item.id">
                 <td class="text-subtitle-1">{{ item.id }}</td>
                 <td class="text-subtitle-1">{{ item.name }}</td>

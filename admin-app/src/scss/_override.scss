@@ -14,15 +14,189 @@ html {
     .bg-warning {
         color: $white !important;
     }
+
+    .bg-secondary-gradient {
+        background: linear-gradient(287deg, rgb(var(--v-theme-primary)) .54%, #1bcaff 100.84%);
+    }
 }
+
+
+
 
 .border,
 .v-divider {
-    border-color: rgba(var(--v-border-color), 1) !important;
+    border-color: rgba(var(--v-border-color)) !important;
 }
-
-
 
 .avtar-border {
     border: 2px solid rgb(var(--v-theme-surface)) !important;
+}
+
+.subtext {
+    font-size: $font-size-root;
+    line-height: 1.75rem;
+}
+
+.v-dialog {
+    &.dialog-mw {
+        max-width: 800px;
+    }
+}
+
+.round-40 {
+    height: 40px;
+    width: 40px;
+}
+
+.round-56 {
+    height: 56px;
+    width: 56px;
+}
+
+.round-48 {
+    height: 48px;
+    width: 48px;
+}
+
+.round-30 {
+    height: 30px;
+    width: 30px;
+}
+
+.lh-0 {
+    line-height: 0 !important;
+}
+
+
+.lh-28 {
+    line-height: 28px !important;
+}
+
+.lh-32 {
+    line-height: 32px !important;
+}
+
+.space-p-96 {
+    padding: 96px 0 !important;
+
+}
+
+.ps-96 {
+    padding-inline-start: 96px !important;
+}
+
+.pt-96 {
+    padding-top: 96px !important;
+}
+
+.end-0 {
+    inset-inline-end: 0;
+}
+
+.top-0 {
+    top: 0;
+}
+
+.no-scrollbar {
+    height: calc(100vh - 350px);
+}
+
+.msg-chat-height {
+    height: calc(-500px + 100vh);
+}
+
+@media screen and (max-width:991px) {
+    .overflow-x-reposive {
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+
+    .border-m-none {
+        border: 0 !important
+    }
+}
+
+@media screen and (max-height:767px) {
+    .msg-chat-height {
+        height: calc(-315px + 100vh);
+    }
+
+}
+
+.max-h-600 {
+    max-height: 600px;
+    height: calc(100vh - 100px);
+}
+
+
+.custom-hover-primary {
+    .iconify {
+        color: rgb(255, 255, 255) !important;
+
+        @media screen and (max-width:991px) {
+            color: rgba(var(--v-theme-textPrimary), 0.8) !important
+        }
+    }
+
+    &:hover {
+        background-color: rgba(var(--v-theme-lightprimary), 0.1);
+
+        .iconify {
+            @media screen and (max-width:991px) {
+                color: rgb(var(--v-theme-primary)) !important
+            }
+        }
+    }
+}
+.custom-hover-primary-white {
+    .iconify {
+        color: rgb(255, 255, 255) !important;
+
+       
+    }
+
+    &:hover {
+        background-color: rgba(var(--v-theme-lightprimary), 0.1);
+
+    }
+}
+
+.no-icon {
+
+    .v-input__prepend,
+    .v-input__append {
+        display: none !important;
+    }
+}
+
+.bg-white {
+    background-color: rgb(255, 255, 255) !important;
+}
+
+.v-badge {
+    &.x-small-badge {
+        .v-badge__badge {
+            height: 6px !important;
+            width: 6px !important;
+        }
+
+    }
+}
+
+.one-line {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+}
+
+.two-line {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.z-1 {
+    z-index: 1;
 }

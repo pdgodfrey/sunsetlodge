@@ -20,3 +20,8 @@
 .v-field--variant-outlined .v-field__outline__end {
     opacity: 1;
 }
+
+
+.v-field--active .v-label.v-field-label{
+    color: rgb(var(--v-theme-textPrimary));
+}

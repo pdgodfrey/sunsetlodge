@@ -1,39 +1,53 @@
 <script setup>
 import { SearchIcon } from 'vue-tabler-icons';
 import { searchSugg } from '@/_mockApis/headerData';
+import { ref } from 'vue';
+
+const dialog = ref(false);
+
 </script>
 
 <template>
     <!-- ---------------------------------------------- -->
-    <!-- search1 -->
+    <!--Search Dialog -->
     <!-- ------------------------------------------------>
-    <v-menu :close-on-content-click="false">
-        <template v-slot:activator="{ props }">
-            <v-btn icon variant="text" class="custom-hover-primary ml-2" size="small" color="primary" v-bind="props">
-                <SearchIcon size="22" />
-            </v-btn>
-        </template>
-        <v-sheet width="360" elevation="10" rounded="md" >
-            <div class="d-flex align-center justify-space-between pa-5">
-                <v-text-field placeholder="Search" color="primary" density="compact" variant="outlined" hide-details></v-text-field>
-            </div>
+    <v-btn
+        icon
+        variant="text"
+        class="ms-md-2 custom-hover-primary-white"
+        color="primary"
+        size="small"
+        @click="dialog = true"
+
+    >
+        <Icon icon="solar:magnifer-linear" height="20" />
+    </v-btn>
+    <v-dialog v-model="dialog" class="dialog-mw" transition="dialog-top-transition" top="0">
+        <v-card>
+            <v-card-text class="pa-4">
+                <div class="d-flex align-center justify-space-between">
+                    <v-text-field placeholder="Search here" color="primary" density="compact" variant="outlined" hide-details></v-text-field>
+                </div>
+            </v-card-text>
             <v-divider></v-divider>
-            <h5 class="text-h5 mt-4 px-5 pb-4">Quick Page Links</h5>
-            <perfect-scrollbar style="height: 380px">
-                <v-list class="pt-0 pb-5" lines="two">
-                    <v-list-item
-                        :value="item"
-                        v-for="(item, index) in searchSugg"
-                        :key="index"
-                        :to="item.href"
-                        active-color="primary"
-                        class="px-5 py-2"
-                    >
-                        <h6 class="text-subtitle-1 font-weight-medium mb-1">{{ item.title }}</h6>
-                        <p class="text-subtitle-2 text-medium-emphasis">{{ item.href }}</p>
-                    </v-list-item>
-                </v-list>
-            </perfect-scrollbar>
-        </v-sheet>
-    </v-menu>
+            <v-card-text class="pa-4">
+                <h5 class="text-h5 pb-4">Quick Page Links</h5>
+                <perfect-scrollbar style="height: 300px">
+                    <v-list class="pt-0 px-0" lines="two">
+                        <v-list-item
+                            :value="item"
+                            v-for="(item, index) in searchSugg"
+                            :key="index"
+                            :to="item.href"
+                            color="primary"
+                            class="px-2 py-2 rounded-md"
+                        >
+                            <h6 class="text-subtitle-1 font-weight-medium mb-1">{{ item.title }}</h6>
+                            <p class="text-subtitle-2 text-medium-emphasis">{{ item.href }}</p>
+                        </v-list-item>
+                    </v-list>
+                </perfect-scrollbar>
+            </v-card-text>
+        </v-card>
+    </v-dialog>
 </template>

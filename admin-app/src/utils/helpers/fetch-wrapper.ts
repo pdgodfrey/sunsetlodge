@@ -1,5 +1,4 @@
 import { useAuthStore } from '@/stores/auth';
-import {jwtDecode} from "jwt-decode";
 
 export const fetchWrapper = {
     get: request('GET'),
@@ -47,54 +46,56 @@ function formDataRequest(method: String) {
 function authHeader(url: any) {
     // return auth header with jwt if user is logged in and request is to the api url
     const { authToken } = useAuthStore();
-    console.log(`authToken: ${authToken}`)
+    // console.log(`authToken: ${authToken}`)
     const isLoggedIn = (authToken != '');
-  console.log(`isLoggedIn: ${isLoggedIn}`)
+    // console.log(`isLoggedIn: ${isLoggedIn}`)
     const isApiUrl = url.startsWith(import.meta.env.VITE_API_URL);
-  console.log(`isApiUrl: ${isApiUrl}`)
+    // console.log(`isApiUrl: ${isApiUrl}`)
     if (isLoggedIn && (isApiUrl || import.meta.env.PROD)) {
         return { Authorization: `Bearer ${authToken}` };
     } else {
-        return { };
+        return {};
     }
 }
 
 function handleResponse(response: any) {
-
-    // if(!response.ok) {
-    //   const { user, logout } = useAuthStore();
-    //   if ([401, 403].includes(response.status) && user) {
-    //     // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
-    //     logout();
-    //   }
+    // return response.text().then((text: any) => {
+    //     const data = text && JSON.parse(text);
     //
-    //   const error = response.text();
-    //   return Promise.reject(error);
-    // } else {
-    //   return response
-    // }
-
+    //     if (!response.ok) {
+    //         const { user, logout } = useAuthStore();
+    //         if ([401, 403].includes(response.status) && user) {
+    //             // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
+    //             logout();
+    //         }
+    //
+    //         const error = (data && data.message) || response.statusText;
+    //         return Promise.reject(error);
+    //     }
+    //
+    //     return data;
+    // });
 
     return response.text().then((text: any) => {
         if (!response.ok) {
             const { user, logout } = useAuthStore();
             if ([401, 403].includes(response.status) && user) {
-              if(response.url.indexOf("api/auth/logout") == -1){
+                if(response.url.indexOf("api/auth/logout") == -1){
 
-                // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
-                logout();
-              }
+                    // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
+                    logout();
+                }
             }
 
             const error = text;
             return Promise.reject(error);
         } else {
-          try {
-            const data = text && JSON.parse(text);
-            return data;
-          } catch(e) {
-            return text
-          }
+            try {
+                const data = text && JSON.parse(text);
+                return data;
+            } catch(e) {
+                return text
+            }
         }
 
     });

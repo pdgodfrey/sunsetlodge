@@ -1,14 +1,23 @@
+
 type notificationType = {
     avatar: string;
     title: string;
     subtitle: string;
+    color:string;
+    time:string;
 };
 
-type profileType = {
+type MessagesType = {
     avatar: string;
     title: string;
     subtitle: string;
+    time:string;
+};
+
+type profileType = {
+    title: string;
     href: string;
+    badge:boolean;
 };
 
 type languageType = {
@@ -18,22 +27,31 @@ type languageType = {
     value: string;
 };
 
-type appsLinkType = {
-    avatar: string;
-    title: string;
-    subtext: string;
-    href: string;
-};
-
-type quickLinksType = {
-    title: string;
-    href: string;
-};
 
 type searchType = {
     title: string;
     href: string;
 };
 
+type appsLinkType = {
+    avatar: string;
+    title: string;
+    subtext: string;
+    color:string;
+    href: string;
+};
 
-export type { notificationType, profileType, languageType, appsLinkType, quickLinksType,searchType }
+
+type quickLinksType = {
+    title: string;
+    href: string;
+};
+
+type SideProfielType = {
+    title: string;
+    icon:string;
+    color:string;
+    href: string;
+};
+
+export type { notificationType, profileType, languageType,searchType,quickLinksType,appsLinkType,MessagesType,SideProfielType }
