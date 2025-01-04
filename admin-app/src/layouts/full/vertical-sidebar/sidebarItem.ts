@@ -1,19 +1,3 @@
-import {
-    MenuIcon,
-    CircleIcon,
-    CircleOffIcon,
-    BrandChromeIcon,
-    MoodSmileIcon,
-    StarIcon,
-    AwardIcon,
-    AnkhIcon,
-    BooksIcon,
-    CalendarEventIcon,
-    SunHighIcon,
-    BrandAppgalleryIcon,
-    PictureInPictureOffIcon,
-    PictureInPictureIcon, PhotoIcon, UsersIcon
-} from 'vue-tabler-icons';
 
 export interface menu {
     header?: string;
@@ -36,22 +20,22 @@ const sidebarItem: menu[] = [
     { header: 'Admin Sections' },
     {
         title: 'Bookings',
-        icon: CalendarEventIcon,
+        icon: 'calendar-linear',
         to: '/bookings'
     },
     {
         title: 'Seasons',
-        icon: SunHighIcon,
+        icon: 'sun-fog-outline',
         to: '/seasons'
     },
     {
         title: 'Galleries',
-        icon: PhotoIcon,
+        icon: 'wallpaper-linear',
         to: '/galleries'
     },
     {
         title: 'Users',
-        icon: UsersIcon,
+        icon: 'user-circle-outline',
         to: '/users',
         adminOnly: true,
     },
