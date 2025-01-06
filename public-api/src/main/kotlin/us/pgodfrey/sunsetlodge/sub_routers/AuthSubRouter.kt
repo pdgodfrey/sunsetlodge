@@ -210,6 +210,7 @@ class AuthSubRouter(vertx: Vertx, pool: Pool, sqlAuthentication: SqlAuthenticati
 
       sendJsonPayload(ctx, json {
         obj(
+          "authenticated" to true,
           "token" to authToken,
           "refresh_token" to refreshToken
         )

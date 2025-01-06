@@ -26,11 +26,24 @@
               rows="8"
             ></v-textarea>
           </v-col>
-          <h4>Preview</h4>
-          <p><b>{{ editedGalleryItem.identifier }}&nbsp;</b>
-            <span v-if="editedGalleryItem.description"
-                  v-html="editedGalleryItem.description.replaceAll('\n', '<br/>')"></span>
-          </p>
+        </v-row>
+        <v-row>
+          <v-col cols="12">
+
+            <div class="text-h5">Preview</div>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12">
+
+            <div>
+
+              <p><b>{{ editedGalleryItem.identifier }}&nbsp;</b>
+                <span v-if="editedGalleryItem.description"
+                      v-html="editedGalleryItem.description.replaceAll('\n', '<br/>')"></span>
+              </p>
+            </div>
+          </v-col>
         </v-row>
       </v-form>
     </v-card-text>

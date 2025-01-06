@@ -147,7 +147,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
       data.put("gallery_category_description", galleryCategory.getString("description").replace("\n", "<br/>"))
 
       val galleries = execQuery(gallerySqlQueries.getGalleriesForCategory, Tuple.of(galleryCategory.getInteger("id")))
-
+logger.info("AAAAAAAAAAAAAAAAAAsssssssssAAAAAAAAAAAAAAAAAA")
       val galleriesData = JsonArray()
       galleries.forEach { gallery ->
         val galleryData = JsonObject()
