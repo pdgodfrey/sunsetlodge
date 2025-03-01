@@ -18,6 +18,7 @@ val launcherClassName = "io.vertx.core.Launcher"
 val watchForChange = "src/**/*"
 val doOnChange = "${projectDir}/gradlew classes"
 
+
 application {
   mainClass.set(launcherClassName)
 }
@@ -52,7 +53,7 @@ dependencies {
   implementation("ch.qos.logback:logback-classic:$logbackVersion")
 
 
-  implementation("org.postgresql:postgresql:42.5.0")
+  implementation("org.postgresql:postgresql:42.7.2")
   implementation("org.flywaydb:flyway-core:$flywayVersion")
 
   implementation("com.google.code.gson:gson:2.11.0")
@@ -89,7 +90,6 @@ tasks.withType<Test> {
 
 tasks.withType<JavaExec> {
   args = listOf("run", mainVerticleName, "--redeploy=$watchForChange", "--launcher-class=$launcherClassName", "--on-redeploy=$doOnChange")
-//  args = listOf("run", mainVerticleName, "--launcher-class=$launcherClassName")
 }
 
 flyway {

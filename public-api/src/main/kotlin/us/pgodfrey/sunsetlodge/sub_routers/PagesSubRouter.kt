@@ -16,6 +16,9 @@ import us.pgodfrey.sunsetlodge.sql.GallerySqlQueries
 import us.pgodfrey.sunsetlodge.sql.ImageSqlQueries
 import us.pgodfrey.sunsetlodge.sql.PageSqlQueries
 import us.pgodfrey.sunsetlodge.sql.SeasonSqlQueries
+import java.text.NumberFormat
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 
 class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pool, jwtAuth) {
@@ -27,7 +30,11 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
   private val imageSqlQueries = ImageSqlQueries()
   private var engine: HandlebarsTemplateEngine
 
+  val dateFormat = DateTimeFormatter.ofPattern("LLLL d, yyyy");
+  val currencyFormat = NumberFormat.getCurrencyInstance(Locale.US)
+
   init {
+    currencyFormat.maximumFractionDigits = 0
 
     engine = HandlebarsTemplateEngine.create(vertx)
 
@@ -73,20 +80,38 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
     try {
       val data: JsonObject = JsonObject()
         .put("title", "Rates and Availability")
+        .put("background_url", getBackgroundImageUrl())
 
       val currentSeason = execQuery(seasonSqlQueries.getCurrentSeason).first()
-      data.put("current_season", currentSeason.toJson())
+      val season = currentSeason.toJson()
+
+      season.put("start_date", currentSeason.getLocalDate("start_date").format(dateFormat))
+      season.put("end_date", currentSeason.getLocalDate("end_date").format(dateFormat))
+
+      data.put("current_season", season)
 
       val highSeasonRates = execQuery(pageSqlQueries.getHighSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
         .map {
-          it.toJson()
+          val obj = it.toJson()
+
+          if(obj.getInteger("high_season_rate") != null) {
+            obj.put("high_season_rate", currencyFormat.format(obj.getInteger("high_season_rate")))
+          }
+
+          obj
         }
 
       data.put("high_current_rates", highSeasonRates)
 
       val lowSeasonRates = execQuery(pageSqlQueries.getLowSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
         .map {
-          it.toJson()
+          val obj = it.toJson()
+
+          if(obj.getInteger("low_season_rate") != null) {
+            obj.put("low_season_rate", currencyFormat.format(obj.getInteger("low_season_rate")))
+          }
+
+          obj
         }
 
       data.put("low_current_rates", lowSeasonRates)
