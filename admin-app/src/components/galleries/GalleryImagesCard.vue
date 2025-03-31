@@ -16,24 +16,37 @@
     return imagesStore.images;
   });
 
-  function uploadImages () {
+  async function uploadImages () {
     if(imageUploads.value.length) {
-      const data = new FormData();
 
-      imageUploads.value.forEach(function(file:any) {
-        data.append("files[]", file)
-      })
 
-      data.append("gallery_id", props.editedGalleryItem.id)
+      for (let i = 0; i < imageUploads.value.length; i++) {
+        const imageUpload = imageUploads.value[i]
+        const data = new FormData();
+        data.append("gallery_id", props.editedGalleryItem.id)
+        data.append("files[]", imageUpload)
 
-      imagesStore.uploadImages(data, props.editedGalleryItem.id)
-        .then(() => {
+        await imagesStore.uploadImages(data, props.editedGalleryItem.id)
+      }
 
-          setTimeout(function() {
-            reloadImagesStore()
-          }, 1000)
-          imageUploads.value = []
-        })
+      setTimeout(function() {
+        reloadImagesStore()
+      }, 2000)
+      imageUploads.value = []
+
+      // imageUploads.value.forEach(function(file:any) {
+      //   data.append("files[]", file)
+      // })
+      //
+      //
+      // imagesStore.uploadImages(data, props.editedGalleryItem.id)
+      //   .then(() => {
+      //
+      //     setTimeout(function() {
+      //       reloadImagesStore()
+      //     }, 1000)
+      //     imageUploads.value = []
+      //   })
     }
   }
 
