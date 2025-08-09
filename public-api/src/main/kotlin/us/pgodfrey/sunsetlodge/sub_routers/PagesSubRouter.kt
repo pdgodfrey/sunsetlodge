@@ -9,16 +9,18 @@ import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
 import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.Row
+import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.Tuple
 import us.pgodfrey.sunsetlodge.BaseSubRouter
 import us.pgodfrey.sunsetlodge.helpers.HandleBarsHelperSource
-import us.pgodfrey.sunsetlodge.sql.GallerySqlQueries
-import us.pgodfrey.sunsetlodge.sql.ImageSqlQueries
-import us.pgodfrey.sunsetlodge.sql.PageSqlQueries
-import us.pgodfrey.sunsetlodge.sql.SeasonSqlQueries
+import us.pgodfrey.sunsetlodge.sql.*
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
 import java.util.*
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
+
 
 
 class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pool, jwtAuth) {
@@ -28,6 +30,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
   private val seasonSqlQueries = SeasonSqlQueries()
   private val gallerySqlQueries = GallerySqlQueries()
   private val imageSqlQueries = ImageSqlQueries()
+  private val miscSqlQueries = MiscSqlQueries()
   private var engine: HandlebarsTemplateEngine
 
   val dateFormat = DateTimeFormatter.ofPattern("LLLL d, yyyy");
@@ -85,10 +88,18 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
       val currentSeason = execQuery(seasonSqlQueries.getCurrentSeason).first()
       val season = currentSeason.toJson()
 
-      season.put("start_date", currentSeason.getLocalDate("start_date").format(dateFormat))
-      season.put("end_date", currentSeason.getLocalDate("end_date").format(dateFormat))
+      val startDate = currentSeason.getLocalDate("start_date")
+      val endDate = currentSeason.getLocalDate("end_date")
 
-      data.put("current_season", season)
+      season.put("start_date", startDate.format(dateFormat))
+      season.put("end_date", endDate.format(dateFormat))
+
+      data.put("current_season", currentSeason.toJson())
+
+      val nextSeasons = execQuery(seasonSqlQueries.getNextSeason)
+      if(nextSeasons.size() > 0) {
+        data.put("next_season", nextSeasons.first().toJson())
+      }
 
       val highSeasonRates = execQuery(pageSqlQueries.getHighSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
         .map {
@@ -115,6 +126,35 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
         }
 
       data.put("low_current_rates", lowSeasonRates)
+
+      // Retrieve active bookings
+      val bookings = execQuery(pageSqlQueries.getBookingsForSeason, Tuple.of(currentSeason.getInteger("id")))
+
+      // Retrieve building identifiers
+      val buildings = execQuery(miscSqlQueries.getBuildings)
+
+      // Prepare response for buildings and booking status
+      val buildingAvailability = JsonArray()
+
+      for (building in buildings) {
+        val buildingId = building.getString("identifier")
+        val buildingData = JsonObject()
+          .put("name", building.getString("name"))
+          .put("identifier", buildingId)
+
+        // Generate months and dates for current season
+        val months = getAvailabilityForBuilding(startDate, endDate, buildingId, bookings)
+
+        buildingData.put("availability", months)
+        buildingAvailability.add(buildingData)
+      }
+
+      logger.info(buildingAvailability.encodePrettily())
+
+      data.put("buildings", buildingAvailability)
+
+
+
 
       engine.render(data, "pages/rates-and-availability.hbs") { res ->
         if (res.succeeded()) {
@@ -169,10 +209,10 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
         .put("background_url", getBackgroundImageUrl())
 
       val galleryCategory = execQuery(gallerySqlQueries.getGalleryCategoryByName, Tuple.of("The Lodge And Cabins")).first()
+
       data.put("gallery_category_description", galleryCategory.getString("description").replace("\n", "<br/>"))
 
       val galleries = execQuery(gallerySqlQueries.getGalleriesForCategory, Tuple.of(galleryCategory.getInteger("id")))
-logger.info("AAAAAAAAAAAAAAAAAAsssssssssAAAAAAAAAAAAAAAAAA")
       val galleriesData = JsonArray()
       galleries.forEach { gallery ->
         val galleryData = JsonObject()
@@ -288,4 +328,91 @@ logger.info("AAAAAAAAAAAAAAAAAAsssssssssAAAAAAAAAAAAAAAAAA")
 
     return "/gallery-images/${image.getInteger("id")}/${filename}_large.png"
   }
+
+  private fun getAvailabilityForBuilding(
+    startDate: LocalDate,
+    endDate: LocalDate,
+    buildingId: String,
+    bookings: RowSet<Row>
+  ): JsonArray {
+    val months = JsonArray()
+
+    var current = startDate.withDayOfMonth(1) // Start from the first day of the month
+    val end = endDate.withDayOfMonth(1) // End at the first day of the endDate's month
+
+    while (!current.isAfter(end)) {
+      val monthStart = current.withDayOfMonth(1) // First day of the current month
+      val monthEnd = current.with(TemporalAdjusters.lastDayOfMonth()) // Last day of the current month
+
+      val startWithSunday = monthStart.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+      val endWithSaturday = monthEnd.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY))
+
+      // Create the month object
+      val monthObj = JsonObject()
+      monthObj.put("name", "${current.month.name}-${current.year}")
+
+      // Generate availability for each date and group into weeks
+      val weeks = JsonArray()
+      var week = JsonArray() // Collect 7 days into a week
+      var date = startWithSunday
+
+      while (!date.isAfter(endWithSaturday)) {
+        val isBooked = isDateBooked(buildingId, date, bookings)
+        val isClosed = date.isBefore(startDate) || date.isAfter(endDate) // Indicates if the date is outside season range
+        val outsideMonth = date.isBefore(monthStart) || date.isAfter(monthEnd) // Indicates if the date is outside the current month
+
+        // Create the date object
+        val dateObj = JsonObject()
+          .put("date", date.toString())
+          .put("dayOfMonth", date.dayOfMonth)
+          .put("isBooked", isBooked)
+          .put("isClosed", isClosed)
+          .put("outsideMonth", outsideMonth)
+
+        // Add the date to the current week
+        week.add(dateObj)
+
+        // If the week is complete, add it to weeks and start a new one
+        if (week.size() == 7) {
+          weeks.add(week)
+          week = JsonArray()
+        }
+
+        // Move to the next day
+        date = date.plusDays(1)
+      }
+
+      // Add the final week if it has any remaining dates
+      if (week.size() > 0) {
+        weeks.add(week)
+      }
+
+      monthObj.put("weeks", weeks)
+      months.add(monthObj)
+
+      current = current.plusMonths(1)
+    }
+
+    return months
+  }
+
+
+  private fun isDateBooked(buildingId: String, date: LocalDate, bookings: RowSet<Row>): Boolean {
+    for (booking in bookings) {
+      // Check if the booking includes the building and overlaps with the date
+      val buildingIds = booking.getArrayOfStrings("buildings")
+      val bookingStart = booking.getLocalDate("start_date")
+      val bookingEnd = booking.getLocalDate("end_date")
+
+      if ((buildingIds.contains(buildingId) || buildingIds.contains("all")) &&
+          (date.isEqual(bookingStart) || date.isEqual(bookingEnd) ||
+            (date.isAfter(bookingStart) && date.isBefore(bookingEnd))
+            )
+        ) {
+        return true
+      }
+    }
+    return false
+  }
+
 }

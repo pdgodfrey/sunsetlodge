@@ -10,7 +10,7 @@ export const useAuthStore = defineStore({
     state: () => ({
         // initialize state from local storage to enable user to stay logged in
         // @ts-ignore
-        user: useStorage('user', '{}'),
+        user: useStorage('user', null),
         authToken: useStorage('authToken', ''),
         refreshToken: useStorage('refreshToken', ''),
         returnUrl: useStorage('returnUrl', ''),
@@ -20,7 +20,9 @@ export const useAuthStore = defineStore({
     }),
     getters: {
         getUser(): Object {
+          if(this.user) {
             return JSON.parse(this.user)
+          }
         }
     },
     actions: {
@@ -64,7 +66,7 @@ export const useAuthStore = defineStore({
                 .catch((err) => {
                 })
                 .then((resp) => {
-                    this.user = '{}';
+                    this.user = null;
                     this.refreshToken = '';
 
                     this.stopRefreshTokenTimer()
@@ -86,7 +88,7 @@ export const useAuthStore = defineStore({
             });
         },
         async refreshAuthToken() {
-            if(this.user === '{}'){
+            if(!this.user){
                 this.logout()
             } else {
                 const lastRefresh = this.lastRefreshTime;

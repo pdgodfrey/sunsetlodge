@@ -50,7 +50,7 @@ const getUser: any = computed(() => {
             <v-list class="py-3 px-4">
                 <!---Menu Loop -->
                 <template v-for="(item, i) in sidebarMenu">
-                  <template v-if="!item.adminOnly || getUser.role_name === 'Administrator'">
+                  <template v-if="!item.adminOnly || (getUser && getUser.role_name === 'Administrator')">
                     <!---Item Sub Header -->
                     <NavGroup :item="item" v-if="item.header" :key="item.title" />
                     <!---If Has Child -->

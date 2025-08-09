@@ -574,10 +574,10 @@ now override the 3.3 new styles for modern browsers & apply opacity
 }
 
 .not-open {
-  background: $dark-grey;
+  background: $dark-grey !important;
 }
 .rented {
-  background: $red;
+  background: $red !important;
 }
 .available {
   background: ForestGreen;

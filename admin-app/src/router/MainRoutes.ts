@@ -1,9 +1,9 @@
 const MainRoutes = {
-    path: '/main',
+    path: '/',
     meta: {
         requiresAuth: true
     },
-    redirect: '/main',
+    redirect: '/bookings',
     component: () => import('@/layouts/full/FullLayout.vue'),
     children: [
         {
@@ -25,11 +25,6 @@ const MainRoutes = {
             name: 'Users',
             path: '/users',
             component: () => import('@/views/Users.vue')
-        },
-        {
-            name: 'Starter',
-            path: '/',
-            component: () => import('@/views/StarterPage.vue')
         },
     ]
 };

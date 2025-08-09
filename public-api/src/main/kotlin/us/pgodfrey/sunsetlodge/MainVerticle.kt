@@ -104,12 +104,12 @@ class MainVerticle : CoroutineVerticle() {
       logger.info(
         "=====" + ctx.request().method() + ": " + ctx.normalizedPath() + " : " + ctx.request().absoluteURI()
       )
-//      ctx.request().cookies().forEach {
-//        if(it.name.equals("auth-token")){
-//          ctx.request().headers().add("Authorization", "Bearer ${it.value}")
-//        }
-//      }
-
+////      ctx.request().cookies().forEach {
+////        if(it.name.equals("auth-token")){
+////          ctx.request().headers().add("Authorization", "Bearer ${it.value}")
+////        }
+////      }
+//
       ctx.next()
     }
 

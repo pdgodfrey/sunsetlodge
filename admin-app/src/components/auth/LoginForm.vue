@@ -43,7 +43,9 @@ function onSubmit() {
             :rules="passwordRules"
             required
             hide-details="auto"
-            type="password"
+            :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+            :type="show1 ? 'text' : 'password'"
+            @click:append="show1 = !show1"
             class="pwdInput"
         ></VTextField>
         <div class="d-flex flex-wrap align-center my-3 ml-n2">
