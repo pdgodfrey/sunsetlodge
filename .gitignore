@@ -11,6 +11,7 @@ admin-app/dist
 
 public-api/uploads
 public-api/file-uploads
+public-api/pem_keys
 
 # local env files
 .env.local
