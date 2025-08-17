@@ -6,7 +6,10 @@ import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.handler.CSRFHandler
 import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
+import io.vertx.kotlin.core.json.json
+import io.vertx.kotlin.core.json.obj
 import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
@@ -37,7 +40,11 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
   val dateFormatNoYear = DateTimeFormatter.ofPattern("LLLL d");
   val currencyFormat = NumberFormat.getCurrencyInstance(Locale.US)
 
+  var contactUsRecipientEmail = ""
+
   init {
+    val env = System.getenv()
+    contactUsRecipientEmail = env.getOrDefault("CONTACT_US_RECIPIENT", "test@recipient.com")
     currencyFormat.maximumFractionDigits = 0
 
     engine = HandlebarsTemplateEngine.create(vertx)
@@ -53,6 +60,8 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
     router.get("/lodge-and-cabins").coroutineHandler(this::handleLodgeAndCabins)
     router.get("/sunsets").coroutineHandler(this::handleSunsets)
     router.get("/weddings").coroutineHandler(this::handleWeddings)
+
+    router.post("/contact-us").coroutineHandler(this::handleContactUsSubmit)
   }
 
   private suspend fun handleHome(ctx: RoutingContext) {
@@ -176,6 +185,9 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
     try {
       val data: JsonObject = JsonObject()
         .put("title", "Contact Us")
+        .put("background_url", getBackgroundImageUrl())
+        .put("csrf_token", ctx.get("X-XSRF-TOKEN"))
+
 
       engine.render(data, "pages/contact-us.hbs") { res ->
         if (res.succeeded()) {
@@ -184,6 +196,45 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
           ctx.fail(res.cause())
         }
       }
+    } catch (e: Exception) {
+      e.printStackTrace()
+    }
+  }
+
+  private suspend fun handleContactUsSubmit(ctx: RoutingContext) {
+    try {
+      val params = ctx.request().formAttributes()
+      params.forEach{
+        logger.info("${it.key} : ${it.value}")
+      }
+
+      val emailObj = JsonObject()
+        .put("recipient_email", contactUsRecipientEmail)
+        .put("subject", "Sunset Lodge Website Inquiry")
+        .put("name", params.get("name"))
+        .put("email", params.get("email"))
+        .put("phone", params.get("phone"))
+        .put("reason_for_contact", params.get("reason_for_contact"))
+        .put("message", params.get("message").replace("\n", "<br/>"))
+        .put("template", "contact.hbs")
+
+      val backgroundUrl = getBackgroundImageUrl()
+
+      vertx.eventBus().request<Any>("email.send", emailObj) {
+
+        val data: JsonObject = JsonObject()
+          .put("title", "Contact Us")
+          .put("background_url", backgroundUrl)
+
+        engine.render(data, "pages/contact-us-thanks.hbs") { res ->
+          if (res.succeeded()) {
+            ctx.response().end(res.result())
+          } else {
+            ctx.fail(res.cause())
+          }
+        }
+      }
+
     } catch (e: Exception) {
       e.printStackTrace()
     }

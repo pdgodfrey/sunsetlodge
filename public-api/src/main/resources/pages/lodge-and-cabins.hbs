@@ -36,101 +36,17 @@
 <!--        <div id="content-wrap">-->
           <div class="tab-content" id="nav-tabContent">
           {{#each galleries}}
-            {{#if @first}}
-                <div class="tab-pane fade show active" id="nav-{{this.anchor}}" role="tabpanel" aria-labelledby="nav-{{this.anchor}}-tab" tabindex="0">
-                  <article class="col-md-12 offset-md-0">
-                    <p><span class="h4">{{this.name}}&nbsp;</span>{{{this.description}}}</p>
-                  </article>
-                  <div class="col-md-10 offset-md-1 col-sm-10 offset-sm-1">
-                    <div id="{{this.anchor}}-carousel" class="carousel slide carousel-fade image-carousel" data-ride="carousel" data-interval="false">
+            <div class="tab-pane fade{{#if @first}} show active{{/if}}" id="nav-{{this.anchor}}" role="tabpanel" aria-labelledby="nav-{{this.anchor}}-tab" tabindex="0">
+                <article class="col-md-12 offset-md-0">
+                  <p><span class="h4">{{this.name}}&nbsp;</span>{{{this.description}}}</p>
+                </article>
+                <div class="col-md-10 offset-md-1 col-sm-10 offset-sm-1">
+                  <div id="{{this.anchor}}-carousel" class="carousel slide carousel-fade image-carousel" data-ride="carousel" data-interval="false">
 
-                      <!-- Wrapper for slides -->
-                      <div class="carousel-inner" role="listbox">
-                        {{#each this.images}}
-                          {{#if @first}}
-                              <div class="carousel-item active gallery-image">
-                                <img src="{{this.large_url}}" class="d-block mx-auto"/>
-                                <!--<div class="carousel-caption">
-                                  The Lodge
-                                </div>-->
-                              </div>
-                            {{else}}
-                              <div class="carousel-item gallery-image">
-                                <img src="{{this.large_url}}" class="d-block mx-auto"/>
-                                <!--<div class="carousel-caption">
-                                  The Lodge
-                                </div>-->
-                              </div>
-                            {{/if}}
-
-                        {{/each}}
-                      </div>
-
-                      <!-- Controls -->
-                      <button class="carousel-control-prev" type="button" data-bs-target="#{{this.anchor}}-carousel" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                      </button>
-                      <button class="carousel-control-next" type="button" data-bs-target="#{{this.anchor}}-carousel" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="col-md-10 offset-md-1 col-sm-10 offset-sm-1 visible-md visible-lg">
-                    <div id="{{this.anchor}}-carousel-thumbnails" class="carousel slide thumbnail-carousel" data-ride="carousel" data-interval="false" data-wrap="true">
-                      <div class="carousel-inner" role="listbox">
-                        {{#each this.thumbs}}
-                          {{#if this.first}}
-                              <div class="carousel-item active">
-                                <div class="row gx-2">
-                                  {{#each this.thumbs}}
-                                      <div class="col-sm-2">
-                                        <div class="thumbnail mx-auto d-block {{#if @first}}current-image{{/if}}" onclick="selectThumbnail(this);">
-                                          <img src="{{thumb_url}}" alt="Image" class="img-responsive">
-                                        </div>
-                                      </div>
-                                    {{/each}}
-                                </div>
-                              </div>
-                            {{ else }}
-                              <div class="carousel-item">
-                                <div class="row">
-                                  {{#each this.thumbs}}
-                                      <div class="col-sm-2">
-                                        <div class="thumbnail mx-auto d-block"  onclick="selectThumbnail(this);">
-                                          <img src="{{thumb_url}}" alt="Image" class="img-responsive">
-                                        </div>
-                                      </div>
-                                    {{/each}}
-                                </div>
-                              </div>
-                            {{/if}}
-                        {{/each}}
-                      </div>
-                      <button class="carousel-control-prev" type="button" data-bs-target="#{{this.anchor}}-carousel-thumbnails" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                      </button>
-                      <button class="carousel-control-next" type="button" data-bs-target="#{{this.anchor}}-carousel-thumbnails" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              {{else}}
-                <div class="tab-pane fade" id="nav-{{this.anchor}}" role="tabpanel" aria-labelledby="nav-{{this.anchor}}-tab" tabindex="0">
-                  <article class="col-md-12 offset-md-0">
-                    <p><span class="h4">{{this.name}}&nbsp;</span>{{{this.description}}}</p>
-                  </article>
-                  <div class="col-md-10 offset-md-1 col-sm-10 offset-sm-1">
-                    <div id="{{this.anchor}}-carousel" class="carousel slide carousel-fade image-carousel" data-ride="carousel" data-interval="false">
-
-                      <!-- Wrapper for slides -->
-                      <div class="carousel-inner" role="listbox">
-                        {{#each this.images}}
-                          {{#if @first}}
+                    <!-- Wrapper for slides -->
+                    <div class="carousel-inner" role="listbox">
+                      {{#each this.images}}
+                        {{#if @first}}
                             <div class="carousel-item active gallery-image">
                               <img src="{{this.large_url}}" class="d-block mx-auto"/>
                               <!--<div class="carousel-caption">
@@ -146,64 +62,63 @@
                             </div>
                           {{/if}}
 
-                        {{/each}}
-                      </div>
-
-                      <!-- Controls -->
-                      <button class="carousel-control-prev" type="button" data-bs-target="#{{this.anchor}}-carousel" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                      </button>
-                      <button class="carousel-control-next" type="button" data-bs-target="#{{this.anchor}}-carousel" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                      </button>
+                      {{/each}}
                     </div>
+
+                    <!-- Controls -->
+                    <button class="carousel-control-prev" type="button" data-bs-target="#{{this.anchor}}-carousel" data-bs-slide="prev">
+                      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                      <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#{{this.anchor}}-carousel" data-bs-slide="next">
+                      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                      <span class="visually-hidden">Next</span>
+                    </button>
                   </div>
-                  <div class="col-md-10 offset-md-1 col-sm-10 offset-sm-1 visible-md visible-lg">
-                    <div id="{{this.anchor}}-carousel-thumbnails" class="carousel slide thumbnail-carousel" data-ride="carousel" data-interval="false" data-wrap="true">
-                      <div class="carousel-inner" role="listbox">
-                        {{#each this.thumbs}}
-                          {{#if this.first}}
+                </div>
+                <div class="col-md-10 offset-md-1 col-sm-10 offset-sm-1 visible-md visible-lg">
+                  <div id="{{this.anchor}}-carousel-thumbnails" class="carousel slide thumbnail-carousel" data-ride="carousel" data-interval="false" data-wrap="true">
+                    <div class="carousel-inner" role="listbox">
+                      {{#each this.thumbs}}
+                        {{#if this.first}}
                             <div class="carousel-item active">
                               <div class="row gx-2">
                                 {{#each this.thumbs}}
-                                  <div class="col-sm-2">
-                                    <div class="thumbnail mx-auto d-block {{#if @first}}current-image{{/if}}" onclick="selectThumbnail(this);">
-                                      <img src="{{thumb_url}}" alt="Image" class="img-responsive">
+                                    <div class="col-sm-2">
+                                      <div class="thumbnail mx-auto d-block {{#if @first}}current-image{{/if}}" onclick="selectThumbnail(this);">
+                                        <img src="{{thumb_url}}" alt="Image" class="img-responsive">
+                                      </div>
                                     </div>
-                                  </div>
-                                {{/each}}
+                                  {{/each}}
                               </div>
                             </div>
                           {{ else }}
                             <div class="carousel-item">
                               <div class="row">
                                 {{#each this.thumbs}}
-                                  <div class="col-sm-2">
-                                    <div class="thumbnail mx-auto d-block"  onclick="selectThumbnail(this);">
-                                      <img src="{{thumb_url}}" alt="Image" class="img-responsive">
+                                    <div class="col-sm-2">
+                                      <div class="thumbnail mx-auto d-block"  onclick="selectThumbnail(this);">
+                                        <img src="{{thumb_url}}" alt="Image" class="img-responsive">
+                                      </div>
                                     </div>
-                                  </div>
-                                {{/each}}
+                                  {{/each}}
                               </div>
                             </div>
                           {{/if}}
-                        {{/each}}
-                      </div>
-                      <button class="carousel-control-prev" type="button" data-bs-target="#{{this.anchor}}-carousel-thumbnails" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                      </button>
-                      <button class="carousel-control-next" type="button" data-bs-target="#{{this.anchor}}-carousel-thumbnails" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                      </button>
+                      {{/each}}
                     </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#{{this.anchor}}-carousel-thumbnails" data-bs-slide="prev">
+                      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                      <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#{{this.anchor}}-carousel-thumbnails" data-bs-slide="next">
+                      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                      <span class="visually-hidden">Next</span>
+                    </button>
                   </div>
                 </div>
-              {{/if}}
-            {{/each}}
+            </div>
+          {{/each}}
           </div>
 <!--        </div>-->
 

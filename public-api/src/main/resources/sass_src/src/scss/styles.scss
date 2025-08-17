@@ -636,3 +636,7 @@ now override the 3.3 new styles for modern browsers & apply opacity
 }
 
 .building-hidden { display: none; }
+
+textarea.form-control {
+  padding: 0.375rem;
+}
