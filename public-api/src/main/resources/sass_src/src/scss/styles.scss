@@ -217,7 +217,7 @@ body {
   .container {
     &:nth-of-type(1) {
       .row:nth-of-type(1) {
-        margin-top:100px;
+        margin-top:50px;
       }
     }
 
@@ -225,7 +225,8 @@ body {
       //background: $wheat-ninety;
       background: $darker-transparent-purple;
       padding: 20px 0;
-      //border-radius: 10px;
+      border-radius: 10px;
+      margin-bottom: 20px;
 
       div {
         .row {
@@ -308,9 +309,9 @@ p {
 }
 
 #featured {
-  margin: 20px -15px;
-  background: transparent;
-  border-radius: 10px !important;
+  //margin: 20px -15px;
+  //background: transparent;
+  //border-radius: 0px !important;
 
   //background: -webkit-linear-gradient(left,  $pale-yellow-lighter , $paler-yellow , $paler-yellow , $paler-yellow,  $pale-yellow-lighter ); /* For Safari 5.1 to 6.0 */
   //background: -o-linear-gradient(right,  $pale-yellow-lighter, $paler-yellow , $paler-yellow , $paler-yellow,  $pale-yellow-lighter ); /* For Opera 11.1 to 12.0 */
@@ -318,8 +319,14 @@ p {
   //background: linear-gradient(to right,  $pale-yellow-lighter , $paler-yellow , $paler-yellow , $paler-yellow,  $pale-yellow-lighter ); /* Standard syntax */
   //height: 200px;
 
+  &.row {
+    padding-top: 0px;
+  }
+
   div {
     div.row {
+      border-radius: 10px;
+      background: transparent;
       div {
         margin-top: 5px;
 
@@ -580,13 +587,13 @@ now override the 3.3 new styles for modern browsers & apply opacity
   background: $red !important;
 }
 .available {
-  background: ForestGreen;
+  background: none !important;
 }
 .partially-available {
   background: repeating-linear-gradient(
       -45deg,
-      ForestGreen,
-      ForestGreen 5px,
+      $available-green,
+      $available-green 5px,
       $red 5px,
       $red 10px
   );
@@ -627,3 +634,5 @@ now override the 3.3 new styles for modern browsers & apply opacity
     padding-top: 20px;
   }
 }
+
+.building-hidden { display: none; }

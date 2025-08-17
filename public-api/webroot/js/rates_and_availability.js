@@ -12,3 +12,13 @@ $( document ).ready(function() {
       window.location.hash = e.target.hash;
   })
 });
+
+
+function handleBuildingChange(elem){
+  console.log("on change");
+  console.log(elem.value)
+  console.log(  $(".building-container"))
+  $(".building-container").addClass("building-hidden");
+  $("#building-"+elem.value).removeClass("building-hidden");
+
+}

@@ -34,6 +34,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
   private var engine: HandlebarsTemplateEngine
 
   val dateFormat = DateTimeFormatter.ofPattern("LLLL d, yyyy");
+  val dateFormatNoYear = DateTimeFormatter.ofPattern("LLLL d");
   val currencyFormat = NumberFormat.getCurrencyInstance(Locale.US)
 
   init {
@@ -91,8 +92,11 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
       val startDate = currentSeason.getLocalDate("start_date")
       val endDate = currentSeason.getLocalDate("end_date")
 
-      season.put("start_date", startDate.format(dateFormat))
-      season.put("end_date", endDate.format(dateFormat))
+      logger.info("START DATE: $startDate")
+      logger.info(startDate.format(dateFormat))
+
+      data.put("start_date", startDate.format(dateFormatNoYear))
+      data.put("end_date", endDate.format(dateFormat))
 
       data.put("current_season", currentSeason.toJson())
 
@@ -149,7 +153,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
         buildingAvailability.add(buildingData)
       }
 
-      logger.info(buildingAvailability.encodePrettily())
+//      logger.info(buildingAvailability.encodePrettily())
 
       data.put("buildings", buildingAvailability)
 
@@ -189,6 +193,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
     try {
       val data: JsonObject = JsonObject()
         .put("title", "Things to Do")
+        .put("background_url", getBackgroundImageUrl())
 
       engine.render(data, "pages/things-to-do.hbs") { res ->
         if (res.succeeded()) {
@@ -212,41 +217,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
 
       data.put("gallery_category_description", galleryCategory.getString("description").replace("\n", "<br/>"))
 
-      val galleries = execQuery(gallerySqlQueries.getGalleriesForCategory, Tuple.of(galleryCategory.getInteger("id")))
-      val galleriesData = JsonArray()
-      galleries.forEach { gallery ->
-        val galleryData = JsonObject()
-        galleryData.put("name", gallery.getString("identifier"))
-        galleryData.put("anchor", gallery.getString("identifier").lowercase().replace(" ", "-").replace("'", ""))
-        if(gallery.getString("description") != null){
-          galleryData.put("description", gallery.getString("description").replace("\n", "<br/>").trim())
-        }
-
-        val images = execQuery(imageSqlQueries.getImagesForGallery, Tuple.of(gallery.getInteger("id")))
-
-        val imagesData = images.map { image ->
-          val obj = JsonObject()
-          obj.put("large_url", getLargeUrl(image))
-          obj
-        }
-
-        val thumbsData = images.map { image ->
-          val obj = JsonObject()
-          obj.put("thumb_url", getThumbnailUrl(image))
-          obj
-        }.chunked(6).mapIndexed { index, jsonObjects ->
-          val obj = JsonObject()
-            .put("first", index == 0)
-            .put("thumbs", jsonObjects)
-
-          obj
-        }
-
-        galleryData.put("images", imagesData)
-        galleryData.put("thumbs", thumbsData)
-
-        galleriesData.add(galleryData)
-      }
+      val galleriesData = getGalleryDataForGalleryCategory(galleryCategory)
 
       logger.info("DATA")
       logger.info("${galleriesData}")
@@ -285,6 +256,18 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
     try {
       val data: JsonObject = JsonObject()
         .put("title", "Weddings")
+        .put("background_url", getBackgroundImageUrl())
+
+      val galleryCategory = execQuery(gallerySqlQueries.getGalleryCategoryByName, Tuple.of("Weddings")).first()
+      data.put("gallery_category_description",
+        galleryCategory.getString("description")
+          .replace("\n", "<br/>")
+          .replaceFirst("Sunset Cabins", "<a href=\"http://www.sunsetcabinsmaine.com\" target=\"_blank\">Sunset Cabins</a>")
+      )
+
+      val galleriesData = getGalleryDataForGalleryCategory(galleryCategory)
+
+      data.put("galleries", galleriesData)
 
       engine.render(data, "pages/weddings.hbs") { res ->
         if (res.succeeded()) {
@@ -329,6 +312,51 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
     return "/gallery-images/${image.getInteger("id")}/${filename}_large.png"
   }
 
+  private suspend fun getGalleryDataForGalleryCategory(galleryCategory: Row): JsonArray {
+
+    val galleries = execQuery(gallerySqlQueries.getGalleriesForCategory, Tuple.of(galleryCategory.getInteger("id")))
+    val galleriesData = JsonArray()
+    galleries.forEach { gallery ->
+      val galleryData = JsonObject()
+      galleryData.put("name", gallery.getString("identifier"))
+      galleryData.put("anchor", gallery
+        .getString("identifier")
+        .lowercase().replace(" ", "-")
+        .replace("'", "")
+        .replace("/", ""))
+      if(gallery.getString("description") != null){
+        galleryData.put("description", gallery.getString("description").replace("\n", "<br/>").trim())
+      }
+
+      val images = execQuery(imageSqlQueries.getImagesForGallery, Tuple.of(gallery.getInteger("id")))
+
+      val imagesData = images.map { image ->
+        val obj = JsonObject()
+        obj.put("large_url", getLargeUrl(image))
+        obj
+      }
+
+      val thumbsData = images.map { image ->
+        val obj = JsonObject()
+        obj.put("thumb_url", getThumbnailUrl(image))
+        obj
+      }.chunked(6).mapIndexed { index, jsonObjects ->
+        val obj = JsonObject()
+          .put("first", index == 0)
+          .put("thumbs", jsonObjects)
+
+        obj
+      }
+
+      galleryData.put("images", imagesData)
+      galleryData.put("thumbs", thumbsData)
+
+      galleriesData.add(galleryData)
+    }
+
+    return galleriesData
+  }
+
   private fun getAvailabilityForBuilding(
     startDate: LocalDate,
     endDate: LocalDate,
@@ -367,6 +395,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
           .put("dayOfMonth", date.dayOfMonth)
           .put("isBooked", isBooked)
           .put("isClosed", isClosed)
+          .put("isAvailable", !(isBooked || isClosed || outsideMonth))
           .put("outsideMonth", outsideMonth)
 
         // Add the date to the current week

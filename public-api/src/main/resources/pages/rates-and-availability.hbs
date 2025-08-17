@@ -1,14 +1,14 @@
 {{#partial "content" }}
   <div class="container">
   <div class="row">
-    <h2>Rates & Availability</h2>
+    <h2>Rates & Availability - {{current_season.name}}</h2>
   </div>
 
-  <div class="row zero-top-padding">
+  <div class="row">
     <article class="col-sm-10 offset-sm-1">
 
       <p><span class="h3">Sunset Lodge</span> and the surrounding cabins are available to rent for 5 months out of the year, from June to October.<br/>
-        During our high season ({{current_season.start_date}} - {{current_season.end_date}}), we only accept bookings of all of the units together (other than Judy's Cabin).
+        During our high season ({{start_date}} - {{end_date}}), we only accept bookings of all of the units together (other than Judy's Cabin).
       </p>
       <!-- Nav tabs -->
       <ul class="nav nav-tabs"  id="rates-availability-tabs">
@@ -131,386 +131,54 @@
             <div style="clear: both"></div>
             <p>
               Viewing availability for:
-              <select class="form-control inline-form-control">
-                <option>All Units</option>
-                <option>The Lodge</option>
-                <option>Lakeside Cabin</option>
-                <option>Judy's Cabin</option>
-                <option>Tree House Cabin</option>
-                <option>Bird's Nest Cabin</option>
+              <select class="form-control inline-form-control" onchange="handleBuildingChange(this)">
+                {{#each buildings}}
+                  <option value="{{identifier}}">{{name}}</option>
+                {{/each}}
               </select>
             </p>
 
             {{#each buildings}}
-
-              <div class="col-md-12 offset-md-0" id="building-{{identifier}}">
-                <div id="calendar-carousel" class="carousel slide" data-ride="carousel" data-interval="false">
+              <div class="col-md-12 offset-md-0 building-container {{#unless @first}}building-hidden{{/unless}}" id="building-{{identifier}}">
+                <div id="building-{{identifier}}-carousel" class="carousel slide building-carousel" data-ride="carousel" data-interval="false">
 
                   <!-- Wrapper for slides -->
                   <div class="carousel-inner" role="listbox">
-                    {{#each availability}}
-                      <div class="item">
-                        <div class="table-responsive">
-                          <table class="table calendar-table table-bordered">
-                            <tr>
-                              <th colspan="7">{{name}}</th>
-                            </tr>
-                            <tr>
-                              <th>Sat</th>
-                              <th>Sun</th>
-                              <th>Mon</th>
-                              <th>Tue</th>
-                              <th>Wed</th>
-                              <th>Thu</th>
-                              <th>Fri</th>
-                            </tr>
-                            {{#each weeks}}
+                    <div><h1>{{name}}</h1></div>
+                      {{#each availability}}
+                        <div class="item">
+                          <div class="table-responsive">
+                            <table class="table calendar-table table-bordered">
                               <tr>
-                              {{#each .}}
-                                <td
-                                  class="{{#if outsideMonth}}not-this-month{{/if}} {{#if isClosed}}not-open{{/if}} {{#if isBooked}}rented{{/if}}"
-                                >{{dayOfMonth}}<br/>{{isBooked}}</td>
-                              {{/each}}
-
+                                <th colspan="7">{{name}}</th>
                               </tr>
-                            {{/each}}
-<!--                            <tr>-->
-<!--                              <td class="not-this-month not-open">27</td>-->
-<!--                              <td class="not-this-month not-open">28</td>-->
-<!--                              <td class="not-this-month not-open">29</td>-->
-<!--                              <td class="not-this-month not-open">30</td>-->
-<!--                              <td cla4ss="not-this-month not-open">31</td>-->
-<!--                              <th class="not-open">1</th>-->
-<!--                              <th class="not-open">2</th>-->
-<!--                            </tr>-->
-<!--                            <tr>-->
-<!--                              <th class="not-open">3</th>-->
-<!--                              <th class="not-open">4</th>-->
-<!--                              <th class="not-open">5</th>-->
-<!--                              <th class="not-open">6</th>-->
-<!--                              <th class="not-open">7</th>-->
-<!--                              <th class="not-open">8</th>-->
-<!--                              <th class="not-open">9</th>-->
-<!--                            </tr>-->
-<!--                            <tr>-->
-<!--                              <th class="not-open">10</th>-->
-<!--                              <th class="not-open">11</th>-->
-<!--                              <th class="not-open">12</th>-->
-<!--                              <th class="not-open">13</th>-->
-<!--                              <th class="not-open">14</th>-->
-<!--                              <th class="not-open">15</th>-->
-<!--                              <th class="not-open">16</th>-->
-<!--                            </tr>-->
-<!--                            <tr>-->
-<!--                              <th class="rented">17</th>-->
-<!--                              <th class="rented">18</th>-->
-<!--                              <th class="rented">19</th>-->
-<!--                              <th class="rented">20</th>-->
-<!--                              <th class="rented">21</th>-->
-<!--                              <th class="rented">22</th>-->
-<!--                              <th class="rented">23</th>-->
-<!--                            </tr>-->
-<!--                            <tr>-->
-<!--                              <th class="rented">24</th>-->
-<!--                              <th class="rented">25</th>-->
-<!--                              <th class="rented">26</th>-->
-<!--                              <th class="rented">27</th>-->
-<!--                              <th class="rented">28</th>-->
-<!--                              <th class="rented">29</th>-->
-<!--                              <th class="rented">30</th>-->
-<!--                            </tr>-->
-<!--                            <tr>-->
-<!--                              <td class="not-this-month rented">1</td>-->
-<!--                              <td class="not-this-month rented">2</td>-->
-<!--                              <td class="not-this-month rented">3</td>-->
-<!--                              <td class="not-this-month rented">4</td>-->
-<!--                              <td class="not-this-month rented">5</td>-->
-<!--                              <td class="not-this-month rented">6</td>-->
-<!--                              <td class="not-this-month rented">7</td>-->
-<!--                            </tr>-->
-                          </table>
+                              <tr>
+                                <th>Sat</th>
+                                <th>Sun</th>
+                                <th>Mon</th>
+                                <th>Tue</th>
+                                <th>Wed</th>
+                                <th>Thu</th>
+                                <th>Fri</th>
+                              </tr>
+                              {{#each weeks}}
+                                  <tr>
+                                  {{#each .}}
+                                      <td
+                                        class="{{#if outsideMonth}}not-this-month{{/if}} {{#if isClosed}}not-open{{/if}} {{#if isBooked}}rented{{/if}} {{#if isAvailable}}available{{/if}}"
+                                      >{{dayOfMonth}}</td>
+                                    {{/each}}
+
+                                  </tr>
+                                {{/each}}
+                            </table>
+                          </div>
                         </div>
-                      </div>
-                    {{/each}}
-                    <div class="item">
-                      <div class="table-responsive">
-                        <table class="table calendar-table table-bordered">
-                          <tr>
-                            <th colspan="7">July 2017</th>
-                          </tr>
-                          <tr>
-                            <th>Sat</th>
-                            <th>Sun</th>
-                            <th>Mon</th>
-                            <th>Tue</th>
-                            <th>Wed</th>
-                            <th>Thu</th>
-                            <th>Fri</th>
-                          </tr>
-                          <tr>
-                            <th class="rented">1</th>
-                            <th class="rented">2</th>
-                            <th class="rented">3</th>
-                            <th class="rented">4</th>
-                            <th class="rented">5</th>
-                            <th class="rented">6</th>
-                            <th class="rented">7</th>
-                          </tr>
-                          <tr>
-                            <th class="rented">8</th>
-                            <th class="rented">9</th>
-                            <th class="rented">10</th>
-                            <th class="rented">11</th>
-                            <th class="rented">12</th>
-                            <th class="rented">13</th>
-                            <th class="rented">14</th>
-                          </tr>
-                          <tr>
-                            <th class="rented">15</th>
-                            <th class="rented">16</th>
-                            <th class="rented">17</th>
-                            <th class="rented">18</th>
-                            <th class="rented">19</th>
-                            <th class="rented">20</th>
-                            <th class="rented">21</th>
-                          </tr>
-                          <tr>
-                            <th class="rented">22</th>
-                            <th class="rented">23</th>
-                            <th class="rented">24</th>
-                            <th class="rented">25</th>
-                            <th class="rented">26</th>
-                            <th class="rented">27</th>
-                            <th class="rented">28</th>
-                          </tr>
-                          <tr>
-                            <th class="rented">29</th>
-                            <th class="rented">30</th>
-                            <th class="rented">31</th>
-                            <td class="rented not-this-month">1</td>
-                            <td class="rented not-this-month">2</td>
-                            <td class="rented not-this-month">3</td>
-                            <td class="rented not-this-month">4</td>
-                          </tr>
-                          <tr><td colspan="7">&nbsp;</td></tr>
-                        </table>
-                      </div>
-                    </div>
-                    <div class="item">
-                      <div class="table-responsive">
-                        <table class="table calendar-table table-bordered">
-                          <tr>
-                            <th colspan="7">August 2017</th>
-                          </tr>
-                          <tr>
-                            <th>Sat</th>
-                            <th>Sun</th>
-                            <th>Mon</th>
-                            <th>Tue</th>
-                            <th>Wed</th>
-                            <th>Thu</th>
-                            <th>Fri</th>
-                          </tr>
-                          <tr>
-                            <td class="rented not-this-month">29</td>
-                            <td class="rented not-this-month">30</td>
-                            <td class="rented not-this-month">31</td>
-                            <th class="rented">1</th>
-                            <th class="rented">2</th>
-                            <th class="rented">3</th>
-                            <th class="rented">4</th>
-                          </tr>
-                          <tr>
-                            <th class="rented">5</th>
-                            <th class="rented">6</th>
-                            <th class="rented">7</th>
-                            <th class="rented">8</th>
-                            <th class="rented">9</th>
-                            <th class="rented">10</th>
-                            <th class="rented">11</th>
-                          </tr>
-                          <tr>
-                            <th class="rented">12</th>
-                            <th class="rented">13</th>
-                            <th class="rented">14</th>
-                            <th class="rented">15</th>
-                            <th class="rented">16</th>
-                            <th class="rented">17</th>
-                            <th class="rented">18</th>
-                          </tr>
-                          <tr>
-                            <th class="rented">19</th>
-                            <th class="rented">20</th>
-                            <th class="rented">21</th>
-                            <th class="rented">22</th>
-                            <th class="rented">23</th>
-                            <th class="rented">24</th>
-                            <th class="rented">25</th>
-                          </tr>
-                          <tr>
-                            <th class="rented">26</th>
-                            <th class="rented">27</th>
-                            <th class="rented">28</th>
-                            <th class="rented">29</th>
-                            <th class="rented">30</th>
-                            <th class="rented">31</th>
-                            <td class="rented not-this-month">1</td>
-                          </tr>
-                          <tr><td colspan="7">&nbsp;</td></tr>
-
-                        </table>
-                      </div>
-                    </div>
-                    <div class="item">
-                      <div class="table-responsive">
-                        <table class="table calendar-table table-bordered">
-                          <tr>
-                            <th colspan="7">September 2017</th>
-                          </tr>
-                          <tr>
-                            <th>Sat</th>
-                            <th>Sun</th>
-                            <th>Mon</th>
-                            <th>Tue</th>
-                            <th>Wed</th>
-                            <th>Thu</th>
-                            <th>Fri</th>
-                          </tr>
-                          <tr>
-                            <td class="rented not-this-month">26</td>
-                            <td class="rented not-this-month">27</td>
-                            <td class="rented not-this-month">28</td>
-                            <td class="rented not-this-month">29</td>
-                            <td class="rented not-this-month">30</td>
-                            <td class="rented not-this-month">31</td>
-                            <th class="rented">1</th>
-                          </tr>
-                          <tr>
-                            <th class="available">2</th>
-                            <th class="available">3</th>
-                            <th class="available">4</th>
-                            <th class="available">5</th>
-                            <th class="available">6</th>
-                            <th class="available">7</th>
-                            <th class="available">8</th>
-                          </tr>
-                          <tr>
-                            <th class="available">9</th>
-                            <th class="available">10</th>
-                            <th class="available">11</th>
-                            <th class="available">12</th>
-                            <th class="available">13</th>
-                            <th class="available">14</th>
-                            <th class="available">15</th>
-                          </tr>
-                          <tr>
-                            <th class="available">16</th>
-                            <th class="available">17</th>
-                            <th class="available">18</th>
-                            <th class="available">19</th>
-                            <th class="available">20</th>
-                            <th class="available">21</th>
-                            <th class="available">22</th>
-                          </tr>
-                          <tr>
-                            <th class="available">23</th>
-                            <th class="available">24</th>
-                            <th class="available">25</th>
-                            <th class="available">26</th>
-                            <th class="available">27</th>
-                            <th class="available">28</th>
-                            <th class="available">29</th>
-                          </tr>
-                          <tr>
-                            <th class="partially-available">30</th>
-                            <th class="partially-available not-this-month">1</th>
-                            <td class="partially-available not-this-month">2</td>
-                            <td class="partially-available not-this-month">3</td>
-                            <td class="partially-available not-this-month">4</td>
-                            <td class="partially-available not-this-month">5</td>
-                            <td class="partially-available not-this-month">6</td>
-                          </tr>
-                        </table>
-                      </div>
-                    </div>
-                    <div class="item">
-                      <div class="table-responsive">
-                        <table class="table calendar-table table-bordered">
-                          <tr>
-                            <th colspan="7">October 2017</th>
-                          </tr>
-                          <tr>
-                            <th>Sat</th>
-                            <th>Sun</th>
-                            <th>Mon</th>
-                            <th>Tue</th>
-                            <th>Wed</th>
-                            <th>Thu</th>
-                            <th>Fri</th>
-                          </tr>
-                          <tr>
-                            <td class="partially-available not-this-month">30</td>
-                            <th class="partially-available">1</th>
-                            <th class="partially-available">2</th>
-                            <th class="partially-available">3</th>
-                            <th class="partially-available">4</th>
-                            <th class="partially-available">5</th>
-                            <th class="partially-available">6</th>
-                          </tr>
-                          <tr>
-                            <th class="not-open">7</th>
-                            <th class="not-open">8</th>
-                            <th class="not-open">9</th>
-                            <th class="not-open">10</th>
-                            <th class="not-open">11</th>
-                            <th class="not-open">12</th>
-                            <th class="not-open">13</th>
-                          </tr>
-                          <tr>
-                            <th class="not-open">14</th>
-                            <th class="not-open">15</th>
-                            <th class="not-open">16</th>
-                            <th class="not-open">17</th>
-                            <th class="not-open">18</th>
-                            <th class="not-open">19</th>
-                            <th class="not-open">20</th>
-                          </tr>
-                          <tr>
-                            <th class="not-open">21</th>
-                            <th class="not-open">22</th>
-                            <th class="not-open">23</th>
-                            <th class="not-open">24</th>
-                            <th class="not-open">25</th>
-                            <th class="not-open">26</th>
-                            <th class="not-open">27</th>
-                          </tr>
-                          <tr>
-                            <th class="not-open">28</th>
-                            <th class="not-open">29</th>
-                            <th class="not-open">30</th>
-                            <th class="not-open">31</th>
-                            <td class="not-open not-this-month">1</td>
-                            <td class="not-open not-this-month">2</td>
-                            <td class="not-open not-this-month">3</td>
-                          </tr>
-                          <tr><td colspan="7">&nbsp;</td></tr>
-                        </table>
-                      </div>
-                    </div>
+                      {{/each}}
                   </div>
-
-                  <!-- Controls -->
-                  <a class="left carousel-control" href="#calendar-carousel" role="button" data-slide="prev">
-                    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-                    <span class="sr-only">Previous</span>
-                  </a>
-                  <a class="right carousel-control" href="#calendar-carousel" role="button" data-slide="next">
-                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-                    <span class="sr-only">Next</span>
-                  </a>
                 </div>
-                <p>If you wish to enquire about any of the above dates, please click <a href="#">here</a></p>
               </div>
+
             {{/each}}
           </article>
         </div>
@@ -518,6 +186,9 @@
     </article>
   </div>
   </div>
+
+
+  <script src="./js/rates_and_availability.js"></script>
 {{/partial}}
 
 {{> layouts/base }}

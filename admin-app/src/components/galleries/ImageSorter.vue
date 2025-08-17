@@ -170,11 +170,25 @@ function truncate(text: string, length: number, suffix: string) {
   }
 }
 
+function reloadGallery() {
+
+  selectedCategoryId.value = getCurrentCategory.value.id
+
+  galleriesStore.getGalleriesForCategory(selectedCategoryId.value)
+}
+
+const galleryName = computed(() => {
+  const selectedCategory = getCategories.value.find((item: any) => { return item.id === selectedCategoryId.value })
+
+  return selectedCategory.name
+})
+
 </script>
 <template>
   <v-dialog v-model="galleryDialog" max-width="600" min-height="600" persistent>
     <gallery-description-card
       :edited-gallery-item="editedGalleryItem"
+      :category-name="galleryName"
       @closeGallery="closeGallery"
       @saveGallery="saveGallery"
     ></gallery-description-card>
@@ -183,6 +197,7 @@ function truncate(text: string, length: number, suffix: string) {
     <gallery-images-card
       :edited-gallery-item="editedGalleryItem"
       @closeGalleryImages="closeGalleryImages"
+      @reloadGallery="reloadGallery"
     ></gallery-images-card>
   </v-dialog>
   <v-row>

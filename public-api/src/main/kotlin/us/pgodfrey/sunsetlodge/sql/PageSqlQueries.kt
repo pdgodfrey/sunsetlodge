@@ -16,6 +16,6 @@ data class PageSqlQueries(
   val getBookingsForSeason: String = "select bookings.*, " +
     "ARRAY(select identifier from buildings " +
       "inner join bookings_buildings bb on bb.building_id = buildings.id " +
-      "where booking_id = bookings.id union select 'all') as buildings from bookings where season_id = $1",
+      "where booking_id = bookings.id) as buildings from bookings where season_id = $1",
 
 )

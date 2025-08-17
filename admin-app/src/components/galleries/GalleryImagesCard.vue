@@ -9,14 +9,19 @@
 
   const props = defineProps(['editedGalleryItem'])
 
+  const emit = defineEmits('reloadGallery');
+
   const imageUploads = ref([]);
   const updateOrderTimer = ref(-1);
+
+  const overlay = ref(false);
 
   const getImages: any = computed(() => {
     return imagesStore.images;
   });
 
   async function uploadImages () {
+    overlay.value = true;
     if(imageUploads.value.length) {
 
 
@@ -31,6 +36,8 @@
 
       setTimeout(function() {
         reloadImagesStore()
+        overlay.value = false;
+        emit('reloadGallery')
       }, 2000)
       imageUploads.value = []
 
@@ -60,6 +67,7 @@
         .then(() => {
           setTimeout(function() {
             reloadImagesStore()
+            emit('reloadGallery')
           }, 1000)
         })
     }
@@ -84,6 +92,17 @@
 </script>
 
 <template>
+  <v-overlay
+    :model-value="overlay"
+    class="align-center justify-center"
+  >
+    <v-progress-circular
+      color="primary"
+      size="64"
+      indeterminate
+    ></v-progress-circular>
+    <div class="text-h5">Uploading Images</div>
+  </v-overlay>
   <v-card height="100vh">
     <v-card-title class="pa-4 bg-secondary">
       <span class="title text-white">{{ editedGalleryItem.identifier }}: Edit Gallery Images</span>

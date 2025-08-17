@@ -9,6 +9,8 @@ admin-app/src/main/resources/webroot
 admin-app/node_modules
 admin-app/dist
 
+public-api/uploads
+public-api/file-uploads
 
 # local env files
 .env.local

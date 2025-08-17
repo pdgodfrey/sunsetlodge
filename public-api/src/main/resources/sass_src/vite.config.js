@@ -8,7 +8,7 @@ export default {
     }
   },
   build: {
-    // outDir: './../../../../../webroot',
+    outDir: './../../../../../webroot',
     rollupOptions: {
       input: '/js/main.js',
       output: {

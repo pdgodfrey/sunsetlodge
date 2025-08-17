@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import {ref} from "vue";
 
-  defineProps(['editedGalleryItem'])
+  defineProps(['editedGalleryItem', 'categoryName'])
 
   const valid = ref(true);
 </script>
@@ -37,8 +37,7 @@
           <v-col cols="12">
 
             <div>
-
-              <p><b>{{ editedGalleryItem.identifier }}&nbsp;</b>
+              <p><b v-if="categoryName != 'Weddings'">{{ editedGalleryItem.identifier }}&nbsp;</b>
                 <span v-if="editedGalleryItem.description"
                       v-html="editedGalleryItem.description.replaceAll('\n', '<br/>')"></span>
               </p>
