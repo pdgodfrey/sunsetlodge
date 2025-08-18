@@ -542,7 +542,7 @@ now override the 3.3 new styles for modern browsers & apply opacity
   .carousel-inner {
     .carousel-item {
       img {
-        height: 650px;
+        height: 100%px;
         width: 100%;
         object-fit: contain;
       }

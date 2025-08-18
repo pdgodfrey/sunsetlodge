@@ -350,6 +350,9 @@ class SeasonsSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRout
       params.addLocalDate(LocalDate.parse(data.getString("high_season_start_date")))
       params.addLocalDate(LocalDate.parse(data.getString("high_season_end_date")))
       params.addBoolean(data.getBoolean("is_open"))
+      params.addInteger(data.getInteger("sheet_rate"))
+      params.addInteger(data.getInteger("boat_package_rate"))
+      params.addInteger(data.getInteger("boat_separate_rate"))
 
       val seasonResult = execQuery(seasonSqlQueries.createSeason, params)
       val season = seasonResult.first()
@@ -359,6 +362,8 @@ class SeasonsSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRout
         val rateParams = Tuple.of(
           season.getInteger("id"),
           building.getInteger("id"),
+          null,
+          null,
           null,
           null
         )
@@ -462,6 +467,9 @@ class SeasonsSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRout
     try {
       val data = ctx.body().asJsonObject()
 
+      logger.info("=================")
+      logger.info(data.encodePrettily())
+
       validateSeasonData(data)
 
       val id = ctx.request().getParam("id").toInt()
@@ -473,6 +481,9 @@ class SeasonsSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRout
       params.addLocalDate(LocalDate.parse(data.getString("high_season_start_date")))
       params.addLocalDate(LocalDate.parse(data.getString("high_season_end_date")))
       params.addBoolean(data.getBoolean("is_open"))
+      params.addInteger(data.getInteger("sheet_rate"))
+      params.addInteger(data.getInteger("boat_package_rate"))
+      params.addInteger(data.getInteger("boat_separate_rate"))
       params.addInteger(id)
 
       val season = execQuery(seasonSqlQueries.updateSeason, params)

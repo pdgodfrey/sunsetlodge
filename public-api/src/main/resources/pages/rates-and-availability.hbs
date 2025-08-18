@@ -10,6 +10,8 @@
       <p><span class="h3">Sunset Lodge</span> and the surrounding cabins are available to rent for 5 months out of the year, from June to October.<br/>
         During our high season ({{start_date}} - {{end_date}}), we only accept bookings of all of the units together (other than Judy's Cabin).
       </p>
+
+      <p><span class=" italics">* All rates subject to 9% state sales tax, $300-$350 cleaning fee & a refundable security deposits. If PayPal is used there is a 3% transaction fee charged.</span></p>
       <!-- Nav tabs -->
       <ul class="nav nav-tabs"  id="rates-availability-tabs">
         <li class="nav-item"><a href="#rates" class="nav-link active" data-bs-toggle="tab">Rates</a></li>
@@ -19,8 +21,7 @@
       <div class="tab-content">
         <div class="tab-pane active" id="rates">
           <article class="col-md-12 offset-md-0">
-            <p><span class="h4">The {{current_season.name}} high season weekly rates</span> are below. During the high season, we require a 1 week minimum stay.<br/>
-              <span class=" italics">All rates subject to 9% state sales tax. Security deposits required.</span></p>
+            <p><span class="h4">The {{current_season.name}} high season weekly rates</span> are below. During the high season, we require a 1 week minimum stay.</p>
 
             <div class="table-responsive">
               <table class="table">
@@ -44,12 +45,11 @@
             </div>
 
 
-            <p><span class="h4">Sheets and towels </span> are not included with the rental fee, but may be rented for $200/week (for all cabins). You may also bring your own.</p>
-            <p><span class="h4">Boats</span> can be rented for $300/week. The boat package includes two canoes, two 1-person kayaks, and one 2-person kayak.<br/>
-              Boats may also be rented separately for $100/week each.</p>
+            <p><span class="h4">Sheets and towels </span> are not included with the rental fee, but may be rented for {{current_season.sheet_rate}}/week (for all cabins). You may also bring your own.</p>
+            <p><span class="h4">Boats</span> can be rented for {{current_season.boat_package_rate}}/week. The boat package includes two canoes, two 1-person kayaks, and one 2-person kayak.<br/>
+              Boats may also be rented separately for {{current_season.boat_separate_rate}}/week each.</p>
 
             <p><span class="h4">The {{current_season.name}} quiet season weekly rates</span> are below.<br/>
-              <span class=" italics">All rates subject to 9% state sales tax. Security deposits required.</span></p>
 
             <div class="table-responsive">
               <table class="table">
@@ -74,7 +74,6 @@
 
 
             <p class="minor-gap"><span class="h4">Daily rates</span>, listed below, are available for the off-season. A minimum 3 night stay is required.<br/>
-              <span class=" italics">All rates subject to 9% state sales tax. Security deposits required.</span></p>
 
             <div class="table-responsive col-sm-8 offset-sm-2">
               <table class="table">
@@ -83,36 +82,14 @@
                   <th>3 night stay</th>
                   <th>per additional night</th>
                 </tr>
-                <tr>
-                  <td>All Units Together</td>
-                  <td>$2,900</td>
-                  <td>$900</td>
-                </tr>
-                <tr>
-                  <td>The Lodge</td>
-                  <td>$1,800</td>
-                  <td>$525</td>
-                </tr>
-                <tr>
-                  <td>Lakeside Cabin</td>
-                  <td>$725</td>
-                  <td>$225</td>
-                </tr>
-                <tr>
-                  <td>Tree House Cabin</td>
-                  <td>$700</td>
-                  <td>$175</td>
-                </tr>
-                <tr>
-                  <td>Bird's Nest Cabin</td>
-                  <td>$525</td>
-                  <td>$150</td>
-                </tr>
-                <tr>
-                  <td>Judy's Cabin</td>
-                  <td>$725</td>
-                  <td>$175</td>
-                </tr>
+
+                {{#each daily_rates}}
+                  <tr>
+                    <td>{{this.building_name}}</td>
+                    <td>{{this.three_night_rate}}</td>
+                    <td>{{this.additional_night_rate}}</td>
+                  </tr>
+                {{/each}}
               </table>
             </div>
           </article>
@@ -131,7 +108,7 @@
             <div style="clear: both"></div>
             <p>
               Viewing availability for:
-              <select class="form-control inline-form-control" onchange="handleBuildingChange(this)">
+              <select class="form-control inline-form-control" onchange="handleBuildingChange(this)" autocomplete="off">
                 {{#each buildings}}
                   <option value="{{identifier}}">{{name}}</option>
                 {{/each}}
@@ -144,7 +121,7 @@
 
                   <!-- Wrapper for slides -->
                   <div class="carousel-inner" role="listbox">
-                    <div><h1>{{name}}</h1></div>
+                    <div><h2>{{name}}</h2></div>
                       {{#each availability}}
                         <div class="item">
                           <div class="table-responsive">

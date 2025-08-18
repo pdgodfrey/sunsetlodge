@@ -13,6 +13,11 @@ data class PageSqlQueries(
     "inner join buildings on rates.building_id = buildings.id " +
     "where season_id = $1",
 
+  val getDailyRatesForSeason: String = "select buildings.name as building_name, max_occupancy, bedrooms, bathrooms, " +
+    "three_night_rate, additional_night_rate from rates " +
+    "inner join buildings on rates.building_id = buildings.id " +
+    "where season_id = $1",
+
   val getBookingsForSeason: String = "select bookings.*, " +
     "ARRAY(select identifier from buildings " +
       "inner join bookings_buildings bb on bb.building_id = buildings.id " +

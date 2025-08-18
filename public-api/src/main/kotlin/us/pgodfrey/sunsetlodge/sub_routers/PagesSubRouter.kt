@@ -96,7 +96,6 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
         .put("background_url", getBackgroundImageUrl())
 
       val currentSeason = execQuery(seasonSqlQueries.getCurrentSeason).first()
-      val season = currentSeason.toJson()
 
       val startDate = currentSeason.getLocalDate("start_date")
       val endDate = currentSeason.getLocalDate("end_date")
@@ -107,7 +106,21 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
       data.put("start_date", startDate.format(dateFormatNoYear))
       data.put("end_date", endDate.format(dateFormat))
 
-      data.put("current_season", currentSeason.toJson())
+      val currentSeasonObj = currentSeason.toJson()
+
+      if(currentSeasonObj.getInteger("sheet_rate") != null) {
+        currentSeasonObj.put("sheet_rate", currencyFormat.format(currentSeasonObj.getInteger("sheet_rate")))
+      }
+
+      if(currentSeasonObj.getInteger("boat_package_rate") != null) {
+        currentSeasonObj.put("boat_package_rate", currencyFormat.format(currentSeasonObj.getInteger("boat_package_rate")))
+      }
+
+      if(currentSeasonObj.getInteger("boat_separate_rate") != null) {
+        currentSeasonObj.put("boat_separate_rate", currencyFormat.format(currentSeasonObj.getInteger("boat_separate_rate")))
+      }
+
+      data.put("current_season", currentSeasonObj)
 
       val nextSeasons = execQuery(seasonSqlQueries.getNextSeason)
       if(nextSeasons.size() > 0) {
@@ -139,6 +152,21 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
         }
 
       data.put("low_current_rates", lowSeasonRates)
+
+
+      val dailyRates = execQuery(pageSqlQueries.getDailyRatesForSeason, Tuple.of(currentSeason.getInteger("id"))).map {
+        val obj = it.toJson()
+
+        if(obj.getInteger("three_night_rate") != null) {
+          obj.put("three_night_rate", currencyFormat.format(obj.getInteger("three_night_rate")))
+        }
+        if(obj.getInteger("additional_night_rate") != null) {
+          obj.put("additional_night_rate", currencyFormat.format(obj.getInteger("additional_night_rate")))
+        }
+
+        obj
+      }
+      data.put("daily_rates", dailyRates)
 
       // Retrieve active bookings
       val bookings = execQuery(pageSqlQueries.getBookingsForSeason, Tuple.of(currentSeason.getInteger("id")))
@@ -204,9 +232,6 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
   private suspend fun handleContactUsSubmit(ctx: RoutingContext) {
     try {
       val params = ctx.request().formAttributes()
-      params.forEach{
-        logger.info("${it.key} : ${it.value}")
-      }
 
       val emailObj = JsonObject()
         .put("recipient_email", contactUsRecipientEmail)
@@ -290,6 +315,14 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
     try {
       val data: JsonObject = JsonObject()
         .put("title", "Sunsets")
+        .put("background_url", getBackgroundImageUrl())
+
+      val galleryCategory = execQuery(gallerySqlQueries.getGalleryCategoryByName, Tuple.of("Sunsets")).first()
+
+      data.put("gallery_category_description", galleryCategory.getString("description").replace("\n", "<br/>"))
+
+      val galleriesData = getGalleryDataForGalleryCategory(galleryCategory)
+      data.put("gallery", galleriesData.getJsonObject(0))
 
       engine.render(data, "pages/sunsets.hbs") { res ->
         if (res.succeeded()) {

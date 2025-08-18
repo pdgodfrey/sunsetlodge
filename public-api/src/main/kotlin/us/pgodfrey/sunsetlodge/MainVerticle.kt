@@ -97,7 +97,7 @@ class MainVerticle : CoroutineVerticle() {
 
     router.route().handler(StaticHandler.create().setCachingEnabled(false))
 
-    router.route().handler(CSRFHandler.create(vertx, UUID.randomUUID().toString()))
+    router.routeWithRegex("^(?!/api).*").handler(CSRFHandler.create(vertx, UUID.randomUUID().toString()))
 
     val sqlOptions = SqlAuthenticationOptions()
 

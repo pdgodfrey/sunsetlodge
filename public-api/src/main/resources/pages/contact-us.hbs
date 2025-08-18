@@ -25,19 +25,20 @@
           <input type="hidden" name="X-XSRF-TOKEN" value="{{csrf_token}}">
           <div class="form-group col-md-6">
             <label for="name">Name*</label>
-            <input type="text" class="form-control" id="name" placeholder="Name*" name="name" required>
+            <input type="text" class="form-control" id="name" placeholder="Name*" name="name" required autocomplete="off">
           </div>
           <div class="form-group col-md-6">
             <label for="email">Email*</label>
-            <input type="email" class="form-control" id="email" placeholder="Email*" name="email" required>
+            <input type="email" class="form-control" id="email" placeholder="Email*" name="email" required autocomplete="off">
           </div>
           <div class="form-group col-md-6">
             <label for="phone">Phone</label>
-            <input type="text" class="form-control" id="phone" placeholder="Phone" name="phone">
+            <input type="text" class="form-control" id="phone" placeholder="Phone" name="phone" autocomplete="off">
           </div>
           <div class="form-group col-md-6">
             <label for="reason_for_contact">Reason for Contact*</label><br/>
-            <select name="reason_for_contact" id=reason_for_contact" class="form-control inline-form-control" onchange="selectReason(this)" required >
+            <select name="reason_for_contact" id=reason_for_contact" class="form-control inline-form-control"
+                    onchange="selectReason(this)" required  autocomplete="off">
               <option value="" disabled selected>Select your reason for contact*</option>
               <option>Rental Inquiry</option>
               <option>Wedding Inquiry</option>
@@ -47,7 +48,7 @@
 
           <div class="form-group col-md-12">
             <label for="message">Message*</label>
-            <textarea class="form-control" id="message" rows="4" placeholder="Message*" name="message"  required></textarea>
+            <textarea class="form-control" id="message" rows="4" placeholder="Message*" name="message"  required  autocomplete="off"></textarea>
           </div>
 
           <div class="form-group col-md-12">

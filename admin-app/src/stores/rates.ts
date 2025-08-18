@@ -9,11 +9,11 @@ const baseUrl = `${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL :
 export const useRatesStore = defineStore({
     id: 'Rates',
     state: () => ({
-      rates: {}
+      rates: []
     }),
     actions: {
         async getRatesForSeason(seasonId: number) {
-            this.rates = { loading: true };
+            this.rates = [];
             fetchWrapper
                 .get(`${baseUrl}/api/rates?season_id=${seasonId}`)
                 .then((response) => {

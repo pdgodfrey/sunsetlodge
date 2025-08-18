@@ -171,9 +171,6 @@ function truncate(text: string, length: number, suffix: string) {
 }
 
 function reloadGallery() {
-
-  selectedCategoryId.value = getCurrentCategory.value.id
-
   galleriesStore.getGalleriesForCategory(selectedCategoryId.value)
 }
 

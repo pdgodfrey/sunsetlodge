@@ -6,21 +6,27 @@
 
     <div class="row">
       <article class="col-md-10 offset-md-1 col-sm-10 offset-sm-1">
+        <div class="d-block d-sm-none">xs</div>
+        <div class="d-none d-sm-block d-md-none">sm</div>
+        <div class="d-none d-md-block d-lg-none">md</div>
+        <div class="d-none d-lg-block d-xl-none">lg</div>
+        <div class="d-none d-xl-block">xl</div>
         <p>{{{gallery_category_description}}}</p>
 
         <p class="d-block d-md-none">For more information on each building, select from the dropdown
-          <select class="form-control inline-form-control" >
+          <select class="form-control inline-form-control"  autocomplete="off">
             {{#each galleries}}
               <option value="{{this.anchor}}">{{this.name}}</option>
             {{/each}}
           </select>
         </p>
 
-        <div class="d-block d-md-none border-line"></div>
+        <div class="d-none d-md-block border-line"></div>
 
-        <p class="d-block d-md-none">Click on a tab below for more information on each building</p>
+        <p class="d-none d-md-block">Click on a tab below for more information on each building</p>
 
 <!--        <div class="flex-container">-->
+        <div class="d-none d-md-block">
           <div class="nav nav-tabs" id="nav-tab" role="tablist">
             {{#each galleries}}
               {{#if @first}}
@@ -31,6 +37,7 @@
               {{/if}}
             {{/each}}
           </div>
+        </div>
 <!--        </div>-->
 
 <!--        <div id="content-wrap">-->
@@ -76,7 +83,7 @@
                     </button>
                   </div>
                 </div>
-                <div class="col-md-10 offset-md-1 col-sm-10 offset-sm-1 visible-md visible-lg">
+                <div class="col-md-10 offset-md-1 col-sm-10 offset-sm-1 d-none d-md-block">
                   <div id="{{this.anchor}}-carousel-thumbnails" class="carousel slide thumbnail-carousel" data-ride="carousel" data-interval="false" data-wrap="true">
                     <div class="carousel-inner" role="listbox">
                       {{#each this.thumbs}}

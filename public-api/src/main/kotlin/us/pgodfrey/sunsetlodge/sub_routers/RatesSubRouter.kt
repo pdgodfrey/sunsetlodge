@@ -185,6 +185,8 @@ class RatesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
       params.addInteger(data.getInteger("building_id"))
       params.addInteger(data.getInteger("high_season_rate"))
       params.addInteger(data.getInteger("low_season_rate"))
+      params.addInteger(data.getInteger("three_night_rate"))
+      params.addInteger(data.getInteger("additional_night_rate"))
 
       val rate = execQuery(rateSqlQueries.createRate, params)
 
@@ -287,6 +289,8 @@ class RatesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
       val params = Tuple.tuple()
       params.addInteger(data.getInteger("high_season_rate"))
       params.addInteger(data.getInteger("low_season_rate"))
+      params.addInteger(data.getInteger("three_night_rate"))
+      params.addInteger(data.getInteger("additional_night_rate"))
       params.addInteger(id)
 
       val rate = execQuery(rateSqlQueries.updateRate, params)

@@ -41,7 +41,10 @@ const editedItem = ref({
   high_season_start_date: '',
   high_season_end_date: '',
   is_open: false,
-  is_current: false
+  is_current: false,
+  sheet_rate: 0,
+  boat_package_rate: 0,
+  boat_separate_rate: 0,
 });
 const defaultItem = ref({
     id: 0,
@@ -51,7 +54,10 @@ const defaultItem = ref({
     high_season_start_date: '',
     high_season_end_date: '',
     is_open: false,
-    is_current: false
+    is_current: false,
+    sheet_rate: 0,
+    boat_package_rate: 0,
+    boat_separate_rate: 0,
 });
 
 //Methods
@@ -83,6 +89,10 @@ function save() {
     season.high_season_start_date = dayjs(season.high_season_start_date).format("YYYY-MM-DD")
     season.high_season_end_date = dayjs(season.high_season_end_date).format("YYYY-MM-DD")
 
+    season.sheet_rate = parseInt(season.sheet_rate)
+    season.boat_package_rate = parseInt(season.boat_package_rate)
+    season.boat_separate_rate = parseInt(season.boat_separate_rate)
+
     if (editedIndex.value > -1) {
       store.updateSeason(season)
         .then(() => {
@@ -107,7 +117,6 @@ function closeRatesDialog() {
   ratesDialog.value = false
 }
 function saveRates() {
-
   const promiseList: any[] = [];
 
   getRates.value.forEach((rate: any) => {
@@ -117,6 +126,12 @@ function saveRates() {
     }
     if(rate.low_season_rate && rate.low_season_rate != '') {
       rateCopy.low_season_rate = parseInt(rate.low_season_rate)
+    }
+    if(rate.three_night_rate && rate.three_night_rate != '') {
+      rateCopy.three_night_rate = parseInt(rate.three_night_rate)
+    }
+    if(rate.low_season_rate && rate.low_season_rate != '') {
+      rateCopy.additional_night_rate = parseInt(rate.additional_night_rate)
     }
 
     ratesStore.updateRate(rateCopy)
@@ -149,8 +164,41 @@ const isValid = computed(() => {
   if(obj.high_season_end_date == null || obj.high_season_end_date == ''){
     return false
   }
+  if(obj.sheet_rate == null || obj.sheet_rate == ''){
+    return false
+  }
+  if(obj.boat_package_rate == null || obj.boat_package_rate == ''){
+    return false
+  }
+  if(obj.boat_separate_rate == null || obj.boat_separate_rate == ''){
+    return false
+  }
 
   return true
+});
+
+const rateIsValid = computed(() => {
+  let ratesAreValid = true;
+  console.log(getRates.value)
+  getRates.value.forEach((obj: any) => {
+
+
+    if(obj.high_season_rate == null || obj.high_season_rate == ''){
+      ratesAreValid = false
+    }
+    if(obj.low_season_rate == null || obj.low_season_rate == ''){
+      ratesAreValid =  false
+    }
+    if(obj.three_night_rate == null || obj.three_night_rate == ''){
+      ratesAreValid =  false
+    }
+    if(obj.additional_night_rate == null || obj.additional_night_rate == ''){
+      ratesAreValid =  false
+    }
+
+  })
+
+  return ratesAreValid
 });
 </script>
 <template>
@@ -230,6 +278,33 @@ const isValid = computed(() => {
                                     text-input
                                   ></VueDatePicker>
                                 </v-col>
+                                <v-col cols="12" sm="6">
+                                  <v-label>Sheet Rate</v-label>
+                                  <v-text-field
+                                    v-model="editedItem.sheet_rate"
+                                    type="number"
+                                    :rules="requiredFieldRules"
+                                    required
+                                  ></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                  <v-label>Boat Package Rate</v-label>
+                                  <v-text-field
+                                    v-model="editedItem.boat_package_rate"
+                                    type="number"
+                                    :rules="requiredFieldRules"
+                                    required
+                                  ></v-text-field>
+                                </v-col>
+                              <v-col cols="12" sm="6">
+                                <v-label>Single Boat Rate</v-label>
+                                <v-text-field
+                                  v-model="editedItem.boat_separate_rate"
+                                  type="number"
+                                  :rules="requiredFieldRules"
+                                  required
+                                ></v-text-field>
+                              </v-col>
                             </v-row>
                         </v-form>
                     </v-card-text>
@@ -251,7 +326,7 @@ const isValid = computed(() => {
     </v-row>
     <v-row>
       <v-col cols="12" class="text-right">
-        <v-dialog v-model="ratesDialog" max-width="600" persistent>
+        <v-dialog v-model="ratesDialog" max-width="800" persistent>
           <v-card height="100vh">
             <v-card-title class="pa-4 bg-secondary">
               <span class="title text-white">Set Season Rates</span>
@@ -260,15 +335,17 @@ const isValid = computed(() => {
             <v-card-text>
               <v-form  v-model="rateValid" >
                 <v-row>
-                  <v-col cols="6"><span class="title">Building</span></v-col>
-                  <v-col cols="3">High Rate</v-col>
-                  <v-col cols="3">Low Rate</v-col>
+                  <v-col cols="4"><span class="title">Building</span></v-col>
+                  <v-col cols="2">High Rate</v-col>
+                  <v-col cols="2">Low Rate</v-col>
+                  <v-col cols="2">3 Night Rate</v-col>
+                  <v-col cols="2">Additional Night Rate</v-col>
                 </v-row>
                 <v-row v-for="rate in getRates">
-                  <v-col cols="6">
+                  <v-col cols="4">
                     <v-label>{{ rate.building_name }}</v-label>
                   </v-col>
-                  <v-col cols="3"
+                  <v-col cols="2"
                          v-if="rate.building_id === 1"
                   >
                     <v-text-field
@@ -278,7 +355,7 @@ const isValid = computed(() => {
                       required
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="3"
+                  <v-col cols="2"
                          v-else
                   >
                     <v-text-field
@@ -287,9 +364,25 @@ const isValid = computed(() => {
                       required
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="3">
+                  <v-col cols="2">
                     <VTextField
                       v-model="rate.low_season_rate"
+                      type="number"
+                      :rules="requiredFieldRules"
+                      required
+                    ></VTextField>
+                  </v-col>
+                  <v-col cols="2">
+                    <VTextField
+                      v-model="rate.three_night_rate"
+                      type="number"
+                      :rules="requiredFieldRules"
+                      required
+                    ></VTextField>
+                  </v-col>
+                  <v-col cols="2">
+                    <VTextField
+                      v-model="rate.additional_night_rate"
                       type="number"
                       :rules="requiredFieldRules"
                       required
@@ -305,7 +398,7 @@ const isValid = computed(() => {
               <v-btn
                 color="secondary"
                 @click="saveRates"
-                :disabled="(rateValid === false)"
+                :disabled="!rateIsValid"
                 variant="flat"
                 type="submit"
               >Save</v-btn>
