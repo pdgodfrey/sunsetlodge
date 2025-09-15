@@ -45,7 +45,6 @@ function onSubmit() {
 <template>
     <v-form @submit.prevent="onSubmit"
             v-model="valid"
-            v-slot="{ isSubmitting }"
             class="mt-5">
       <template v-if="!submitted">
         <p class="text-subtitle-1 mb-6">Enter your email address below to reset your password.</p>
@@ -72,7 +71,7 @@ function onSubmit() {
           color="primary"
         ></VTextField>
 
-        <v-btn size="large" :loading="isSubmitting" :disabled="!valid" color="primary" block type="submit" flat>Set Password</v-btn>
+        <v-btn size="large"  :disabled="!valid" color="primary" block type="submit" flat>Set Password</v-btn>
 
         <div v-if="errors" class="mt-2">
           <v-alert color="error">{{ errors }}</v-alert>

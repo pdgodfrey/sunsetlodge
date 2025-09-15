@@ -33,6 +33,7 @@ export const useAuthStore = defineStore({
             this.user = JSON.stringify(userResponse.user);
         },
         async login(username: string, password: string) {
+          console.log(`AUTH UR:${baseUrl}/api/auth/authenticate`)
             const authResponse = await fetchWrapper.post(`${baseUrl}/api/auth/authenticate`, {
                 email: username,
                 password: password
@@ -53,11 +54,11 @@ export const useAuthStore = defineStore({
 
             const returnUrl = this.returnUrl;
             setTimeout(function() {
-                if(returnUrl != '') {
-                    router.push(returnUrl);
-                } else {
+                // if(returnUrl != '') {
+                //     router.push(returnUrl);
+                // } else {
                     router.push('/bookings');
-                }
+                // }
             }, 500)
 
         },

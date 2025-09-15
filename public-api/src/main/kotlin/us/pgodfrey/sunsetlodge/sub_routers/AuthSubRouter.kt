@@ -388,6 +388,8 @@ class AuthSubRouter(vertx: Vertx, pool: Pool, sqlAuthentication: SqlAuthenticati
       val email = data.getString("email")
       val users = execQuery(userSqlQueries.getUserByEmail, Tuple.of(email.lowercase()))
 
+      val hostHeader = ctx.request().getHeader("Host")
+
       if(users.size() == 0) {
         throw InvalidParameterException("Email address not found")
       } else {
@@ -400,6 +402,7 @@ class AuthSubRouter(vertx: Vertx, pool: Pool, sqlAuthentication: SqlAuthenticati
 
         val emailObj = JsonObject()
           .put("recipient_email", user.getString("email"))
+          .put("domain", hostHeader)
           .put("subject", "Sunset Lodge: Password Reset")
           .put("name", user.getString("name"))
           .put("reset_token", resetToken.toString())

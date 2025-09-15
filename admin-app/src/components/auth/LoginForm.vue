@@ -55,7 +55,7 @@ function onSubmit() {
                 >
             </div>
         </div>
-        <v-btn size="large" :loading="isSubmitting" color="primary" :disabled="!valid" block type="submit" flat>Sign In</v-btn>
+        <v-btn size="large" color="primary" :disabled="!valid" block type="submit" flat>Sign In</v-btn>
         <div v-if="errors" class="mt-2">
             <v-alert color="error">{{ errors }}</v-alert>
         </div>

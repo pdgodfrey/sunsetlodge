@@ -4,9 +4,7 @@ import io.vertx.core.eventbus.Message
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.impl.logging.LoggerFactory
 import io.vertx.core.json.JsonObject
-import io.vertx.ext.mail.MailClient
-import io.vertx.ext.mail.MailConfig
-import io.vertx.ext.mail.MailMessage
+import io.vertx.ext.mail.*
 import io.vertx.ext.web.client.WebClient
 import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -17,6 +15,9 @@ class EmailerVerticle: CoroutineVerticle() {
 
   private var emailNotificationHttpPort = 0
   private var emailNotificationHost = ""
+  private var tlsRequired = false
+  private var emailUsername = ""
+  private var emailPassword = ""
 
 
   private lateinit var webClient: WebClient
@@ -30,14 +31,34 @@ class EmailerVerticle: CoroutineVerticle() {
 
     emailNotificationHttpPort = env.getOrDefault("EMAIL_HTTP_PORT", "1025").toInt()
     emailNotificationHost = env.getOrDefault("EMAIL_HOST", "localhost")
+    tlsRequired = env.getOrDefault("EMAIL_TLS_REQUIRED", "false").toBoolean()
+    emailUsername = env.getOrDefault("EMAIL_USERNAME", "")
+    emailPassword = env.getOrDefault("EMAIL_PASSWORD", "")
 
-    DEFAULT_FROM = env.getOrDefault("DEFAULT_FROM", "noreply@sunsetlodge.org")
+
+//    DEFAULT_FROM = env.getOrDefault("DEFAULT_FROM", "noreply@sunsetlodge.org")
+    DEFAULT_FROM = env.getOrDefault("DEFAULT_FROM", "sunset@pgodfrey.us")
+
+    val mailConfig = MailConfig()
+      .setHostname(emailNotificationHost)
+      .setPort(emailNotificationHttpPort)
+
+    if(tlsRequired) {
+      mailConfig.setStarttls(StartTLSOptions.REQUIRED)
+      mailConfig.setSsl(false)
+    }
+
+    if(emailUsername.isNotEmpty() && emailPassword.isNotEmpty()) {
+      mailConfig.setLogin(LoginOption.REQUIRED)
+      mailConfig.setUsername(emailUsername)
+      mailConfig.setPassword(
+        emailPassword
+      )
+    }
 
     mailClient = MailClient.createShared(
       vertx,
-      MailConfig()
-        .setHostname(emailNotificationHost)
-        .setPort(emailNotificationHttpPort)
+      mailConfig
     )
     webClient = WebClient.create(vertx)
     engine = HandlebarsTemplateEngine.create(vertx)
@@ -73,8 +94,12 @@ class EmailerVerticle: CoroutineVerticle() {
           .onComplete { mailResult ->
             if(mailResult.succeeded()){
               logger.info("sent")
+              logger.info(mailResult.result().messageID)
+              logger.info(mailResult.result().recipients.joinToString(", "))
             } else {
               logger.info("not sent")
+              logger.info(mailResult.cause().message)
+              logger.info(mailResult.cause().stackTraceToString())
               mailResult.cause().printStackTrace()
             }
 

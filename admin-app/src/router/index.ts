@@ -17,9 +17,11 @@ export const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
     // redirect to login page if not logged in and trying to access a restricted page
-    const publicPages = ['/auth/login'];
+    const publicPages = ['/auth/login', '/auth/forgot-password'];
     console.log(`Path ${to.path}`)
-    const authRequired = !publicPages.includes(to.path);
+  console.log(to)
+    // const authRequired = !publicPages.includes(to.path) || to.path.indexOf('/auth/reset-password/') != -1;
+  const authRequired = to.meta && to.meta.requiresAuth
     console.log(`Auth Required ${authRequired}`)
     const auth: any = useAuthStore();
     console.log(authRequired)
@@ -29,8 +31,10 @@ router.beforeEach(async (to, from, next) => {
         if (authRequired && !auth.user) {
             auth.returnUrl = to.fullPath;
             return next('/auth/login');
-        } else next();
+        } else {
+          return next();
+        }
     } else {
-        next();
+      return next();
     }
 });

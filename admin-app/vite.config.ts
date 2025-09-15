@@ -7,7 +7,7 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/admin",
+  base: "/loons",
   plugins: [
     vue(),
   ],
@@ -36,7 +36,7 @@ export default defineConfig({
     cors: true
   },
   build: {
-    outDir: "../public-api/webroot/admin",
+    outDir: "../public-api/webroot/loons",
     emptyOutDir: true
   }
 })

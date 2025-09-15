@@ -132,6 +132,7 @@ class MainVerticle : CoroutineVerticle() {
       CorsHandler.create()
         .addOrigin("http://localhost:3000")
         .addOrigin("http://localhost:8081")
+        .addOrigin("https://sunsetnew.pgodfrey.us")
         .allowCredentials(true)
         .allowedHeaders(allowedHeaders)
         .allowedMethod(HttpMethod.POST)
@@ -161,6 +162,8 @@ class MainVerticle : CoroutineVerticle() {
     router.route("/api/*").subRouter(MiscSubRouter(vertx, pool, jwtAuth).getSubRouter());
 
     router.get("/gallery-images/*").handler(this::serveUpload)
+
+    router.route("/loons*").handler(this::handlePage)
 
     router.route().subRouter(PagesSubRouter(vertx, pool, jwtAuth).getSubRouter());
 
@@ -213,11 +216,17 @@ class MainVerticle : CoroutineVerticle() {
 
   }
 
+  private fun handlePage(ctx: RoutingContext) {
+
+    ctx.reroute("/loons/")
+  }
+
   private fun serveUpload(ctx: RoutingContext) {
     try {
       var path = URLDecoder.decode(ctx.normalizedPath(), "UTF-8")
       path = path.replace("/gallery-images", "")
       logger.info("PATH ${path}")
+      logger.info("PATH $uploadsDir${path}")
 
       if(!vertx.fileSystem().existsBlocking("$uploadsDir$path")) {
         ctx.fail(404, FileNotFoundException("File does not exist"))
@@ -236,7 +245,9 @@ class MainVerticle : CoroutineVerticle() {
 
   private fun readPemFile(file: String): String {
     val env = System.getenv()
+    logger.info("ENV ${env.entries.joinToString(", ") { "${it.key}=${it.value}" }}")
     val pemPath = env.getOrDefault("PEM_PATH", "pem_keys")
+    logger.info("PEM Path: ${pemPath}")
     val path = Paths.get(pemPath, file)
     logger.info("Path: ${path.toAbsolutePath()}")
     logger.info("Exists?: ${path.toFile().exists()}")

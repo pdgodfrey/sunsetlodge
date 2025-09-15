@@ -78,7 +78,8 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
 
       engine.render(data, "pages/home.hbs") { res ->
         if (res.succeeded()) {
-          ctx.response().end(res.result())
+          ctx.response().putHeader("Content-Type", "text/html; charset=utf-8")
+            .end(res.result())
         } else {
           ctx.fail(res.cause())
         }
@@ -199,7 +200,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
 
       engine.render(data, "pages/rates-and-availability.hbs") { res ->
         if (res.succeeded()) {
-          ctx.response().end(res.result())
+          ctx.response().putHeader("Content-Type", "text/html; charset=utf-8").end(res.result())
         } else {
           ctx.fail(res.cause())
         }
@@ -219,7 +220,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
 
       engine.render(data, "pages/contact-us.hbs") { res ->
         if (res.succeeded()) {
-          ctx.response().end(res.result())
+          ctx.response().putHeader("Content-Type", "text/html; charset=utf-8").end(res.result())
         } else {
           ctx.fail(res.cause())
         }
@@ -233,9 +234,13 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
     try {
       val params = ctx.request().formAttributes()
 
+
+      val hostHeader = ctx.request().getHeader("Host")
+
       val emailObj = JsonObject()
         .put("recipient_email", contactUsRecipientEmail)
         .put("subject", "Sunset Lodge Website Inquiry")
+        .put("domain", hostHeader)
         .put("name", params.get("name"))
         .put("email", params.get("email"))
         .put("phone", params.get("phone"))
@@ -253,7 +258,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
 
         engine.render(data, "pages/contact-us-thanks.hbs") { res ->
           if (res.succeeded()) {
-            ctx.response().end(res.result())
+            ctx.response().putHeader("Content-Type", "text/html; charset=utf-8").end(res.result())
           } else {
             ctx.fail(res.cause())
           }
@@ -273,7 +278,8 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
 
       engine.render(data, "pages/things-to-do.hbs") { res ->
         if (res.succeeded()) {
-          ctx.response().end(res.result())
+          ctx.response().putHeader("Content-Type", "text/html; charset=utf-8")
+            .end(res.result())
         } else {
           ctx.fail(res.cause())
         }
@@ -301,7 +307,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
 
       engine.render(data, "pages/lodge-and-cabins.hbs") { res ->
         if (res.succeeded()) {
-          ctx.response().end(res.result())
+          ctx.response().putHeader("Content-Type", "text/html; charset=utf-8").end(res.result())
         } else {
           ctx.fail(res.cause())
         }
@@ -326,7 +332,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
 
       engine.render(data, "pages/sunsets.hbs") { res ->
         if (res.succeeded()) {
-          ctx.response().end(res.result())
+          ctx.response().putHeader("Content-Type", "text/html; charset=utf-8").end(res.result())
         } else {
           ctx.fail(res.cause())
         }
@@ -355,7 +361,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
 
       engine.render(data, "pages/weddings.hbs") { res ->
         if (res.succeeded()) {
-          ctx.response().end(res.result())
+          ctx.response().putHeader("Content-Type", "text/html; charset=utf-8").end(res.result())
         } else {
           ctx.fail(res.cause())
         }

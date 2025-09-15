@@ -72,11 +72,27 @@ dependencies {
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions.jvmTarget = "11"
 
+//tasks.register<ShadowJar>("shadowJar") {
+//  archiveClassifier.set("fat")
+//  manifest {
+//    attributes(mapOf("Main-Verticle" to mainVerticleName))
+//  }
+//  mergeServiceFiles()
+//  configurations = listOf(project.configurations.runtimeClasspath.get())
+//}
+//
+
 tasks.withType<ShadowJar> {
   archiveClassifier.set("fat")
   manifest {
     attributes(mapOf("Main-Verticle" to mainVerticleName))
   }
+
+  from("webroot") {
+    // Copy Foo file into Bar/ in the shadowed JAR.
+    into("webroot")
+  }
+
   mergeServiceFiles()
 }
 

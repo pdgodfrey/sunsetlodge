@@ -9,7 +9,7 @@
 
   const props = defineProps(['editedGalleryItem'])
 
-  const emit = defineEmits('reloadGallery');
+  const emit = defineEmits(['reloadGallery', 'closeGalleryImages']);
 
   const imageUploads = ref([]);
   const updateOrderTimer = ref(-1);
