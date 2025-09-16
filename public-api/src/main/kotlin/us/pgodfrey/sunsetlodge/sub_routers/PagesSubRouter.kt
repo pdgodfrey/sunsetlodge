@@ -55,6 +55,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
 
     router.get("/").coroutineHandler(this::handleHome)
     router.get("/rates-and-availability").coroutineHandler(this::handleRatesAndAvailability)
+    router.get("/rates-and-availability/:season_name").coroutineHandler(this::handleRatesAndAvailabilityForSeason)
     router.get("/contact-us").coroutineHandler(this::handleContactUs)
     router.get("/things-to-do").coroutineHandler(this::handleThingstoDo)
     router.get("/lodge-and-cabins").coroutineHandler(this::handleLodgeAndCabins)
@@ -73,7 +74,6 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
       val openSeasons = execQuery(seasonSqlQueries.getOpenSeasons).map {
         it.toJson()
       }
-
       data.put("open_seasons", openSeasons)
 
       engine.render(data, "pages/home.hbs") { res ->
@@ -95,6 +95,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
       val data: JsonObject = JsonObject()
         .put("title", "Rates and Availability")
         .put("background_url", getBackgroundImageUrl())
+
 
       val currentSeason = execQuery(seasonSqlQueries.getCurrentSeason).first()
 
@@ -127,6 +128,129 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
       if(nextSeasons.size() > 0) {
         data.put("next_season", nextSeasons.first().toJson())
       }
+
+      val highSeasonRates = execQuery(pageSqlQueries.getHighSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
+        .map {
+          val obj = it.toJson()
+
+          if(obj.getInteger("high_season_rate") != null) {
+            obj.put("high_season_rate", currencyFormat.format(obj.getInteger("high_season_rate")))
+          }
+
+          obj
+        }
+
+      data.put("high_current_rates", highSeasonRates)
+
+      val lowSeasonRates = execQuery(pageSqlQueries.getLowSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
+        .map {
+          val obj = it.toJson()
+
+          if(obj.getInteger("low_season_rate") != null) {
+            obj.put("low_season_rate", currencyFormat.format(obj.getInteger("low_season_rate")))
+          }
+
+          obj
+        }
+
+      data.put("low_current_rates", lowSeasonRates)
+
+
+      val dailyRates = execQuery(pageSqlQueries.getDailyRatesForSeason, Tuple.of(currentSeason.getInteger("id"))).map {
+        val obj = it.toJson()
+
+        if(obj.getInteger("three_night_rate") != null) {
+          obj.put("three_night_rate", currencyFormat.format(obj.getInteger("three_night_rate")))
+        }
+        if(obj.getInteger("additional_night_rate") != null) {
+          obj.put("additional_night_rate", currencyFormat.format(obj.getInteger("additional_night_rate")))
+        }
+
+        obj
+      }
+      data.put("daily_rates", dailyRates)
+
+      // Retrieve active bookings
+      val bookings = execQuery(pageSqlQueries.getBookingsForSeason, Tuple.of(currentSeason.getInteger("id")))
+
+      // Retrieve building identifiers
+      val buildings = execQuery(miscSqlQueries.getBuildings)
+
+      // Prepare response for buildings and booking status
+      val buildingAvailability = JsonArray()
+
+      for (building in buildings) {
+        val buildingId = building.getString("identifier")
+        val buildingData = JsonObject()
+          .put("name", building.getString("name"))
+          .put("identifier", buildingId)
+
+        // Generate months and dates for current season
+        val months = getAvailabilityForBuilding(startDate, endDate, buildingId, bookings)
+
+        buildingData.put("availability", months)
+        buildingAvailability.add(buildingData)
+      }
+
+//      logger.info(buildingAvailability.encodePrettily())
+
+      data.put("buildings", buildingAvailability)
+
+
+
+
+      engine.render(data, "pages/rates-and-availability.hbs") { res ->
+        if (res.succeeded()) {
+          ctx.response().putHeader("Content-Type", "text/html; charset=utf-8").end(res.result())
+        } else {
+          ctx.fail(res.cause())
+        }
+      }
+    } catch (e: Exception) {
+      e.printStackTrace()
+    }
+  }
+
+
+  private suspend fun handleRatesAndAvailabilityForSeason(ctx: RoutingContext) {
+    try {
+      val data: JsonObject = JsonObject()
+        .put("title", "Rates and Availability")
+        .put("background_url", getBackgroundImageUrl())
+
+      val currentSeasons = execQuery(seasonSqlQueries.getSeasonByName, Tuple.of(ctx.pathParam("season_name")))
+
+      if(currentSeasons.size() == 0) {
+        ctx.response().setStatusCode(404).end()
+      }
+
+      val currentSeason = currentSeasons.first()
+
+      val startDate = currentSeason.getLocalDate("start_date")
+      val endDate = currentSeason.getLocalDate("end_date")
+
+      logger.info("START DATE: $startDate")
+      logger.info(startDate.format(dateFormat))
+
+      data.put("start_date", startDate.format(dateFormatNoYear))
+      data.put("end_date", endDate.format(dateFormat))
+
+      val currentSeasonObj = currentSeason.toJson()
+
+      if(currentSeasonObj.getInteger("sheet_rate") != null) {
+        currentSeasonObj.put("sheet_rate", currencyFormat.format(currentSeasonObj.getInteger("sheet_rate")))
+      }
+
+      if(currentSeasonObj.getInteger("boat_package_rate") != null) {
+        currentSeasonObj.put("boat_package_rate", currencyFormat.format(currentSeasonObj.getInteger("boat_package_rate")))
+      }
+
+      if(currentSeasonObj.getInteger("boat_separate_rate") != null) {
+        currentSeasonObj.put("boat_separate_rate", currencyFormat.format(currentSeasonObj.getInteger("boat_separate_rate")))
+      }
+
+      data.put("current_season", currentSeasonObj)
+
 
       val highSeasonRates = execQuery(pageSqlQueries.getHighSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
         .map {

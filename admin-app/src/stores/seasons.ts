@@ -32,10 +32,16 @@ export const useSeasonsStore = defineStore({
         async createSeason(season: any) {
           fetchWrapper
             .post(`${baseUrl}/api/seasons`, season)
+            .catch((err) =>{
+              alert(err)
+            })
         },
         async updateSeason(season: any) {
           fetchWrapper
             .put(`${baseUrl}/api/seasons/${season.id}`, season)
+            .catch((err) =>{
+              alert(err)
+            })
         },
         async deleteSeason(seasonId: number) {
           fetchWrapper

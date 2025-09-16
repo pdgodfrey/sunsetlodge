@@ -7,10 +7,14 @@
   <div class="row">
     <article class="col-sm-10 offset-sm-1">
 
+      {{#if next_season}}
+        <p class="h4">Our {{next_season.name}} Rates and Availability are now available <a href="/rates-and-availability/{{next_season.name}}">here</a></p>
+      {{/if}}
+
+
       <p><span class="h3">Sunset Lodge</span> and the surrounding cabins are available to rent for 5 months out of the year, from June to October.<br/>
         During our high season ({{start_date}} - {{end_date}}), we only accept bookings of all of the units together (other than Judy's Cabin).
       </p>
-
       <p><span class=" italics">* All rates subject to 9% state sales tax, $300-$350 cleaning fee & a refundable security deposits. If PayPal is used there is a 3% transaction fee charged.</span></p>
       <!-- Nav tabs -->
       <ul class="nav nav-tabs"  id="rates-availability-tabs">

@@ -2,7 +2,9 @@ package us.pgodfrey.sunsetlodge.sql
 
 data class SeasonSqlQueries(
   val getCurrentSeason: String = "select * from seasons where date_part('year', end_date) = date_part('year', CURRENT_DATE) limit 1",
-  val getNextSeason: String = "select * from seasons where date_part('year', end_date) = date_part('year', CURRENT_DATE)+1 limit 1",
+  val getNextSeason: String = "select * from seasons where date_part('year', end_date) = date_part('year', CURRENT_DATE)+1 and is_open is true limit 1",
+
+  val getSeasonByName: String = "select * from seasons where name = $1",
 
   val getSeasons: String = "select * from (select seasons.*," +
     "(id = (select id from seasons WHERE date_part('year', end_date) = date_part('year', CURRENT_DATE))) as is_current "+
