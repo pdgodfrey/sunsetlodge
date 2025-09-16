@@ -14,7 +14,7 @@
         <p>{{{gallery_category_description}}}</p>
 
         <p class="d-block d-md-none">For more information on each building, select from the dropdown
-          <select class="form-control inline-form-control"  autocomplete="off">
+          <select class="form-control inline-form-control"  autocomplete="off"  onchange="selectedGallery(this);">>
             {{#each galleries}}
               <option value="{{this.anchor}}">{{this.name}}</option>
             {{/each}}
@@ -135,7 +135,7 @@
   </div>
 
 
-  <script src="./js/lodge_and_cabins.js"></script>
+  <script src="/js/lodge_and_cabins.js"></script>
 
 {{/partial}}
 

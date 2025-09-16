@@ -57,3 +57,11 @@ function selectThumbnail(elem){
 
   return false;
 }
+
+
+function selectedGallery(elem) {
+  console.log(elem.value)
+  $('.tab-pane.active').removeClass('active').removeClass("show");
+  console.log( $('#nav--' + elem.value))
+  $('#nav-' + elem.value).addClass('active').addClass("show");
+}
