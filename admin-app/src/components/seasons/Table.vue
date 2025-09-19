@@ -84,6 +84,7 @@ function close() {
 }
 function save() {
     const season = Object.assign({}, editedItem.value);
+    console.log(`season start: ${season.start_date} :: ${dayjs(season.start_date).format("YYYY-MM-DD")}`)
     season.start_date = dayjs(season.start_date).format("YYYY-MM-DD")
     season.end_date = dayjs(season.end_date).format("YYYY-MM-DD")
     season.high_season_start_date = dayjs(season.high_season_start_date).format("YYYY-MM-DD")
@@ -337,7 +338,7 @@ const rateIsValid = computed(() => {
                 <v-row>
                   <v-col cols="4"><span class="title">Building</span></v-col>
                   <v-col cols="2">High Rate</v-col>
-                  <v-col cols="2">Low Rate</v-col>
+                  <v-col cols="2">Quiet Rate</v-col>
                   <v-col cols="2">3 Night Rate</v-col>
                   <v-col cols="2">Additional Night Rate</v-col>
                 </v-row>
@@ -455,13 +456,13 @@ const rateIsValid = computed(() => {
                             /></v-btn>
                           </template>
                         </v-tooltip>
-                        <v-tooltip text="Delete">
-                            <template v-slot:activator="{ props }">
-                                <v-btn icon flat @click="deleteItem(item)" v-bind="props"
-                                    ><TrashIcon stroke-width="1.5" size="20" class="text-error"
-                                /></v-btn>
-                            </template>
-                        </v-tooltip>
+<!--                        <v-tooltip text="Delete">-->
+<!--                            <template v-slot:activator="{ props }">-->
+<!--                                <v-btn icon flat @click="deleteItem(item)" v-bind="props"-->
+<!--                                    ><TrashIcon stroke-width="1.5" size="20" class="text-error"-->
+<!--                                /></v-btn>-->
+<!--                            </template>-->
+<!--                        </v-tooltip>-->
                     </div>
                 </td>
             </tr>

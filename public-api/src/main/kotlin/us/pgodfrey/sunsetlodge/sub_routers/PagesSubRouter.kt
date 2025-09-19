@@ -96,105 +96,127 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
         .put("title", "Rates and Availability")
         .put("background_url", getBackgroundImageUrl())
 
+      var currentSeason: Row? = null
 
-      val currentSeason = execQuery(seasonSqlQueries.getCurrentSeason).first()
+      val currentSeasons = execQuery(seasonSqlQueries.getCurrentSeason)
 
-      val startDate = currentSeason.getLocalDate("start_date")
-      val endDate = currentSeason.getLocalDate("end_date")
+      if(currentSeasons.size() > 0) {
+        currentSeason = currentSeasons.first()
+      } else {
+        val nextOpenSeasons = execQuery(seasonSqlQueries.getNextOpenSeason)
 
-      logger.info("START DATE: $startDate")
-      logger.info(startDate.format(dateFormat))
-
-      data.put("start_date", startDate.format(dateFormatNoYear))
-      data.put("end_date", endDate.format(dateFormat))
-
-      val currentSeasonObj = currentSeason.toJson()
-
-      if(currentSeasonObj.getInteger("sheet_rate") != null) {
-        currentSeasonObj.put("sheet_rate", currencyFormat.format(currentSeasonObj.getInteger("sheet_rate")))
+        if(nextOpenSeasons.size() > 0) {
+          currentSeason = nextOpenSeasons.first()
+        }
       }
 
-      if(currentSeasonObj.getInteger("boat_package_rate") != null) {
-        currentSeasonObj.put("boat_package_rate", currencyFormat.format(currentSeasonObj.getInteger("boat_package_rate")))
-      }
+      if(currentSeason != null ){
+        val startDate = currentSeason.getLocalDate("start_date")
+        val endDate = currentSeason.getLocalDate("end_date")
+        val highSeasonStartDate = currentSeason.getLocalDate("high_season_start_date")
+        val highSeasonEndDate = currentSeason.getLocalDate("high_season_end_date")
+        val quietSeasonEndDate = currentSeason.getLocalDate("high_season_start_date").minusDays(1)
+        val quietSeasonRestartDate = currentSeason.getLocalDate("high_season_end_date").plusDays(1)
 
-      if(currentSeasonObj.getInteger("boat_separate_rate") != null) {
-        currentSeasonObj.put("boat_separate_rate", currencyFormat.format(currentSeasonObj.getInteger("boat_separate_rate")))
-      }
+        data.put("start_date", startDate.format(dateFormatNoYear))
+        data.put("end_date", endDate.format(dateFormat))
+        data.put("high_season_start_date", highSeasonStartDate.format(dateFormatNoYear))
+        data.put("high_season_end_date", highSeasonEndDate.format(dateFormat))
+        data.put("quiet_season_end_date", quietSeasonEndDate.format(dateFormat))
+        data.put("quiet_season_restart_date", quietSeasonRestartDate.format(dateFormat))
 
-      data.put("current_season", currentSeasonObj)
+        val currentSeasonObj = currentSeason.toJson()
 
-      val nextSeasons = execQuery(seasonSqlQueries.getNextSeason)
-      if(nextSeasons.size() > 0) {
-        data.put("next_season", nextSeasons.first().toJson())
-      }
+        if(currentSeasonObj.getInteger("sheet_rate") != null) {
+          currentSeasonObj.put("sheet_rate", currencyFormat.format(currentSeasonObj.getInteger("sheet_rate")))
+        }
 
-      val highSeasonRates = execQuery(pageSqlQueries.getHighSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
-        .map {
+        if(currentSeasonObj.getInteger("boat_package_rate") != null) {
+          currentSeasonObj.put("boat_package_rate", currencyFormat.format(currentSeasonObj.getInteger("boat_package_rate")))
+        }
+
+        if(currentSeasonObj.getInteger("boat_separate_rate") != null) {
+          currentSeasonObj.put("boat_separate_rate", currencyFormat.format(currentSeasonObj.getInteger("boat_separate_rate")))
+        }
+
+        data.put("current_season", currentSeasonObj)
+
+        val nextSeasons = execQuery(seasonSqlQueries.getNextSeason, Tuple.of(currentSeason.getInteger("id")))
+        if(nextSeasons.size() > 0) {
+          data.put("next_season", nextSeasons.first().toJson())
+        }
+
+        val highSeasonRates = execQuery(pageSqlQueries.getHighSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
+          .map {
+            val obj = it.toJson()
+
+            if(obj.getInteger("high_season_rate") != null) {
+              obj.put("high_season_rate", currencyFormat.format(obj.getInteger("high_season_rate")))
+            }
+
+            obj
+          }
+
+        data.put("high_current_rates", highSeasonRates)
+
+        val lowSeasonRates = execQuery(pageSqlQueries.getLowSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
+          .map {
+            val obj = it.toJson()
+
+            if(obj.getInteger("low_season_rate") != null) {
+              obj.put("low_season_rate", currencyFormat.format(obj.getInteger("low_season_rate")))
+            }
+
+            obj
+          }
+
+        data.put("low_current_rates", lowSeasonRates)
+
+
+        val dailyRates = execQuery(pageSqlQueries.getDailyRatesForSeason, Tuple.of(currentSeason.getInteger("id"))).map {
           val obj = it.toJson()
 
-          if(obj.getInteger("high_season_rate") != null) {
-            obj.put("high_season_rate", currencyFormat.format(obj.getInteger("high_season_rate")))
+          if(obj.getInteger("three_night_rate") != null) {
+            obj.put("three_night_rate", currencyFormat.format(obj.getInteger("three_night_rate")))
+          }
+          if(obj.getInteger("additional_night_rate") != null) {
+            obj.put("additional_night_rate", currencyFormat.format(obj.getInteger("additional_night_rate")))
           }
 
           obj
         }
+        data.put("daily_rates", dailyRates)
 
-      data.put("high_current_rates", highSeasonRates)
+        // Retrieve active bookings
+        val bookings = execQuery(pageSqlQueries.getBookingsForSeason, Tuple.of(currentSeason.getInteger("id")))
 
-      val lowSeasonRates = execQuery(pageSqlQueries.getLowSeasonRatesForSeason, Tuple.of(currentSeason.getInteger("id")))
-        .map {
-          val obj = it.toJson()
+        // Retrieve building identifiers
+        val buildings = execQuery(miscSqlQueries.getBuildings)
 
-          if(obj.getInteger("low_season_rate") != null) {
-            obj.put("low_season_rate", currencyFormat.format(obj.getInteger("low_season_rate")))
-          }
+        // Prepare response for buildings and booking status
+        val buildingAvailability = JsonArray()
 
-          obj
+        for (building in buildings) {
+          val buildingId = building.getString("identifier")
+          val buildingData = JsonObject()
+            .put("name", building.getString("name"))
+            .put("identifier", buildingId)
+
+          // Generate months and dates for current season
+          val months = getAvailabilityForBuilding(startDate, endDate, buildingId, bookings)
+
+          buildingData.put("availability", months)
+          buildingAvailability.add(buildingData)
         }
-
-      data.put("low_current_rates", lowSeasonRates)
-
-
-      val dailyRates = execQuery(pageSqlQueries.getDailyRatesForSeason, Tuple.of(currentSeason.getInteger("id"))).map {
-        val obj = it.toJson()
-
-        if(obj.getInteger("three_night_rate") != null) {
-          obj.put("three_night_rate", currencyFormat.format(obj.getInteger("three_night_rate")))
-        }
-        if(obj.getInteger("additional_night_rate") != null) {
-          obj.put("additional_night_rate", currencyFormat.format(obj.getInteger("additional_night_rate")))
-        }
-
-        obj
-      }
-      data.put("daily_rates", dailyRates)
-
-      // Retrieve active bookings
-      val bookings = execQuery(pageSqlQueries.getBookingsForSeason, Tuple.of(currentSeason.getInteger("id")))
-
-      // Retrieve building identifiers
-      val buildings = execQuery(miscSqlQueries.getBuildings)
-
-      // Prepare response for buildings and booking status
-      val buildingAvailability = JsonArray()
-
-      for (building in buildings) {
-        val buildingId = building.getString("identifier")
-        val buildingData = JsonObject()
-          .put("name", building.getString("name"))
-          .put("identifier", buildingId)
-
-        // Generate months and dates for current season
-        val months = getAvailabilityForBuilding(startDate, endDate, buildingId, bookings)
-
-        buildingData.put("availability", months)
-        buildingAvailability.add(buildingData)
-      }
 
 //      logger.info(buildingAvailability.encodePrettily())
 
-      data.put("buildings", buildingAvailability)
+        data.put("buildings", buildingAvailability)
+        data.put("no_current_season", false)
+
+      } else {
+        data.put("no_current_season", true)
+      }
 
 
 
@@ -206,6 +228,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
           ctx.fail(res.cause())
         }
       }
+
     } catch (e: Exception) {
       e.printStackTrace()
     }
@@ -228,12 +251,17 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
 
       val startDate = currentSeason.getLocalDate("start_date")
       val endDate = currentSeason.getLocalDate("end_date")
-
-      logger.info("START DATE: $startDate")
-      logger.info(startDate.format(dateFormat))
+      val highSeasonStartDate = currentSeason.getLocalDate("high_season_start_date")
+      val highSeasonEndDate = currentSeason.getLocalDate("high_season_end_date")
+      val quietSeasonEndDate = currentSeason.getLocalDate("high_season_start_date").minusDays(1)
+      val quietSeasonRestartDate = currentSeason.getLocalDate("high_season_end_date").plusDays(1)
 
       data.put("start_date", startDate.format(dateFormatNoYear))
       data.put("end_date", endDate.format(dateFormat))
+      data.put("high_season_start_date", highSeasonStartDate.format(dateFormatNoYear))
+      data.put("high_season_end_date", highSeasonEndDate.format(dateFormat))
+      data.put("quiet_season_end_date", quietSeasonEndDate.format(dateFormat))
+      data.put("quiet_season_restart_date", quietSeasonRestartDate.format(dateFormat))
 
       val currentSeasonObj = currentSeason.toJson()
 
@@ -584,10 +612,12 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
 
     while (!current.isAfter(end)) {
       val monthStart = current.withDayOfMonth(1) // First day of the current month
+
       val monthEnd = current.with(TemporalAdjusters.lastDayOfMonth()) // Last day of the current month
 
-      val startWithSunday = monthStart.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
-      val endWithSaturday = monthEnd.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY))
+      val startWithSunday = monthStart.with(TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY))
+//      logger.info("startWithSunday ${startWithSunday}")
+      val endWithSaturday = monthEnd.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY))
 
       // Create the month object
       val monthObj = JsonObject()
@@ -599,6 +629,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
       var date = startWithSunday
 
       while (!date.isAfter(endWithSaturday)) {
+//        logger.info(date)
         val isBooked = isDateBooked(buildingId, date, bookings)
         val isClosed = date.isBefore(startDate) || date.isAfter(endDate) // Indicates if the date is outside season range
         val outsideMonth = date.isBefore(monthStart) || date.isAfter(monthEnd) // Indicates if the date is outside the current month
@@ -606,9 +637,9 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
         // Create the date object
         val dateObj = JsonObject()
           .put("date", date.toString())
-          .put("dayOfMonth", date.dayOfMonth)
-          .put("isBooked", isBooked)
-          .put("isClosed", isClosed)
+          .put("dayOfMonth", if(outsideMonth) { "" } else { date.dayOfMonth})
+          .put("isBooked", !outsideMonth && isBooked)
+          .put("isClosed", !outsideMonth && isClosed)
           .put("isAvailable", !(isBooked || isClosed || outsideMonth))
           .put("outsideMonth", outsideMonth)
 

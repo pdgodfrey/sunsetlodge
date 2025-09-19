@@ -173,9 +173,25 @@ class SeasonsSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRout
     try {
       val seasons = execQuery(seasonSqlQueries.getSeasons)
 
+      val rows = seasons.map { it.toJson() }
+      val currentSeason = rows.firstOrNull { it.getBoolean("is_current") == true }
+
+      if(currentSeason == null) {
+
+        val nextOpenSeason = execQuery(seasonSqlQueries.getNextAvailableSeason).firstOrNull()
+        if(nextOpenSeason == null){
+          rows.firstOrNull()?.put("is_current", true)
+        } else {
+          val row = rows.firstOrNull { it.getInteger("id") == nextOpenSeason.getInteger("id") }
+          if(row != null) {
+            row.put("is_current", true)
+          }
+        }
+      }
+
       sendJsonPayload(ctx, json {
         obj(
-          "rows" to seasons.map { it.toJson() }
+          "rows" to rows
         )
       })
     } catch (e: Exception) {

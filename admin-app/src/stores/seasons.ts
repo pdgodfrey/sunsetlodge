@@ -18,13 +18,18 @@ export const useSeasonsStore = defineStore({
             fetchWrapper
                 .get(`${baseUrl}/api/seasons`)
                 .then((seasonsResponse) => {
-                  this.seasons = seasonsResponse.rows
 
                   seasonsResponse.rows.forEach((season: any) => {
+                    season.start_date = dayjs(season.start_date)
+                    season.end_date = dayjs(season.end_date)
+                    season.high_season_start_date = dayjs(season.high_season_start_date)
+                    season.high_season_end_date = dayjs(season.high_season_end_date)
                     if(season.is_current) {
                       this.currentSeason = season
                     }
                   })
+
+                  this.seasons = seasonsResponse.rows
 
                 })
                 .catch((error) => (this.seasons = []));

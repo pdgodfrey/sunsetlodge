@@ -7,125 +7,136 @@
   <div class="row">
     <article class="col-sm-10 offset-sm-1">
 
-      {{#if next_season}}
-        <p class="h4">Our {{next_season.name}} Rates and Availability are now available <a href="/rates-and-availability/{{next_season.name}}">here</a></p>
-      {{/if}}
+      {{#unless current_season}}
+        <p><span class="h3">Sunset Lodge</span> and the surrounding cabins are available to rent for 5 months out of the year, from June to October.<br/>
+          During our high season, we only accept bookings of all of the units together (other than Judy's Cabin).
+        </p>
+
+        <p>No current season information is available - please check back soon</p>
+      {{else}}
+
+        {{#if next_season}}
+          <p class="h4">Our {{next_season.name}} Rates and Availability are now available <a href="/rates-and-availability/{{next_season.name}}">here</a></p>
+        {{/if}}
 
 
-      <p><span class="h3">Sunset Lodge</span> and the surrounding cabins are available to rent for 5 months out of the year, from June to October.<br/>
-        During our high season ({{start_date}} - {{end_date}}), we only accept bookings of all of the units together (other than Judy's Cabin).
-      </p>
-      <p><span class=" italics">* All rates subject to 9% state sales tax, $300-$350 cleaning fee & a refundable security deposits. If PayPal is used there is a 3% transaction fee charged.</span></p>
-      <!-- Nav tabs -->
-      <ul class="nav nav-tabs"  id="rates-availability-tabs">
-        <li class="nav-item"><a href="#rates" class="nav-link active" data-bs-toggle="tab">Rates</a></li>
-        <li class="nav-item"><a href="#availability" class="nav-link" data-bs-toggle="tab">Availability</a></li>
-      </ul>
+        <p><span class="h3">Sunset Lodge</span> and the surrounding cabins are available to rent for 5 months out of the year, from June to October.<br/>
+          During our high season ({{high_season_start_date}} - {{high_season_end_date}}), we only accept bookings of all of the units together (other than Judy's Cabin).
+        </p>
+        <p><span class=" italics">* All rates subject to 9% state sales tax, $300-$350 cleaning fee & a refundable security deposits. If PayPal is used there is a 3% transaction fee charged.</span></p>
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs"  id="rates-availability-tabs">
+          <li class="nav-item"><a href="#rates" class="nav-link active" data-bs-toggle="tab">Rates</a></li>
+          <li class="nav-item"><a href="#availability" class="nav-link" data-bs-toggle="tab">Availability</a></li>
+        </ul>
 
-      <div class="tab-content">
-        <div class="tab-pane active" id="rates">
-          <article class="col-md-12 offset-md-0">
-            <p><span class="h4">The {{current_season.name}} high season weekly rates</span> are below. During the high season, we require a 1 week minimum stay.</p>
+        <div class="tab-content">
+          <div class="tab-pane active" id="rates">
+            <article class="col-md-12 offset-md-0">
+              <p><span class="h4">The {{current_season.name}} high season weekly rates</span> are below. During the high season, we require a 1 week minimum stay.</p>
+              <p>The high season runs from {{high_season_start_date}} to {{high_season_end_date}}</p>
 
-            <div class="table-responsive">
-              <table class="table">
-                <tr>
-                  <th></th>
-                  <th>Max Occupancy</th>
-                  <th># Bedrooms</th>
-                  <th># Bathrooms</th>
-                  <th>Rate</th>
-                </tr>
-                {{#each high_current_rates}}
+              <div class="table-responsive">
+                <table class="table">
                   <tr>
-                    <td>{{this.building_name}}</td>
-                    <td>{{this.max_occupancy}}</td>
-                    <td>{{this.bedrooms}}</td>
-                    <td>{{this.bathrooms}}</td>
-                    <td>{{this.high_season_rate}}</td>
+                    <th></th>
+                    <th>Max Occupancy</th>
+                    <th># Bedrooms</th>
+                    <th># Bathrooms</th>
+                    <th>Rate</th>
                   </tr>
-                {{/each}}
-              </table>
-            </div>
+                  {{#each high_current_rates}}
+                    <tr>
+                      <td>{{this.building_name}}</td>
+                      <td>{{this.max_occupancy}}</td>
+                      <td>{{this.bedrooms}}</td>
+                      <td>{{this.bathrooms}}</td>
+                      <td>{{this.high_season_rate}}</td>
+                    </tr>
+                  {{/each}}
+                </table>
+              </div>
 
 
-            <p><span class="h4">Sheets and towels </span> are not included with the rental fee, but may be rented for {{current_season.sheet_rate}}/week (for all cabins). You may also bring your own.</p>
-            <p><span class="h4">Boats</span> can be rented for {{current_season.boat_package_rate}}/week. The boat package includes two canoes, two 1-person kayaks, and one 2-person kayak.<br/>
-              Boats may also be rented separately for {{current_season.boat_separate_rate}}/week each.</p>
+              <p><span class="h4">Sheets and towels </span> are not included with the rental fee, but may be rented for {{current_season.sheet_rate}}/week (for all cabins). You may also bring your own.</p>
+              <p><span class="h4">Boats</span> can be rented for {{current_season.boat_package_rate}}/week.<br/>The boat package includes 1-Standup Paddle Board; 2-Canoes; 2-Kayaks (1 person); 2-Kayak (2 person); 1-Kids Kayak; 1-Sunfish. <br/>
+                Boats may also be rented separately for {{current_season.boat_separate_rate}}/week each.</p>
 
-            <p><span class="h4">The {{current_season.name}} quiet season weekly rates</span> are below.<br/>
+              <p><span class="h4">The {{current_season.name}} quiet season weekly rates</span> are below.</p>
+              <p>The quiet season runs from {{start_date}} to {{quiet_season_end_date}} and {{quiet_season_restart_date}} to {{end_date}}</p>
 
-            <div class="table-responsive">
-              <table class="table">
-                <tr>
-                  <th></th>
-                  <th>Max Occupancy</th>
-                  <th># Bedrooms</th>
-                  <th># Bathrooms</th>
-                  <th>Rate</th>
-                </tr>
-                {{#each low_current_rates}}
+              <div class="table-responsive">
+                <table class="table">
                   <tr>
-                    <td>{{this.building_name}}</td>
-                    <td>{{this.max_occupancy}}</td>
-                    <td>{{this.bedrooms}}</td>
-                    <td>{{this.bathrooms}}</td>
-                    <td>{{this.low_season_rate}}</td>
+                    <th></th>
+                    <th>Max Occupancy</th>
+                    <th># Bedrooms</th>
+                    <th># Bathrooms</th>
+                    <th>Rate</th>
                   </tr>
-                {{/each}}
-              </table>
-            </div>
+                  {{#each low_current_rates}}
+                    <tr>
+                      <td>{{this.building_name}}</td>
+                      <td>{{this.max_occupancy}}</td>
+                      <td>{{this.bedrooms}}</td>
+                      <td>{{this.bathrooms}}</td>
+                      <td>{{this.low_season_rate}}</td>
+                    </tr>
+                  {{/each}}
+                </table>
+              </div>
 
 
-            <p class="minor-gap"><span class="h4">Daily rates</span>, listed below, are available for the off-season. A minimum 3 night stay is required.<br/>
+              <p class="minor-gap"><span class="h4">Daily rates</span>, listed below, are available for the off-season. A minimum 3 night stay is required.<br/>
 
-            <div class="table-responsive col-sm-8 offset-sm-2">
-              <table class="table">
-                <tr>
-                  <th></th>
-                  <th>3 night stay</th>
-                  <th>per additional night</th>
-                </tr>
-
-                {{#each daily_rates}}
+              <div class="table-responsive col-sm-8 offset-sm-2">
+                <table class="table">
                   <tr>
-                    <td>{{this.building_name}}</td>
-                    <td>{{this.three_night_rate}}</td>
-                    <td>{{this.additional_night_rate}}</td>
+                    <th></th>
+                    <th>3 night stay</th>
+                    <th>per additional night</th>
                   </tr>
-                {{/each}}
-              </table>
-            </div>
-          </article>
-        </div>
 
-        <div class="tab-pane" id="availability">
-          <article class="col-md-12 offset-md-0">
-            <p><span class="h4">{{current_season.name}} Availability</span> is listed below
-              {{#if next_season}}
-                , for {{next_season.name}} availability <a href="#">click here</a>
-              {{/if}}
-            </p>
-            <div class="calendar-guide col-md-3"><div class="not-open square"></div><div class="guide-explanation">Closed</div></div>
-            <div class="calendar-guide col-md-3"><div class="rented square"></div><div class="guide-explanation">Rented</div></div>
-            <div class="calendar-guide col-md-3"><div class="available square"></div><div class="guide-explanation">Available</div></div>
-            <div style="clear: both"></div>
-            <p>
-              Viewing availability for:
-              <select class="form-control inline-form-control" onchange="handleBuildingChange(this)" autocomplete="off">
-                {{#each buildings}}
-                  <option value="{{identifier}}">{{name}}</option>
-                {{/each}}
-              </select>
-            </p>
+                  {{#each daily_rates}}
+                    <tr>
+                      <td>{{this.building_name}}</td>
+                      <td>{{this.three_night_rate}}</td>
+                      <td>{{this.additional_night_rate}}</td>
+                    </tr>
+                  {{/each}}
+                </table>
+              </div>
+            </article>
+          </div>
 
-            {{#each buildings}}
-              <div class="col-md-12 offset-md-0 building-container {{#unless @first}}building-hidden{{/unless}}" id="building-{{identifier}}">
-                <div id="building-{{identifier}}-carousel" class="carousel slide building-carousel" data-ride="carousel" data-interval="false">
+          <div class="tab-pane" id="availability">
+            <article class="col-md-12 offset-md-0">
+              <p><span class="h4">{{current_season.name}} Availability</span> is listed below
+                {{#if next_season}}
+                  , for {{next_season.name}} availability <a href="#">click here</a>
+                {{/if}}
+              </p>
+              <p class="h5 mb-3">Check-in time: 4:00pm, Check-out time: 10:30am</p>
+              <div class="calendar-guide col-md-3"><div class="not-open square"></div><div class="guide-explanation">Closed</div></div>
+              <div class="calendar-guide col-md-3"><div class="rented square"></div><div class="guide-explanation">Rented (night of)</div></div>
+              <div class="calendar-guide col-md-3"><div class="available square"></div><div class="guide-explanation">Available</div></div>
+              <div style="clear: both"></div>
+              <p class="mt-3">
+                Viewing availability for:
+                <select class="form-control inline-form-control" onchange="handleBuildingChange(this)" autocomplete="off">
+                  {{#each buildings}}
+                    <option value="{{identifier}}">{{name}}</option>
+                  {{/each}}
+                </select>
+              </p>
 
-                  <!-- Wrapper for slides -->
-                  <div class="carousel-inner" role="listbox">
-                    <div><h2>{{name}}</h2></div>
+              {{#each buildings}}
+                <div class="col-md-12 offset-md-0 building-container {{#unless @first}}building-hidden{{/unless}}" id="building-{{identifier}}">
+                  <div id="building-{{identifier}}-carousel" class="carousel slide building-carousel" data-ride="carousel" data-interval="false">
+
+                    <!-- Wrapper for slides -->
+                    <div class="carousel-inner" role="listbox">
+                      <div><h2>{{name}}</h2></div>
                       {{#each availability}}
                         <div class="item">
                           <div class="table-responsive">
@@ -143,27 +154,29 @@
                                 <th>Fri</th>
                               </tr>
                               {{#each weeks}}
-                                  <tr>
+                                <tr>
                                   {{#each .}}
-                                      <td
-                                        class="{{#if outsideMonth}}not-this-month{{/if}} {{#if isClosed}}not-open{{/if}} {{#if isBooked}}rented{{/if}} {{#if isAvailable}}available{{/if}}"
-                                      >{{dayOfMonth}}</td>
-                                    {{/each}}
+                                    <td
+                                      class="{{#if outsideMonth}}not-this-month{{/if}} {{#if isClosed}}not-open{{/if}} {{#if isBooked}}rented{{/if}} {{#if isAvailable}}available{{/if}}"
+                                    >{{dayOfMonth}}</td>
+                                  {{/each}}
 
-                                  </tr>
-                                {{/each}}
+                                </tr>
+                              {{/each}}
                             </table>
                           </div>
                         </div>
                       {{/each}}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-            {{/each}}
-          </article>
+              {{/each}}
+            </article>
+          </div>
         </div>
-      </div>
+      {{/unless}}
+
     </article>
   </div>
   </div>
