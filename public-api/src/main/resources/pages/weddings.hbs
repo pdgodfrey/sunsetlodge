@@ -29,10 +29,11 @@
         </div>
 
         <div class="tab-content">
-          <div role="tabpanel" class="tab-pane active" id="godfrey-kahn">
-            <article class="col-md-12 offset-md-0">
-              <p><span class="h4">{{this.name}}&nbsp;</span>{{{this.description}}}</p>
-            </article>
+          <div role="tabpanel" class="tab-pane active">
+
+<!--            <article class="col-md-12 offset-md-0">-->
+<!--              <p><span class="h4">{{this.name}}&nbsp;</span>{{{this.description}}}</p>-->
+<!--            </article>-->
             <div class="tab-content" id="nav-tabContent">
             {{#each galleries}}
               <div class="tab-pane fade{{#if @first}} show active{{/if}}" id="nav-{{this.anchor}}" role="tabpanel" aria-labelledby="nav-{{this.anchor}}-tab" tabindex="0">
@@ -75,7 +76,7 @@
                       </button>
                     </div>
                   </div>
-                  <div class="col-md-10 offset-md-1 col-sm-10 offset-sm-1 visible-md visible-lg">
+                  <div class="col-md-10 offset-md-1 col-sm-10 offset-sm-1 d-none d-md-block">
                     <div id="{{this.anchor}}-carousel-thumbnails" class="carousel slide thumbnail-carousel" data-ride="carousel" data-interval="false" data-wrap="true">
                       <div class="carousel-inner" role="listbox">
                         {{#each this.thumbs}}

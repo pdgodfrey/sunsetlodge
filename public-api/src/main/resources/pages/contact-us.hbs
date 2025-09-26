@@ -1,5 +1,5 @@
 {{#partial "content" }}
-
+  <script src="https://www.google.com/recaptcha/api.js?render={{captcha_site_key}}"></script>
   <div class="container">
     <div class="row">
       <h2>Contact Us</h2>
@@ -20,7 +20,7 @@
         </ul>          <br/>
           <span class="smalltext italics">Fields marked with an asterisks (*) are required.</span></p>
 
-        <form action="/contact-us" method="post">
+        <form action="/contact-us" method="post" id="contact-form">
 
           <input type="hidden" name="X-XSRF-TOKEN" value="{{csrf_token}}">
           <div class="form-group col-md-6">
@@ -38,7 +38,7 @@
           <div class="form-group col-md-6">
             <label for="reason_for_contact">Reason for Contact*</label><br/>
             <select name="reason_for_contact" id=reason_for_contact" class="form-control inline-form-control"
-                    onchange="selectReason(this)" required  autocomplete="off">
+                     required  autocomplete="off">
               <option value="" disabled selected>Select your reason for contact*</option>
               <option>Rental Inquiry</option>
               <option>Wedding Inquiry</option>
@@ -50,9 +50,23 @@
             <label for="message">Message*</label>
             <textarea class="form-control" id="message" rows="4" placeholder="Message*" name="message"  required  autocomplete="off"></textarea>
           </div>
+          <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response"/>
 
           <div class="form-group col-md-12">
-            <button type="submit" class="btn btn-primary">Submit</button>
+            {{#if captcha_site_key}}
+              <button  class="btn btn-primary g-recaptcha"
+                       data-sitekey="{{captcha_site_key}}"
+                       data-callback='onSubmit'
+                       data-action='submit'>Submit</button>
+            {{else}}
+              <button type="submit" class="btn btn-primary" onclick="onSubmitUnchecked()">Submit Now</button>
+              <script>
+                function onSubmitUnchecked() {
+                  document.getElementById("contact-form").submit();
+                }
+              </script>
+            {{/if}}
+
           </div>
         </form>
 
@@ -60,6 +74,29 @@
       </article>
     </div>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('contact-form');
+
+      // Prevent the default form submission
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+      });
+    });
+
+
+    function onSubmit() {
+      grecaptcha.ready(function () {
+        grecaptcha.execute('{{captcha_site_key}}', {action: 'submit'}).then(function (token) {
+          document.getElementById("g-recaptcha-response").value = token;
+          document.getElementById("contact-form").submit();
+        });
+      });
+    }
+
+
+  </script>
 {{/partial}}
 
 {{> layouts/base }}

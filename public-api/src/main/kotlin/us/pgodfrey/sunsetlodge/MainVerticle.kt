@@ -133,6 +133,7 @@ class MainVerticle : CoroutineVerticle() {
         .addOrigin("http://localhost:3000")
         .addOrigin("http://localhost:8081")
         .addOrigin("https://sunsetnew.pgodfrey.us")
+        .addOrigin("https://www.sunsetlodge.org")
         .allowCredentials(true)
         .allowedHeaders(allowedHeaders)
         .allowedMethod(HttpMethod.POST)

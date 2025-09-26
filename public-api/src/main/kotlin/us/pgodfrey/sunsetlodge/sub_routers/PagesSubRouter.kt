@@ -1,15 +1,22 @@
 package us.pgodfrey.sunsetlodge.sub_routers
 
 import com.github.jknack.handlebars.Handlebars
+import io.vertx.core.MultiMap
 import io.vertx.core.Vertx
+import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.jwt.JWTAuth
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.client.HttpResponse
+import io.vertx.ext.web.client.WebClient
+import io.vertx.ext.web.client.WebClientOptions
+import io.vertx.ext.web.codec.BodyCodec
 import io.vertx.ext.web.handler.CSRFHandler
 import io.vertx.ext.web.templ.handlebars.HandlebarsTemplateEngine
 import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.core.json.obj
+import io.vertx.kotlin.coroutines.coAwait
 import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
@@ -28,7 +35,6 @@ import java.time.temporal.TemporalAdjusters
 
 class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter(vertx, pool, jwtAuth) {
 
-
   private val pageSqlQueries = PageSqlQueries()
   private val seasonSqlQueries = SeasonSqlQueries()
   private val gallerySqlQueries = GallerySqlQueries()
@@ -41,10 +47,25 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
   val currencyFormat = NumberFormat.getCurrencyInstance(Locale.US)
 
   var contactUsRecipientEmail = ""
+  var captchaApiKey = ""
+  var captchaSiteKey = ""
+  private var emailNotificationHttpPort = 0
+
+  val webClientOptions = WebClientOptions()
+    .setSsl(true) // Ensure communication over SSL.
+    .setConnectTimeout(5000) // Optional: Set connection timeout
+    .setLogActivity(true)
+
+  val webclient = WebClient.create(vertx, webClientOptions)
+
+
 
   init {
     val env = System.getenv()
     contactUsRecipientEmail = env.getOrDefault("CONTACT_US_RECIPIENT", "test@recipient.com")
+    captchaApiKey = env.getOrDefault("CAPTCHA_API_KEY", "")
+    captchaSiteKey = env.getOrDefault("CAPTCHA_SITE_KEY", "")
+    emailNotificationHttpPort = env.getOrDefault("EMAIL_HTTP_PORT", "1025").toInt()
     currencyFormat.maximumFractionDigits = 0
 
     engine = HandlebarsTemplateEngine.create(vertx)
@@ -368,6 +389,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
         .put("title", "Contact Us")
         .put("background_url", getBackgroundImageUrl())
         .put("csrf_token", ctx.get("X-XSRF-TOKEN"))
+        .put("captcha_site_key", captchaSiteKey)
 
 
       engine.render(data, "pages/contact-us.hbs") { res ->
@@ -386,8 +408,13 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
     try {
       val params = ctx.request().formAttributes()
 
+      val backgroundUrl = getBackgroundImageUrl()
 
       val hostHeader = ctx.request().getHeader("Host")
+
+      val token = params.get("g-recaptcha-response")
+      logger.info("TOKEN")
+      logger.info(token)
 
       val emailObj = JsonObject()
         .put("recipient_email", contactUsRecipientEmail)
@@ -400,25 +427,62 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
         .put("message", params.get("message").replace("\n", "<br/>"))
         .put("template", "contact.hbs")
 
-      val backgroundUrl = getBackgroundImageUrl()
 
-      vertx.eventBus().request<Any>("email.send", emailObj) {
+      val data: JsonObject = JsonObject()
+        .put("title", "Contact Us")
+        .put("background_url", backgroundUrl)
 
-        val data: JsonObject = JsonObject()
-          .put("title", "Contact Us")
-          .put("background_url", backgroundUrl)
+      if(!captchaSiteKey.isNullOrBlank() && !captchaApiKey.isNullOrBlank()) {
 
-        engine.render(data, "pages/contact-us-thanks.hbs") { res ->
-          if (res.succeeded()) {
-            ctx.response().putHeader("Content-Type", "text/html; charset=utf-8").end(res.result())
-          } else {
-            ctx.fail(res.cause())
+          val response = validateCaptcha(token)
+
+        logger.info("CAPTCHA RESPONSE")
+          logger.info(response)
+
+        if(response.getBoolean("success")) {
+
+          vertx.eventBus().request<Any>("email.send", emailObj) {
+            logger.info("EMAIL SENT")
+            renderContactUs(ctx, data)
           }
+        } else {
+//          logger.error("CONTACT US ERROR ${response.encodePrettily()}")
+          renderContactUs(ctx, data)
         }
+
+
+//          val challenge = response.getJsonObject("riskAnalysis").getString("challenge")
+//
+//          if(challenge.equals("PASS")){
+//
+//          } else {
+//            renderContactUs(ctx, data)
+//          }
+
+      } else if(emailNotificationHttpPort == 1025) {
+
+        vertx.eventBus().request<Any>("email.send", emailObj) {
+          logger.info("EMAIL SENT")
+          renderContactUs(ctx, data)
+        }
+      } else {
+        renderContactUs(ctx, data)
       }
+
 
     } catch (e: Exception) {
       e.printStackTrace()
+    }
+  }
+
+  private fun renderContactUs(ctx: RoutingContext, data: JsonObject) {
+
+    engine.render(data, "pages/contact-us-thanks.hbs") { res ->
+      if (res.succeeded()) {
+        ctx.response().putHeader("Content-Type", "text/html; charset=utf-8").end(res.result())
+      } else {
+        ctx.fail(res.cause())
+      }
     }
   }
 
@@ -687,6 +751,21 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
       }
     }
     return false
+  }
+
+
+  private suspend fun validateCaptcha(token: String): JsonObject {
+
+      return webclient.postAbs("https://www.google.com/recaptcha/api/siteverify")
+        .`as`(BodyCodec.jsonObject())
+        .sendForm(
+          MultiMap.caseInsensitiveMultiMap().apply {
+            add("secret", captchaApiKey)  // Use your captcha API key
+            add("response", token)       // Use the reCAPTCHA token from the front end
+          }
+        )
+        .coAwait()
+        .body()
   }
 
 }
