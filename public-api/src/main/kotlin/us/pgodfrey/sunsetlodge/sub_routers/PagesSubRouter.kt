@@ -90,7 +90,7 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
     try {
       val data: JsonObject = JsonObject()
         .put("title", "Home")
-        .put("background_url", getBackgroundImageUrl())
+        .put("background_url", "/images/20170815_maine-7759_large.png")
 
       val openSeasons = execQuery(seasonSqlQueries.getOpenSeasons).map {
         it.toJson()
