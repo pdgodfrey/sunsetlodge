@@ -40,7 +40,8 @@ const editedItem = ref({
   end_date: '',
   high_season_start_date: '',
   high_season_end_date: '',
-  is_open: false,
+  bookings_open_date: '',
+  is_closed: false,
   is_current: false,
   sheet_rate: 0,
   boat_package_rate: 0,
@@ -53,11 +54,13 @@ const defaultItem = ref({
     end_date: '',
     high_season_start_date: '',
     high_season_end_date: '',
-    is_open: false,
+    bookings_open_date: '',
+    is_closed: false,
     is_current: false,
     sheet_rate: 0,
     boat_package_rate: 0,
     boat_separate_rate: 0,
+    bookings_close_date: '',
 });
 
 //Methods
@@ -89,6 +92,7 @@ function save() {
     season.end_date = dayjs(season.end_date).format("YYYY-MM-DD")
     season.high_season_start_date = dayjs(season.high_season_start_date).format("YYYY-MM-DD")
     season.high_season_end_date = dayjs(season.high_season_end_date).format("YYYY-MM-DD")
+    season.bookings_open_date = dayjs(season.bookings_open_date).format("YYYY-MM-DD")
 
     season.sheet_rate = parseInt(season.sheet_rate)
     season.boat_package_rate = parseInt(season.boat_package_rate)
@@ -165,6 +169,9 @@ const isValid = computed(() => {
   if(obj.high_season_end_date == null || obj.high_season_end_date == ''){
     return false
   }
+  if(obj.bookings_open_date == null || obj.bookings_open_date == ''){
+    return false
+  }
   if(obj.sheet_rate == null || obj.sheet_rate == ''){
     return false
   }
@@ -230,9 +237,20 @@ const rateIsValid = computed(() => {
                                     ></v-text-field>
                                 </v-col>
                                 <v-col cols="12" sm="6">
+                                  <v-label>Bookings Open Date</v-label>
+                                  <VueDatePicker
+                                    v-model="editedItem.bookings_open_date"
+                                    format="MM/dd/yyyy"
+                                    :enable-time-picker="false"
+                                    required
+                                    auto-apply
+                                    text-input
+                                  ></VueDatePicker>
+                                </v-col>
+                                <v-col cols="12">
                                   <v-checkbox
-                                    label="Open For Bookings?"
-                                    v-model="editedItem.is_open"
+                                    label="Closed For Bookings"
+                                    v-model="editedItem.is_closed"
                                   ></v-checkbox>
                                 </v-col>
                                 <v-col cols="12" sm="6">
@@ -414,8 +432,8 @@ const rateIsValid = computed(() => {
                 <th class="text-subtitle-1 font-weight-semibold">Id</th>
                 <th class="text-subtitle-1 font-weight-semibold">Name</th>
                 <th class="text-subtitle-1 font-weight-semibold">Season Dates</th>
-                <th class="text-subtitle-1 font-weight-semibold">Open for Booking?</th>
                 <th class="text-subtitle-1 font-weight-semibold">Current Season?</th>
+              <th class="text-subtitle-1 font-weight-semibold">Closed for Bookings?</th>
             </tr>
         </thead>
         <tbody>
@@ -433,12 +451,12 @@ const rateIsValid = computed(() => {
                     </div>
                 </td>
                 <td class="text-subtitle-1">
-                  <v-chip v-if="item.is_open" color="success" size="small" label>Yes</v-chip>
-                  <v-chip v-if="!item.is_open" size="small" label>No</v-chip>
-                </td>
-                <td class="text-subtitle-1">
                   <v-chip v-if="item.is_current" color="success" size="small" label>Yes</v-chip>
                   <v-chip v-if="!item.is_current" size="small" label>No</v-chip>
+                </td>
+                <td class="text-subtitle-1">
+                  <v-chip v-if="item.is_closed" color="success" size="small" label>Yes</v-chip>
+                  <v-chip v-if="!item.is_closed" size="small" label>No</v-chip>
                 </td>
                 <td>
                     <div class="d-flex align-center">

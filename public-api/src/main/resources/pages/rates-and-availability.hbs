@@ -15,6 +15,15 @@
         <p>No current season information is available - please check back soon</p>
       {{else}}
 
+        {{#if current_season.is_closed}}
+        <p><span class="h3">Sunset Lodge</span> and the surrounding cabins are available to rent for 5 months out of the year, from June to October.<br/>
+          During our high season, we only accept bookings of all of the units together (other than Judy's Cabin).
+        </p>
+
+        <p>This season information is now closed. Please visit our <a href="/rates-and-availability/">current rates page for more information.</a> </p>
+        {{else}}
+
+
         {{#if next_season}}
           <p class="h4">Our {{next_season.name}} Rates and Availability are now available <a href="/rates-and-availability/{{next_season.name}}">here</a></p>
         {{/if}}
@@ -175,6 +184,7 @@
             </article>
           </div>
         </div>
+        {{/if}}
       {{/unless}}
 
     </article>

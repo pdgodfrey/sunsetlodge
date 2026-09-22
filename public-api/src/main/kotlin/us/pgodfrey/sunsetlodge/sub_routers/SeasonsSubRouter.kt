@@ -365,7 +365,7 @@ class SeasonsSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRout
       params.addLocalDate(LocalDate.parse(data.getString("end_date")))
       params.addLocalDate(LocalDate.parse(data.getString("high_season_start_date")))
       params.addLocalDate(LocalDate.parse(data.getString("high_season_end_date")))
-      params.addBoolean(data.getBoolean("is_open"))
+      params.addLocalDate(LocalDate.parse(data.getString("bookings_open_date")))
       params.addInteger(data.getInteger("sheet_rate"))
       params.addInteger(data.getInteger("boat_package_rate"))
       params.addInteger(data.getInteger("boat_separate_rate"))
@@ -496,10 +496,11 @@ class SeasonsSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRout
       params.addLocalDate(LocalDate.parse(data.getString("end_date")))
       params.addLocalDate(LocalDate.parse(data.getString("high_season_start_date")))
       params.addLocalDate(LocalDate.parse(data.getString("high_season_end_date")))
-      params.addBoolean(data.getBoolean("is_open"))
+      params.addLocalDate(LocalDate.parse(data.getString("bookings_open_date")))
       params.addInteger(data.getInteger("sheet_rate"))
       params.addInteger(data.getInteger("boat_package_rate"))
       params.addInteger(data.getInteger("boat_separate_rate"))
+      params.addBoolean(data.getBoolean("is_closed"))
       params.addInteger(id)
 
       val season = execQuery(seasonSqlQueries.updateSeason, params)
@@ -605,8 +606,8 @@ class SeasonsSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRout
       if (!data.containsKey("high_season_end_date") || data.getString("high_season_end_date").isNullOrBlank()) {
         invalidFields.add("High Season End Date is a required field")
       }
-      if (!data.containsKey("is_open") || !(data.getValue("is_open") is Boolean)) {
-        invalidFields.add("Is Open is a required field")
+      if (!data.containsKey("bookings_open_date") || data.getString("bookings_open_date").isNullOrBlank()) {
+        invalidFields.add("Bookings Open Date is a required field")
       }
 
       if(invalidFields.size > 0){

@@ -163,6 +163,9 @@ class PagesSubRouter(vertx: Vertx, pool: Pool, jwtAuth: JWTAuth) : BaseSubRouter
         data.put("current_season", currentSeasonObj)
 
         val nextSeasons = execQuery(seasonSqlQueries.getNextSeason, Tuple.of(currentSeason.getInteger("id")))
+
+        logger.info("NEXT SEASONS SZIE ${nextSeasons.size()}")
+
         if(nextSeasons.size() > 0) {
           data.put("next_season", nextSeasons.first().toJson())
         }
